@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Morning Digest ☕</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #0f0f1a;
+      color: #e8e8f0;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    .header {
+      text-align: center;
+      padding: 36px 24px 24px;
+      background: linear-gradient(135deg, #1a1a3e 0%, #0d0d22 100%);
+      border-radius: 16px;
+      margin-bottom: 32px;
+      border: 1px solid #2a2a5a;
+    }
+    .header h1 {
+      font-size: 2rem;
+      margin: 0 0 8px 0;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: #9090b0;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #2a2a5a;
+      color: #c4b5fd;
+    }
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a5a;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .card:hover {
+      border-color: #6d5aed;
+    }
+    .card h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.05rem;
+    }
+    .card h3 a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+    .card h3 a:hover {
+      color: #a78bfa;
+      text-decoration: underline;
+    }
+    .card p {
+      margin: 0;
+      color: #b0b0cc;
+      font-size: 0.93rem;
+      line-height: 1.65;
+    }
+    .badge {
+      display: inline-block;
+      background: #2a1a5e;
+      color: #a78bfa;
+      font-size: 0.72rem;
+      padding: 2px 9px;
+      border-radius: 99px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .quick-takes {
+      background: #1a1a2e;
+      border: 1px solid #2a2a5a;
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+    .quick-takes ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .quick-takes ul li {
+      margin-bottom: 12px;
+      color: #b0b0cc;
+      font-size: 0.93rem;
+      line-height: 1.6;
+    }
+    .quick-takes ul li a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .quick-takes ul li a:hover {
+      color: #a78bfa;
+      text-decoration: underline;
+    }
+    .term-card {
+      background: linear-gradient(135deg, #1e1040 0%, #0f1a30 100%);
+      border: 1px solid #4c3a9e;
+      border-radius: 12px;
+      padding: 24px 22px;
+      margin-bottom: 16px;
+    }
+    .term-card h2 {
+      font-size: 1.1rem;
+      color: #f9a8d4;
+      margin: 0 0 12px 0;
+    }
+    .term-card p {
+      color: #c4c4e0;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin: 0;
+    }
+    .footer {
+      text-align: center;
+      color: #555577;
+      font-size: 0.8rem;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2a5a;
+    }
+    .emoji-big {
+      font-size: 1.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h1>🤖 AI Morning Digest</h1>
+      <p>你的每日AI早报 · Served hot, like freshly brewed coffee ☕ and freshly baked hype 🥐</p>
+    </div>
+
+    <!-- SECTION 1: TOP STORIES -->
+    <div class="section-title">🔥 Top AI Stories</div>
+
+    <div class="card">
+      <div class="badge">Google · Hardware</div>
+      <h3><a href="https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/" target="_blank">Our Eighth Generation TPUs: Two Chips for the Agentic Era</a></h3>
+      <p>Google祭出了第八代TPU，而且一次出来两颗芯片——一颗主攻训练（TPU 8i），一颗专为推理优化（TPU 8t）。"Agentic era"这个词用得非常有气势，基本上就是官方承认：以后AI agent满天飞，算力缺口得靠我们来堵。给力！</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">Google · Deep Dive</div>
+      <h3><a href="https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive" target="_blank">The Eighth-Generation TPU: An Architecture Deep Dive</a></h3>
+      <p>上面那篇还不够过瘾？Google还贴心地给了一篇硬核架构解析。如果你是芯片工程师，这是今天必读；如果你不是，你大概会在第三段开始感谢自己没去念电子工程。总之：快、省、为AI而生。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">OpenAI · Product</div>
+      <h3><a href="https://openai.com/index/introducing-chatgpt-images-2-0/" target="_blank">ChatGPT Images 2.0</a></h3>
+      <p>OpenAI更新了图像生成能力，ChatGPT Images升到2.0版本。上个版本的用户刚学会怎么写prompt让它画出人类正常的手指，这次又来新版了……总之：生图更强、更快、更准，ps软件又少了一个借口被打开。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">Linux · Security · AI</div>
+      <h3><a href="https://lwn.net/Articles/1068928/" target="_blank">Kernel Code Removals Driven by LLM-Created Security Reports</a></h3>
+      <p>AI安全报告开始影响Linux内核代码的删减？这听起来很酷，但LWN的老伙计们表示需要仔细审视——毕竟，一个hallucination满天飞的模型在内核里"发现漏洞"，这个故事可以走向非常不同的方向。有趣的时代，各位。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">Dev Tools · Privacy</div>
+      <h3><a href="https://cli.github.com/telemetry" target="_blank">GitHub CLI Now Collects Pseudoanonymous Telemetry</a></h3>
+      <p>GitHub CLI悄悄开始收集"伪匿名"遥测数据了。"Pseudoanonymous"这个词选得很微妙——不是anonymous，是pseudo。翻译成人话就是：我们知道是你，但我们假装不知道是你。开发者社区表示：你们先发公告，我们再决定要不要相信你。</p>
+    </div>
+
+    <!-- SECTION 2: NEW MODELS & RESEARCH -->
+    <div class="section-title">🤖 New Models & Research</div>
+
+    <div class="card">
+      <div class="badge">NVIDIA · OCR · Multilingual</div>
+      <h3><a href="https://huggingface.co/blog/nvidia/nemotron-ocr-v2" target="_blank">Building a Fast Multilingual OCR Model with Synthetic Data</a></h3>
+      <p>NVIDIA的Nemotron OCR v2来了，专门搞多语言文字识别，而且大量依赖合成数据训练。用假数据练出真功夫——这招现在越来越主流了。你奶奶的手写菜谱、你老板的手绘UML图，理论上都逃不过它的眼睛。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">LightOn · Embeddings</div>
+      <h3><a href="https://huggingface.co/blog/lightonai/denseon-lateon" target="_blank">DenseOn with the LateOn: Open State-of-the-Art Single and Multi-Vector Models</a></h3>
+      <p>LightOn推出了两个开源向量检索模型：DenseOn（单向量）和LateOn（多向量）。名字听着像一对搭档——一个快刀手，一个精算师。在RAG系统里，这类embedding模型就是AI的"眼睛"，好不好直接决定它能不能找到正确答案，而不是一本正经地胡说八道。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">NVIDIA · Robotics · VLA</div>
+      <h3><a href="https://huggingface.co/blog/nvidia/gr00t-n1-7" target="_blank">NVIDIA Isaac GR00T N1.7: Open Reasoning VLA Model for Humanoid Robots</a></h3>
+      <p>NVIDIA给人形机器人推出了开源的视觉-语言-动作模型GR00T N1.7，专门用于推理型任务。翻译成大白话：机器人以后不只是按指令执行动作，还会"想一想再动"。距离你家出现一个会思考的机器人管家，又近了一小步（或者一大步，取决于你有多少预算）。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">Education · Transformers</div>
+      <h3><a href="https://huggingface.co/blog/not-lain/kv-caching" target="_blank">KV Caching Explained: Optimizing Transformer Inference Efficiency</a></h3>
+      <p>一篇讲KV Cache的科普文，专门解释为什么Transformer推理可以这么快。如果你每次听到"KV Cache"都默默点头装懂，今天是补课的好机会。这篇文章的存在本身就是一种善意——毕竟大家都曾是新手。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">Hugging Face · OCR · Automation</div>
+      <h3><a href="https://huggingface.co/blog/nielsr/ocr-papers-jobs" target="_blank">How We OCR'ed 30,000 Papers Using Codex, Open OCR Models and Jobs</a></h3>
+      <p>Hugging Face团队用Codex + 开源OCR模型批量处理了三万篇论文，堪称学术界版本的"流水线工厂"。这事放在五年前，需要一个研究生助理和数不清的咖啡。现在？AI搞定了，研究生助理可以去做更有趣的事了（比如读那三万篇论文）。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">NucleusAI · Text-to-Image · MoE</div>
+      <h3><a href="https://huggingface.co/blog/NucleusAI/nucleus-image" target="_blank">Nucleus-Image: Scaling Text-to-Image with Sparse Mixture of Experts</a></h3>
+      <p>Nucleus-Image把Sparse MoE（混合专家模型）架构引入文生图领域，试图在规模和效率之间找到甜蜜点。简单说：不是用一个超大模型硬扛，而是让一群"专家小模型"按需上岗——有点像一家公司雇了一群专业外包，按项目派活。聪明！</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">Debugging · Tracing · ML Ops</div>
+      <h3><a href="https://huggingface.co/blog/pcuenq/save-the-traces" target="_blank">Save the Traces! 🐳</h3>
+      <p>这篇文章呼吁大家在ML模型训练和推理过程中保存运行traces，方便后续调试和性能分析。名字里有条鲸鱼🐳，内容却是实打实的工程干货。你以为是环保倡议，其实是MLOps教程——这波标题创意给满分。</p>
+    </div>
+
+    <div class="card">
+      <div class="badge">TTS · Emotion · Efficiency</div>
+      <h3><a href="https://huggingface.co/blog/FINAL-Bench/darwin-tts" target="_blank">Darwin-TTS: We Gave a TTS Model 3% of an LLM's Brain — It Started Showing Emotion</a></h3>
+      <p>Darwin-TTS用了仅相当于大语言模型3%参数规模的架构，却让TTS（文字转语音）模型开始表现出情感色彩。这就像喂了一只仓鼠一丁
