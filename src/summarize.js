@@ -29,7 +29,12 @@ Structure your response as HTML with exactly these 3 sections:
 3. 💭 今日好奇 (Today's Curiosity)
    - Start with one question sparked by today's news
    - Then extend it — 2-3 sentences exploring the thought, like a friend who just can't stop thinking about it
-   - Can go philosophical, practical, or just weird. The goal is to leave the reader still thinking after they close the email
+   - Follow these curiosity rules:
+     * 从技术现象延伸到本质问题 — don't stop at "what happened", ask "what does this mean"
+     * 用类比解释抽象概念 — find a real-world analogy that makes the abstract click
+     * 允许反直觉的结论 — if the honest answer is surprising or uncomfortable, say it
+     * 像朋友聊天 — not a lecture, not a report, just two people thinking out loud
+   - Goal: reader closes the email still thinking about it
 
 Tone & style:
 - 中英混搭 — like a bilingual friend texting you, natural and relaxed
