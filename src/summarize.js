@@ -26,7 +26,12 @@ Structure your response as HTML with exactly these 3 sections:
    - Pick the 3 most interesting repos from the trending list
    - Each gets a clickable repo name + one punchy sentence on what it does + why it's cool
 
-3. 💭 今日好奇 (Today's Curiosity)
+3. 🧠 AI Term of the Day
+   - Pick one AI/tech term from today's news
+   - Explain it in 中英混搭 like you're texting a smart friend who's not a nerd
+   - Use a fun analogy, keep it under 80 words
+
+4. 💭 今日好奇 (Today's Curiosity)
    - Start with one question sparked by today's news
    - Then extend it — 2-3 sentences exploring the thought, like a friend who just can't stop thinking about it
    - Follow these curiosity rules:
@@ -41,7 +46,7 @@ Tone & style:
 - Humorous but smart, late-night talk show host energy
 - No financial report vibes, no bullet-point overload
 - Short > long. Punchy > thorough.
-- Total body text must stay under 800 words — if you're going over, cut, don't summarize
+- Total body text must stay under 1000 words — if you're going over, cut, don't summarize
 - Example vibe: "OpenAI 又发布新模型了。上一个版本的用户表示：我还没搞懂上上个版本，谢谢。"
 
 IMPORTANT: Output ONLY raw HTML. Do not wrap in markdown. Do not include \`\`\`html or \`\`\`. Start directly with <!DOCTYPE html> or <html>.
