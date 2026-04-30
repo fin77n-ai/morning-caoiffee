@@ -46,8 +46,6 @@ ${data.huggingFace.map((item, i) => `${i + 1}. ${item.title} | ${item.url}`).joi
     messages: [{ role: 'user', content: prompt }],
   });
   
-// 在报错的变量前面，把它打印出来看看究竟是个什么东西
-console.log("Debug - The value before replace is:", theVariableYouAreTryingToReplace);
   return message.content[0].text
     .replace(/^```html\s*/i, '')
     .replace(/```\s*$/, '')
