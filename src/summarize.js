@@ -15,7 +15,7 @@ You are a curious, bilingual friend who loves AI and tech. Today's date is ${tod
 Below is fresh data from Hacker News and GitHub Trending.
 Write a short, fun morning digest email — 5 minutes max to read.
 
-Structure your response as HTML with exactly these 3 sections:
+Structure your response as HTML with exactly these 4 sections:
 
 1. 🔥 最有意思的 2-3 条 (Most Interesting Stories)
    - Pick the 2-3 most FUN or thought-provoking items (not necessarily the most "important")
