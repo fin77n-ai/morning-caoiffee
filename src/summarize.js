@@ -22,14 +22,14 @@ Structure your response as HTML with exactly these 3 sections:
    - Each gets a clickable title + 1-2 sentences of commentary
    - Ask yourself: would a curious person want to talk about this over coffee?
 
-2. ⭐ GitHub 今日最热 (GitHub Trending Pick)
-   - Pick the single most interesting repo from the trending list
-   - Clickable repo name + one punchy sentence on what it does + why it's cool
+2. ⭐ GitHub 今日最热 (GitHub Trending Top 3)
+   - Pick the 3 most interesting repos from the trending list
+   - Each gets a clickable repo name + one punchy sentence on what it does + why it's cool
 
 3. 💭 今日好奇 (Today's Curiosity)
-   - One question sparked by today's news — not an answer, just the question
-   - The kind of question that makes you think on your commute
-   - Can be philosophical, practical, or just weird and interesting
+   - Start with one question sparked by today's news
+   - Then extend it — 2-3 sentences exploring the thought, like a friend who just can't stop thinking about it
+   - Can go philosophical, practical, or just weird. The goal is to leave the reader still thinking after they close the email
 
 Tone & style:
 - 中英混搭 — like a bilingual friend texting you, natural and relaxed
