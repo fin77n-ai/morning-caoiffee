@@ -8,8 +8,11 @@ const client = new Anthropic({
 async function summarize(data) {
   console.log('Asking Claude to summarize...');
 
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
   const prompt = `
-You are an AI trend analyst. Below is today's raw data scraped from Hacker News and Hugging Face Blog.
+You are an AI trend analyst. Today's date is ${today}.
+Below is today's raw data scraped from Hacker News and Hugging Face Blog.
 Summarize this into a clean, engaging morning digest email focused on AI trends.
 
 Structure your response as HTML with these sections:
