@@ -17,20 +17,27 @@ async function scrapeHackerNews() {
   return items;
 }
 
-async function scrapeHuggingFace() {
-  const { data } = await axios.get('https://huggingface.co/blog');
+async function scrapeGitHubTrending() {
+  const { data } = await axios.get('https://github.com/trending', {
+    headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+  });
   const $ = cheerio.load(data);
   const items = [];
 
-  $('a').each((i, el) => {
-    const href = $(el).attr('href');
-    const h4 = $(el).find('h4');
-    if (h4.length && href) {
-      const text = h4.text().trim();
-      if (text && items.length < 8) {
-        const url = href.startsWith('http') ? href : `https://huggingface.co${href}`;
-        items.push({ title: text, url });
-      }
+  $('article.Box-row').each((i, el) => {
+    if (i >= 5) return false;
+    const repoEl = $(el).find('h2 a');
+    const name = repoEl.text().replace(/\s+/g, '').trim();
+    const href = repoEl.attr('href');
+    const description = $(el).find('p').text().trim();
+    const stars = $(el).find('.octicon-star').parent().text().trim();
+    if (name && href) {
+      items.push({
+        name,
+        url: `https://github.com${href}`,
+        description: description || '',
+        stars: stars || '',
+      });
     }
   });
 
@@ -40,12 +47,12 @@ async function scrapeHuggingFace() {
 async function scrapeAll() {
   console.log('Scraping sources...');
 
-  const [hackerNews, huggingFace] = await Promise.all([
+  const [hackerNews, githubTrending] = await Promise.all([
     scrapeHackerNews(),
-    scrapeHuggingFace(),
+    scrapeGitHubTrending(),
   ]);
 
-  return { hackerNews, huggingFace };
+  return { hackerNews, githubTrending };
 }
 
 module.exports = { scrapeAll };
