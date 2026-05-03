@@ -10,12 +10,16 @@ async function summarize(data) {
 
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  const podcastSection = data.podcasts && data.podcasts.length > 0
+    ? data.podcasts.map((p, i) => `${i + 1}. [${p.podcast}] ${p.title} | ${p.link} | ${p.description}`).join('\n')
+    : 'No new episodes today.';
+
   const prompt = `
 You are a curious, bilingual friend who loves AI and tech. Today's date is ${today}.
-Below is fresh data from Hacker News and GitHub Trending.
+Below is fresh data from Hacker News, GitHub Trending, and the latest podcast episodes.
 Write a short, fun morning digest email — 5 minutes max to read.
 
-Structure your response as HTML with exactly these 4 sections:
+Structure your response as HTML with exactly these 5 sections:
 
 1. 🔥 最有意思的 2-3 条 (Most Interesting Stories)
    - Pick the 2-3 most FUN or thought-provoking items (not necessarily the most "important")
@@ -41,12 +45,20 @@ Structure your response as HTML with exactly these 4 sections:
      * 像朋友聊天 — not a lecture, not a report, just two people thinking out loud
    - Goal: reader closes the email still thinking about it
 
+5. 🎙 访谈速读 (Podcast Spotlight)
+   - Pick the most interesting recent episode from the podcasts list below
+   - Write 3 sentences: who's the guest, what's the big idea, why it matters
+   - Then pick 1-2 terms from the episode that a non-technical listener might not know
+   - For each term: explain it in 中英混搭 under 50 words, use a fun real-world analogy
+   - Tone: like a friend who just finished listening on the commute and is excitedly telling you about it
+   - If no new episodes, skip this section entirely
+
 Tone & style:
 - 中英混搭 — like a bilingual friend texting you, natural and relaxed
 - Humorous but smart, late-night talk show host energy
 - No financial report vibes, no bullet-point overload
 - Short > long. Punchy > thorough.
-- Total body text must stay under 1000 words — if you're going over, cut, don't summarize
+- Total body text must stay under 1200 words — if you're going over, cut, don't summarize
 - Example vibe: "OpenAI 又发布新模型了。上一个版本的用户表示：我还没搞懂上上个版本，谢谢。"
 
 IMPORTANT: Output ONLY raw HTML. Do not wrap in markdown. Do not include \`\`\`html or \`\`\`. Start directly with <!DOCTYPE html> or <html>.
@@ -57,6 +69,9 @@ ${data.hackerNews.map((item, i) => `${i + 1}. ${item.title} | ${item.url}`).join
 
 GitHub Trending Repos (name + url + description + stars):
 ${data.githubTrending.map((item, i) => `${i + 1}. ${item.name} | ${item.url} | ${item.description} | ⭐ ${item.stars}`).join('\n')}
+
+Latest Podcast Episodes:
+${podcastSection}
 `;
 
   const message = await client.messages.create({
