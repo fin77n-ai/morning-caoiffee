@@ -75,16 +75,78 @@ async function scrapePodcasts() {
   return results;
 }
 
+async function scrapeReddit() {
+  const subreddits = ['MachineLearning', 'LocalLLaMA', 'artificial'];
+  const results = [];
+
+  for (const sub of subreddits) {
+    try {
+      const { data } = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=3`, {
+        headers: { 'User-Agent': 'morning-caoiffee/1.0' },
+        timeout: 10000,
+      });
+      const posts = data.data.children
+        .filter(p => !p.data.stickied)
+        .slice(0, 3)
+        .map(p => ({
+          subreddit: sub,
+          title: p.data.title,
+          url: `https://reddit.com${p.data.permalink}`,
+          score: p.data.score,
+          comments: p.data.num_comments,
+        }));
+      results.push(...posts);
+    } catch (e) {
+      // skip silently
+    }
+  }
+
+  return results;
+}
+
+async function scrapeAIBlogs() {
+  const feeds = [
+    { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/' },
+    { name: 'The Batch (deeplearning.ai)', url: 'https://www.deeplearning.ai/the-batch/feed/' },
+  ];
+
+  const results = [];
+
+  for (const feed of feeds) {
+    try {
+      const { data } = await axios.get(feed.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        timeout: 10000,
+      });
+      const $ = cheerio.load(data, { xmlMode: true });
+      const item = $('entry, item').first();
+      const title = item.find('title').first().text().trim();
+      const link = item.find('link').attr('href') || item.find('link').first().text().trim();
+      const summary = (item.find('summary, description').first().text() || '')
+        .replace(/<[^>]+>/g, '').trim().slice(0, 300);
+      if (title) {
+        results.push({ author: feed.name, title, link, summary });
+      }
+    } catch (e) {
+      // skip silently
+    }
+  }
+
+  return results;
+}
+
 async function scrapeAll() {
   console.log('Scraping sources...');
 
-  const [hackerNews, githubTrending, podcasts] = await Promise.all([
+  const [hackerNews, githubTrending, podcasts, reddit, aiBlogs] = await Promise.all([
     scrapeHackerNews(),
     scrapeGitHubTrending(),
     scrapePodcasts(),
+    scrapeReddit(),
+    scrapeAIBlogs(),
   ]);
 
-  return { hackerNews, githubTrending, podcasts };
+  return { hackerNews, githubTrending, podcasts, reddit, aiBlogs };
 }
 
 module.exports = { scrapeAll };
