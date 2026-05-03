@@ -44,15 +44,47 @@ async function scrapeGitHubTrending() {
   return items;
 }
 
+async function scrapePodcasts() {
+  const feeds = [
+    { name: 'Dwarkesh Podcast', url: 'https://www.dwarkesh.com/feed' },
+    { name: 'Lex Fridman Podcast', url: 'https://lexfridman.com/feed/podcast/' },
+  ];
+
+  const results = [];
+
+  for (const feed of feeds) {
+    try {
+      const { data } = await axios.get(feed.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        timeout: 10000,
+      });
+      const $ = cheerio.load(data, { xmlMode: true });
+      const item = $('item').first();
+      const title = item.find('title').first().text().trim();
+      const link = item.find('link').first().text().trim();
+      const description = item.find('description').first().text().replace(/<[^>]+>/g, '').trim().slice(0, 300);
+      const pubDate = item.find('pubDate').first().text().trim();
+      if (title) {
+        results.push({ podcast: feed.name, title, link, description, pubDate });
+      }
+    } catch (e) {
+      // skip failed feeds silently
+    }
+  }
+
+  return results;
+}
+
 async function scrapeAll() {
   console.log('Scraping sources...');
 
-  const [hackerNews, githubTrending] = await Promise.all([
+  const [hackerNews, githubTrending, podcasts] = await Promise.all([
     scrapeHackerNews(),
     scrapeGitHubTrending(),
+    scrapePodcasts(),
   ]);
 
-  return { hackerNews, githubTrending };
+  return { hackerNews, githubTrending, podcasts };
 }
 
 module.exports = { scrapeAll };
