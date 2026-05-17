@@ -1,12 +1,12 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-  baseURL: process.env.ANTHROPIC_BASE_URL,
+const client = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com',
 });
 
 async function summarize(data) {
-  console.log('Asking Claude to summarize...');
+  console.log('Asking DeepSeek to summarize...');
 
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -94,13 +94,13 @@ Latest Podcast Episodes:
 ${podcastSection}
 `;
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+  const completion = await client.chat.completions.create({
+    model: 'deepseek-chat',
     max_tokens: 3000,
     messages: [{ role: 'user', content: prompt }],
   });
 
-  return message.content[0].text
+  return completion.choices[0].message.content
     .replace(/^```html\s*/i, '')
     .replace(/```\s*$/, '')
     .trim();
