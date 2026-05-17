@@ -95,7 +95,7 @@ ${podcastSection}
 `;
 
   const completion = await client.chat.completions.create({
-    model: 'deepseek-chat',
+    model: 'deepseek-v4-pro',
     max_tokens: 3000,
     messages: [{ role: 'user', content: prompt }],
   });
