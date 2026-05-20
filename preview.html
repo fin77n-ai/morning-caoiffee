@@ -1,187 +1,140 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" style="color-scheme:dark only">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Morning cAoIffee ☕ — Preview</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="color-scheme" content="dark only">
+  <meta name="supported-color-schemes" content="dark only">
+  <title>Morning cAoIffee ☕</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',sans-serif;
-      background:#0F172A;color:#F1F5F9;line-height:1.6;
-      -webkit-font-smoothing:antialiased;
+    :root{color-scheme:dark only}
+    body,table,td,div,p,h1,h2,h3{color-scheme:dark only}
+    a{color:#06B6D4;text-decoration:none}
+    a:hover{text-decoration:underline}
+    /* Outlook.com 暗色模式钩子 */
+    [data-ogsc] body,[data-ogsb] body{background-color:#0F172A !important;color:#F1F5F9 !important}
+    [data-ogsc] .card,[data-ogsb] .card,
+    [data-ogsc] .term-card,[data-ogsb] .term-card,
+    [data-ogsc] .curiosity-card,[data-ogsb] .curiosity-card,
+    [data-ogsc] .podcast-card,[data-ogsb] .podcast-card{background-color:#1E293B !important}
+    [data-ogsc] h1,[data-ogsc] h2,[data-ogsc] h3{color:#F1F5F9 !important}
+    /* 移动端微调 */
+    @media only screen and (max-width:600px){
+      .wrapper-td{padding:12px 8px !important}
+      .header-td{padding:28px 20px 24px !important}
+      .content-td{padding:24px 18px !important}
     }
-    .wrapper{max-width:660px;margin:0 auto;padding:24px 16px}
-
-    .header{
-      padding:40px 32px 32px;
-      background:linear-gradient(160deg,#1E293B 0%,#0F172A 100%);
-      border:1px solid #334155;border-bottom:2px solid #06B6D4;
-      border-radius:16px 16px 0 0;text-align:center;
-    }
-    .header-eyebrow{
-      font-size:11px;font-weight:700;letter-spacing:.14em;
-      text-transform:uppercase;color:#06B6D4;margin-bottom:14px;
-    }
-    .header h1{
-      font-size:26px;font-weight:800;color:#F1F5F9;
-      letter-spacing:-.02em;margin-bottom:8px;
-    }
-    .header .date{font-size:13px;color:#64748B}
-
-    .content{
-      background:#0F172A;border:1px solid #334155;border-top:none;
-      border-radius:0 0 16px 16px;padding:36px 32px;
-    }
-
-    .section{margin-bottom:36px}
-    .section:last-child{margin-bottom:0}
-    .section-title{
-      font-size:11px;font-weight:700;letter-spacing:.12em;
-      text-transform:uppercase;color:#06B6D4;
-      padding-bottom:10px;margin-bottom:16px;
-      border-bottom:1px solid #1E293B;
-    }
-
-    .card{
-      background:#1E293B;border:1px solid #334155;
-      border-left:3px solid #06B6D4;border-radius:10px;
-      padding:16px 18px;margin-bottom:10px;
-    }
-    .card:last-child{margin-bottom:0}
-    .badge{
-      display:inline-block;font-size:10px;font-weight:600;
-      letter-spacing:.07em;text-transform:uppercase;
-      color:#06B6D4;background:rgba(6,182,212,.12);
-      padding:2px 8px;border-radius:4px;margin-bottom:8px;
-    }
-    .card h3{font-size:14px;font-weight:600;margin-bottom:7px;line-height:1.45}
-    .card h3 a{color:#E2E8F0;text-decoration:none}
-    .card h3 a:hover{color:#06B6D4;text-decoration:underline}
-    .card p{font-size:13px;color:#94A3B8;line-height:1.68}
-
-    .term-card{
-      background:#1E293B;border:1px solid #334155;
-      border-left:3px solid #7C3AED;border-radius:10px;
-      padding:18px 20px;
-    }
-    .term-card h2{font-size:14px;font-weight:700;color:#A78BFA;margin-bottom:10px}
-    .term-card p{font-size:13px;color:#94A3B8;line-height:1.7}
-
-    .curiosity-card{
-      background:#1E293B;border:1px solid #334155;
-      border-left:3px solid #F59E0B;border-radius:10px;
-      padding:18px 20px;
-    }
-    .curiosity-card p{font-size:13px;color:#94A3B8;line-height:1.7}
-    .curiosity-card .question{
-      font-size:15px;font-weight:700;color:#FCD34D;
-      margin-bottom:10px;line-height:1.4;
-    }
-
-    .podcast-card{
-      background:#1E293B;border:1px solid #334155;
-      border-left:3px solid #10B981;border-radius:10px;
-      padding:18px 20px;
-    }
-    .podcast-card h3{font-size:14px;font-weight:600;color:#6EE7B7;margin-bottom:8px}
-    .podcast-card p{font-size:13px;color:#94A3B8;line-height:1.68}
-
-    .footer{text-align:center;padding:20px;color:#334155;font-size:12px}
-    a{color:#06B6D4}
   </style>
 </head>
-<body>
-<div class="wrapper">
-
-  <div class="header">
-    <div class="header-eyebrow">☕ Morning cAoIffee</div>
-    <h1>你的每日 AI 早报</h1>
-    <div class="date">2026年5月18日 星期一</div>
+<body style="background-color:#0F172A;color:#F1F5F9;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#0F172A;">
+    <tr>
+      <td align="center" class="wrapper-td" style="padding:24px 16px;background-color:#0F172A;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="660" style="max-width:660px;width:100%;">
+          <tr>
+            <td class="header-td" style="background:linear-gradient(160deg,#1E293B 0%,#0F172A 100%);background-color:#1E293B;border:1px solid #334155;border-bottom:2px solid #06B6D4;border-radius:16px 16px 0 0;padding:40px 32px 32px;text-align:center;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#06B6D4;margin-bottom:14px;">☕ Morning cAoIffee</div>
+              <h1 style="font-size:26px;font-weight:800;color:#F1F5F9;letter-spacing:-.02em;margin:0 0 8px 0;">你的每日 AI 早报</h1>
+              <div style="font-size:13px;color:#64748B;">2026年5月20日星期三</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="content-td" style="background-color:#0F172A;border:1px solid #334155;border-top:none;border-radius:0 0 16px 16px;padding:36px 32px;color:#F1F5F9;">
+              <div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#06B6D4;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🔥 最有意思的</div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://duckdb.org/2026/05/20/announcing-duckdb-153.html" style="color:#E2E8F0;text-decoration:none;">DuckDB 1.5.3 发布：Quack 协议来了，DuckDB 之间可以远程聊天了</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">说是"patch release"，但带了一大波新功能。Quack 远程协议意味着 DuckDB 终于支持 client-server 模式 + 多并发写入了 —— 对于跑 RAG pipeline 的数据工程师来说，这简直是"本地 SQLite 的轻快 + 远程数据库的灵活"合体了。</p>
   </div>
-
-  <div class="content">
-
-    <div class="section">
-      <div class="section-title">🔥 最有意思的 2-3 条</div>
-      <div class="card">
-        <div class="badge">Google · Hardware</div>
-        <h3><a href="https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/" target="_blank">Our Eighth Generation TPUs: Two Chips for the Agentic Era</a></h3>
-        <p>Google 祭出第八代 TPU，一次出来两颗芯片——TPU 8i 主攻训练，TPU 8t 专为推理优化。"Agentic era" 这个词用得非常有气势，基本上是官方承认：以后 AI agent 满天飞，算力缺口得靠我们来堵。</p>
-      </div>
-      <div class="card">
-        <div class="badge">OpenAI · Product</div>
-        <h3><a href="https://openai.com/index/introducing-chatgpt-images-2-0/" target="_blank">ChatGPT Images 2.0</a></h3>
-        <p>OpenAI 更新了图像生成能力，ChatGPT Images 升到 2.0。上个版本的用户刚学会怎么写 prompt 让它画出人类正常的手指，这次又来新版了……总之：生图更强、更快、更准，PS 软件又少了一个被打开的借口。</p>
-      </div>
-      <div class="card">
-        <div class="badge">Linux · Security · AI</div>
-        <h3><a href="https://lwn.net/Articles/1068928/" target="_blank">Kernel Code Removals Driven by LLM-Created Security Reports</a></h3>
-        <p>AI 安全报告开始影响 Linux 内核代码的删减？LWN 老伙计们表示需要仔细审视——毕竟，一个 hallucination 满天飞的模型在内核里"发现漏洞"，这个故事可以走向非常不同的方向。</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">⭐ GitHub 今日最热</div>
-      <div class="card">
-        <div class="badge">Python · AI Tools</div>
-        <h3><a href="https://github.com/example/repo1" target="_blank">example/ai-toolkit</a></h3>
-        <p>一个把 10 个常用 AI 工具链打包在一起的工具箱，一行命令跑通从数据处理到部署的全流程——懒人福音，效率神器。</p>
-      </div>
-      <div class="card">
-        <div class="badge">Rust · Systems</div>
-        <h3><a href="https://github.com/example/repo2" target="_blank">example/fast-llm-serving</a></h3>
-        <p>用 Rust 写的 LLM 推理服务框架，延迟比现有方案低 40%。Rust + LLM = 性能党的梦中情框架。</p>
-      </div>
-      <div class="card">
-        <div class="badge">TypeScript · Dev Tools</div>
-        <h3><a href="https://github.com/example/repo3" target="_blank">example/agent-ui</a></h3>
-        <p>给 AI Agent 配的开源前端 UI 库，拖拽式搭建对话流，想象成 Figma 但输出的是真正能跑的 Agent 界面。</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">🤖 AI 圈在聊什么</div>
-      <div class="card">
-        <div class="badge">r/LocalLLaMA</div>
-        <h3><a href="https://reddit.com" target="_blank">Running 70B Models on Consumer Hardware Is Now Realistic</a></h3>
-        <p>量化技术越来越成熟，r/LocalLLaMA 的网友们已经在讨论用 RTX 4090 跑 70B 模型的实战经验了。穷人逆袭系列，持续更新中。</p>
-      </div>
-      <div class="card">
-        <div class="badge">Simon Willison</div>
-        <h3><a href="https://simonwillison.net" target="_blank">The Prompt Injection Problem Isn't Going Away</a></h3>
-        <p>Simon 老师又在敲警钟了：只要 AI 系统还在处理用户输入，prompt injection 就是一个没有完美解法的结构性问题。值得认真看一遍。</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">🧠 今日 AI 词</div>
-      <div class="term-card">
-        <h2>KV Cache（键值缓存）</h2>
-        <p>你每次问 AI 问题，它都要"回忆"一遍之前说过的所有内容。KV Cache 就是把这些"回忆"存下来，下次直接查，不用重新算。就像你背了一首诗，第二遍背的时候不需要重新理解每个字的意思——直接背就行。省算力，跑得快。</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">💭 今日好奇</div>
-      <div class="curiosity-card">
-        <p class="question">如果 AI 开始写 AI 的代码，谁来审核这些代码的安全性？</p>
-        <p>Linux 内核那条新闻让我想到一个更深的问题：当 LLM 生成的安全报告开始影响基础设施决策，我们实际上是在把一个统计模型的输出当成权威判断来用。不是说它一定错，而是它的"信心"和它的"准确率"之间存在一条看不见的缝——而这条缝，在内核级别的代码里，可能会变成一道裂缝。</p>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">🎙 访谈速读</div>
-      <div class="podcast-card">
-        <h3>Lex Fridman × Andrej Karpathy — AI, Education, and the Future of Coding</h3>
-        <p>Karpathy 这期聊了他对"software 2.0"的最新思考——AI 不只是工具，而是正在成为一种新的编程语言。最有趣的观点：未来的程序员可能更像"需求工程师"，把问题描述清楚比写代码更重要。如果你只能听一期播客，这期值得放进队列。</p>
-        <p style="margin-top:10px"><strong style="color:#6EE7B7">Software 2.0</strong>：传统编程是人写规则让机器执行；Software 2.0 是人提供数据和目标，让神经网络"学出"规则。就像从手工画地图，变成让 AI 看卫星图自动生成地图。</p>
-      </div>
-    </div>
-
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://qwen.ai/blog?id=qwen3.7" style="color:#E2E8F0;text-decoration:none;">Qwen3.7-Max 发布：Agent 能力卷出新高度</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">Qwen 团队放出了 3.7-Max，号称是"Agent Frontier"。对 RAG 玩家意味着什么？更强的工具调用 + 更长的上下文窗口 = 你的检索管道可以更少依赖 prompt 工程，更多依赖模型本身的领悟力。</p>
   </div>
-
-  <div class="footer">Brewed with ☕ &amp; 🤖</div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://www.bbc.com/future/article/20260519-google-tackles-attempts-to-hack-its-ai-results" style="color:#E2E8F0;text-decoration:none;">Google 的 AI 搜索结果被操纵了 —— 它正在悄悄反击</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">如果你的 RAG 系统从网上扒内容，这就是个警钟：检索质量不只关乎 embedding 选择，还关乎数据源的信任度。Google 在打的这场仗，每个做搜索增强的人都在打。</p>
+  </div>
 </div>
+
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#06B6D4;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">⭐ GitHub 今日最热</div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://github.com/colbymchenry/codegraph" style="color:#E2E8F0;text-decoration:none;">codegraph — 预索引代码知识图谱，让 Claude Code 少走弯路</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">把整个代码库预先索引成知识图谱，给 LLM 工具（Claude Code / Codex / Cursor）用。更少的 token，更少的工具调用，100% 本地。RAG 之于代码，就是这个项目在做的事。</p>
+  </div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://github.com/tinyhumansai/openhuman" style="color:#E2E8F0;text-decoration:none;">OpenHuman — 你的私人 AI 超级智能，本地运行</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">23k+ stars 今天又涨了 3600。主打隐私、简单、强大。对 RAG 玩家来说，"本地优先"的 AI 栈越来越成熟了 —— 你的 embedding pipeline 和数据都不用出你的电脑。</p>
+  </div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://github.com/rohitg00/ai-engineering-from-scratch" style="color:#E2E8F0;text-decoration:none;">ai-engineering-from-scratch — 从零学到发版</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">GitHub 上又一套"从零开始"系列，但这次聚焦 AI 工程。标题很燃："Learn it. Build it. Ship it for others." 适合想系统搭建 RAG 管道的朋友当 roadmap 参考。</p>
+  </div>
+</div>
+
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#06B6D4;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🤖 AI 圈在聊什么</div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://reddit.com/r/LocalLLaMA/comments/1tilvit/huggingface_benchmark_datasets_now_let_you_filter/" style="color:#E2E8F0;text-decoration:none;">HuggingFace 评测数据集支持按模型大小筛选了</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">r/LocalLLaMA 上 237 赞的小更新，但很实用。选 embedding 模型或 reranker 时，按参数量级筛选 benchmark 结果 —— 终于不用手动翻表格了。</p>
+  </div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://reddit.com/r/LocalLLaMA/comments/1tie6gy/qwen37_max_scored_by_artificial_analysis_27b35b/" style="color:#E2E8F0;text-decoration:none;">Qwen3.7 Max 被 Artificial Analysis 打分，27B/35B 在排队</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">216 赞 86 条评论，社区热情高涨。Qwen 系列越来越成为开源 RAG 系统的首选 backbone，这次 Max 版本在 agent 能力上的提升可能意味着更聪明的检索路由。</p>
+  </div>
+  
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="https://simonwillison.net/2026/May/20/google-io/#atom-everything" style="color:#E2E8F0;text-decoration:none;">Simon Willison 谈 Google I/O：不亲手试试的他不写</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">Simon 说他有个原则：没亲自用过的产品不写。Google I/O 很多发布是"coming soon"，所以这篇 blog 有点冷幽默。作为 RAG 实践者，这种"hands-on first"的态度值得学习。</p>
+  </div>
+</div>
+
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#A78BFA;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🧠 AI Term of the Day</div>
+  <div class="term-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #7C3AED;border-radius:10px;padding:18px 20px;">
+    <h2 style="font-size:14px;font-weight:700;color:#A78BFA;margin:0 0 10px 0;">HNSW (Hierarchical Navigable Small World) 索引</h2>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.7;margin:0 0 10px 0;">一种用于近似最近邻搜索的算法，构建多层图结构来加速向量检索。想象城市的道路网络：高速路（上层）让你快速跨越长距离，社区小路（下层）精确定位。ChromaDB、Pinecone、Qdrant 都用它做快速向量检索，是 RAG 系统中"检索"环节的幕后英雄。</p>
+    <pre style="background-color:#0F172A;border:1px solid #334155;border-radius:6px;padding:10px 12px;margin:0;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#67E8F9;overflow-x:auto;line-height:1.5;">from chromadb import Client
+client = Client()
+collection = client.create_collection(
+    "my_docs",
+    metadata={"hnsw:space": "cosine", "hnsw:M": 16, "hnsw:ef_construction": 200}
+)
+collection.add(embeddings=my_vectors, ids=my_ids)</pre>
+  </div>
+</div>
+
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#FCD34D;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">💭 今日好奇</div>
+  <div class="curiosity-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #F59E0B;border-radius:10px;padding:18px 20px;">
+    <div class="question" style="font-size:15px;font-weight:700;color:#FCD34D;margin-bottom:10px;line-height:1.4;">DuckDB 现在能当远程数据库用了，那 RAG pipeline 的架构会被改写吗？</div>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.7;margin:0;">以前我们的 RAG 数据层往往是"本地 DuckDB 做 ETL → 远程 PostgreSQL 或向量数据库存生产数据"的割裂状态。现在 Quack 协议让 DuckDB 实例之间可以远程通信、并发写入，能不能把整个 RAG 数据栈统一在 DuckDB 里？本地 embedding + 远程向量搜索 + 同一套 SQL 语法……想想就兴奋。当然，生产环境的并发和稳定性还有待验证，但方向太诱人了。</p>
+  </div>
+</div>
+
+<div style="margin-bottom:0;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6EE7B7;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🎙 访谈速读</div>
+  <div class="podcast-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #10B981;border-radius:10px;padding:18px 20px;">
+    <h3 style="font-size:14px;font-weight:600;color:#6EE7B7;margin:0 0 8px 0;"><a href="https://www.dwarkesh.com/p/the-mistake-of-conflating-intelligence" style="color:#6EE7B7;text-decoration:none;">Dwarkesh Podcast · 把智力和权力混为一谈的谬误</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">嘉宾抛出了一个尖锐的观点：如果你定义智力是"在广泛领域实现目标的能力"，那斯大林就是史上最聪明的人。这个讨论对 RAG 实践者也有启发——我们追求的"智能检索"到底是检索能力本身，还是检索结果带来的影响力？值得在跑下一次 evaluation 之前想一想。</p>
+  </div>
+</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:center;padding:20px;color:#334155;font-size:12px;background-color:#0F172A;">Brewed with ☕ &amp; 🤖</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

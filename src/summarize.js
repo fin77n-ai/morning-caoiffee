@@ -22,79 +22,89 @@ async function summarize(data) {
     ? data.aiBlogs.map((b, i) => `${i + 1}. [${b.author}] ${b.title} | ${b.link} | ${b.summary}`).join('\n')
     : 'No blog posts today.';
 
+  const dataToolsSection = data.dataTools && data.dataTools.length > 0
+    ? data.dataTools.map((b, i) => `${i + 1}. [${b.source}] ${b.title} | ${b.link} | ${b.summary}`).join('\n')
+    : 'No data-tool updates today.';
+
   const prompt = `
-You are a curious, bilingual friend who loves AI and tech. Today's date is ${today}.
-Below is fresh data from Hacker News, GitHub Trending, Reddit AI communities, AI thought-leader blogs, and the latest podcast episodes.
-Write a short, fun morning digest email — 5 minutes max to read.
+You are a curious, bilingual friend who loves AI, RAG and data engineering. Today is ${today}.
+Below is fresh data from Hacker News, GitHub Trending, Reddit AI communities, AI blogs, podcasts, and the data-tooling world (DuckDB / Chroma / SQLite).
+Write a short, fun morning digest — 5 minutes max to read.
 
-Structure your response as HTML with exactly these 6 sections:
+=========================
+READER CONTEXT (very important)
+=========================
+The reader is actively learning RAG and data analysis. Daily stack: Python, SQL, SQLite, DuckDB, Pandas, ChromaDB, embeddings.
+Prioritize stories that touch RAG, vector search, embeddings, LLM + database tooling, columnar storage, SQL tricks, data pipelines.
+If a generic AI headline can be reframed through the lens of "what does this mean for someone building a RAG app?" — do it.
 
-1. 🔥 最有意思的 2-3 条 (Most Interesting Stories)
-   - Pick the 2-3 most FUN or thought-provoking items from Hacker News
-   - Each gets a clickable title + 1-2 sentences of commentary
-   - Ask yourself: would a curious person want to talk about this over coffee?
+=========================
+OUTPUT FORMAT (STRICT — read carefully)
+=========================
+Output ONLY an HTML fragment (NO <!DOCTYPE>, NO <html>, NO <head>, NO <body>, NO <style> tags).
+The fragment will be injected into a dark-themed email template that already handles styling.
+Use the EXACT inline styles shown in the templates below for every element — this is critical for email-client dark mode compatibility.
+Output 6 sections in this exact order. Each section is a <div>.
 
-2. ⭐ GitHub 今日最热 (GitHub Trending Top 3)
-   - Pick the 3 most interesting repos from the trending list
-   - Each gets a clickable repo name + one punchy sentence on what it does + why it's cool
+----- SECTION 1: Top stories -----
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#06B6D4;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🔥 最有意思的</div>
+  <!-- repeat the card below 2-3 times -->
+  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="LINK" style="color:#E2E8F0;text-decoration:none;">中文标题</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">1-2 句中英混搭点评</p>
+  </div>
+</div>
 
-3. 🤖 AI 圈在聊什么 (AI Community Buzz)
-   - Pick 2-3 most interesting posts from Reddit AI communities
-   - Also include 1 highlight from the AI blogs if it's interesting
-   - Tone: like a friend who's been lurking on the AI forums and found the spicy discussions
+----- SECTION 2: GitHub trending -----
+Same structure as Section 1, title "⭐ GitHub 今日最热", 3 repos.
 
-4. 🧠 AI Term of the Day
-   - Pick one AI/tech term from today's news or community buzz
-   - Explain it in 中英混搭 like you're texting a smart friend who's not a nerd
-   - Use a fun analogy, keep it under 80 words
+----- SECTION 3: AI community buzz -----
+Same structure as Section 1, title "🤖 AI 圈在聊什么", 2-3 items (Reddit + 1 blog highlight).
 
-5. 💭 今日好奇 (Today's Curiosity)
-   - Start with one question sparked by today's news
-   - Then extend it — 2-3 sentences exploring the thought, like a friend who just can't stop thinking about it
+----- SECTION 4: AI Term of the Day (PURPLE accent — must focus on RAG / SQL / vector DB / data tooling) -----
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#A78BFA;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🧠 AI Term of the Day</div>
+  <div class="term-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #7C3AED;border-radius:10px;padding:18px 20px;">
+    <h2 style="font-size:14px;font-weight:700;color:#A78BFA;margin:0 0 10px 0;">术语 (Term)</h2>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.7;margin:0 0 10px 0;">中英混搭解释 + 一个生动比喻 (under 80 words)</p>
+    <pre style="background-color:#0F172A;border:1px solid #334155;border-radius:6px;padding:10px 12px;margin:0;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#67E8F9;overflow-x:auto;line-height:1.5;">一行可运行的代码示例（SQL / DuckDB / Pandas / ChromaDB）</pre>
+  </div>
+</div>
 
-6. 🎙 访谈速读 (Podcast Spotlight)
-   - Pick the most interesting recent episode from the podcasts list below
-   - Write 3 sentences: who's the guest, what's the big idea, why it matters
-   - If no new episodes, skip this section entirely
+⚠️ Term MUST come from: chunking strategies, hybrid search, BM25, reranking, query expansion, columnar storage, vector index (HNSW/IVF), cosine similarity, embeddings, OLAP vs OLTP, window functions, CTE, DuckDB-specific feature, SQLite trick, Pandas idiom, ChromaDB API, etc. Never repeat yesterday's term.
 
-Reader context (use this to pick & frame stories):
-- The reader is currently building RAG systems and doing data analysis
-- Their daily stack: Python, SQL, SQLite, Pandas, vector databases
-- When a story touches RAG, embeddings, vector search, LLM + data pipelines, SQL/database tooling, or data analysis — prioritize it and go slightly deeper
-- For the 🧠 AI Term of the Day: strongly prefer terms from this space (e.g. chunking strategies, hybrid search, reranking, query expansion, columnar storage, query planner, etc.)
-- For 💭 今日好奇: lean toward questions that connect today's news to data/RAG practice
-- If nothing in today's data is relevant to this space, just pick the most interesting story as usual — don't force it
+----- SECTION 5: Today's curiosity (AMBER accent — connect to RAG / data practice) -----
+<div style="margin-bottom:36px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#FCD34D;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">💭 今日好奇</div>
+  <div class="curiosity-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #F59E0B;border-radius:10px;padding:18px 20px;">
+    <div class="question" style="font-size:15px;font-weight:700;color:#FCD34D;margin-bottom:10px;line-height:1.4;">一个由今天新闻引发的问题？(prefer questions that connect to RAG / SQL / data work)</div>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.7;margin:0;">2-3 句延伸思考，像一个朋友停不下来在想这件事</p>
+  </div>
+</div>
 
-Tone & style:
-- 中英混搭, humorous but smart, late-night talk show energy
+----- SECTION 6: Podcast spotlight (GREEN accent) — skip entirely if no episodes -----
+<div style="margin-bottom:0;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6EE7B7;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🎙 访谈速读</div>
+  <div class="podcast-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #10B981;border-radius:10px;padding:18px 20px;">
+    <h3 style="font-size:14px;font-weight:600;color:#6EE7B7;margin:0 0 8px 0;"><a href="LINK" style="color:#6EE7B7;text-decoration:none;">播客 · 集名</a></h3>
+    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">3 句话：嘉宾是谁、核心观点、为什么有意思</p>
+  </div>
+</div>
+
+=========================
+TONE & RULES
+=========================
+- 中英混搭, humorous but smart, late-night talk show energy.
 - Short > long. Punchy > thorough.
-- Total text under 1400 words
+- Total under 1400 words.
 - Example vibe: "OpenAI 又发布新模型了。上一个版本的用户表示：我还没搞懂上上个版本，谢谢。"
+- Output ONLY the HTML fragment. NO markdown fences, NO \`\`\`html, NO commentary before/after.
+- ⚠️ Do not output <!DOCTYPE>, <html>, <head>, <body>, or <style> tags. Start directly with the first <div>.
 
-IMPORTANT: Output ONLY raw HTML. Do not wrap in markdown. Do not include \`\`\`html or \`\`\`. Start directly with <!DOCTYPE html>.
-
-STYLING REQUIREMENTS — follow these exactly:
-- The <head> MUST include these two meta tags to prevent email clients from inverting the dark theme:
-  <meta name="color-scheme" content="dark">
-  <meta name="supported-color-schemes" content="dark">
-- The <head> MUST also include this <style> block (this is the only allowed <style> block):
-  <style>:root{color-scheme:dark}body{color-scheme:dark}</style>
-- The <html> tag must have: style="color-scheme:dark"
-- The outermost <body> tag must have: style="background-color:#0f0f0f;margin:0;padding:0;color-scheme:dark"
-- Overall background: #0f0f0f (near-black), body text: #e8e8e8
-- Max-width 640px, centered, font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
-- Header banner: bold gradient background (e.g. linear-gradient(135deg, #1a1a2e, #16213e)), large white title "☕ Morning cAoIffee", subtitle with today's date in smaller muted text
-- Each of the 6 sections gets its own card: background #1a1a1a, border-radius 12px, padding 20px 24px, margin-bottom 16px
-- Section title: colored accent bar on the left (4px solid), use a distinct color per section:
-  🔥 red #ff4757 | ⭐ yellow #ffd32a | 🤖 purple #7d5fff | 🧠 cyan #18dcff | 💭 green #0be881 | 🎙 orange #ff9f43
-- Section title text: 15px, font-weight 700, letter-spacing 0.5px, color matches accent color
-- Story/item titles: white, font-weight 600, 15px; links styled in accent color, no underline, hover underline
-- Commentary/body text: #b2bec3, font-size 14px, line-height 1.7
-- Horizontal rule between items: 1px solid #2d2d2d
-- Footer: centered, muted #555, 12px, "Generated by DeepSeek · Sent with ☕"
-- All other CSS must be inline (except the one <style> block above) so Gmail renders it correctly
-
+=========================
 --- DATA ---
+=========================
 Hacker News Top Stories:
 ${data.hackerNews.map((item, i) => `${i + 1}. ${item.title} | ${item.url}`).join('\n')}
 
@@ -107,13 +117,16 @@ ${redditSection}
 AI Thought-Leader Blog Posts:
 ${aiBlogsSection}
 
+Data-Tooling Updates (DuckDB / Chroma / SQLite — prioritize these for the AI Term and curiosity sections):
+${dataToolsSection}
+
 Latest Podcast Episodes:
 ${podcastSection}
 `;
 
   const completion = await client.chat.completions.create({
     model: 'deepseek-v4-flash',
-    max_tokens: 3000,
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   });
 
@@ -121,6 +134,10 @@ ${podcastSection}
     .replace(/^```html\s*/i, '')
     .replace(/^```\s*/i, '')
     .replace(/```\s*$/, '')
+    .replace(/<!DOCTYPE[^>]*>/gi, '')
+    .replace(/<\/?html[^>]*>/gi, '')
+    .replace(/<head[\s\S]*?<\/head>/gi, '')
+    .replace(/<\/?body[^>]*>/gi, '')
     .trim();
 }
 

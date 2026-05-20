@@ -135,18 +135,74 @@ async function scrapeAIBlogs() {
   return results;
 }
 
+async function scrapeDataTools() {
+  const results = [];
+
+  // DuckDB blog (RSS)
+  try {
+    const { data } = await axios.get('https://duckdb.org/feed.xml', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 10000,
+    });
+    const $ = cheerio.load(data, { xmlMode: true });
+    $('item, entry').slice(0, 3).each((i, el) => {
+      const item = $(el);
+      const title = item.find('title').first().text().trim();
+      const link = item.find('link').attr('href') || item.find('link').first().text().trim();
+      const summary = (item.find('summary, description').first().text() || '')
+        .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
+      if (title) results.push({ source: 'DuckDB', title, link, summary });
+    });
+  } catch (e) { /* skip silently */ }
+
+  // ChromaDB GitHub releases (atom)
+  try {
+    const { data } = await axios.get('https://github.com/chroma-core/chroma/releases.atom', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 10000,
+    });
+    const $ = cheerio.load(data, { xmlMode: true });
+    $('entry').slice(0, 2).each((i, el) => {
+      const item = $(el);
+      const title = item.find('title').first().text().trim();
+      const link = item.find('link').attr('href') || '';
+      const summary = (item.find('content').first().text() || '')
+        .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
+      if (title) results.push({ source: 'ChromaDB', title, link, summary });
+    });
+  } catch (e) { /* skip silently */ }
+
+  // SQLite news
+  try {
+    const { data } = await axios.get('https://www.sqlite.org/news.html', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 10000,
+    });
+    const $ = cheerio.load(data);
+    const firstH3 = $('h3').first();
+    const title = firstH3.text().replace(/\s+/g, ' ').trim();
+    if (title) {
+      const summary = firstH3.nextUntil('h3').text().replace(/\s+/g, ' ').trim().slice(0, 240);
+      results.push({ source: 'SQLite', title, link: 'https://www.sqlite.org/news.html', summary });
+    }
+  } catch (e) { /* skip silently */ }
+
+  return results;
+}
+
 async function scrapeAll() {
   console.log('Scraping sources...');
 
-  const [hackerNews, githubTrending, podcasts, reddit, aiBlogs] = await Promise.all([
+  const [hackerNews, githubTrending, podcasts, reddit, aiBlogs, dataTools] = await Promise.all([
     scrapeHackerNews(),
     scrapeGitHubTrending(),
     scrapePodcasts(),
     scrapeReddit(),
     scrapeAIBlogs(),
+    scrapeDataTools(),
   ]);
 
-  return { hackerNews, githubTrending, podcasts, reddit, aiBlogs };
+  return { hackerNews, githubTrending, podcasts, reddit, aiBlogs, dataTools };
 }
 
 module.exports = { scrapeAll };
