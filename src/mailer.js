@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const path = require('path');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -18,6 +19,13 @@ async function sendMail(htmlContent) {
     to: process.env.GMAIL_TO,
     subject: `☕ Morning cAoIffee — ${today}`,
     html: htmlContent,
+    attachments: [
+      {
+        filename: 'cyberpunk-ai-long-background.png',
+        path: path.join(__dirname, '..', 'assets', 'cyberpunk-ai-long-background.png'),
+        cid: 'cyberpunk-ai-background',
+      },
+    ],
   });
 
   console.log(`Email sent: ${info.messageId}`);

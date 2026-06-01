@@ -27,16 +27,17 @@ async function summarize(data) {
     : 'No data-tool updates today.';
 
   const prompt = `
-You are a curious, bilingual friend who loves AI, RAG and data engineering. Today is ${today}.
-Below is fresh data from Hacker News, GitHub Trending, Reddit AI communities, AI blogs, podcasts, and the data-tooling world (DuckDB / Chroma / SQLite).
+You are a curious, bilingual friend who loves the whole AI ecosystem. Today is ${today}.
+Below is fresh data from Hacker News, GitHub Trending, Reddit AI communities, AI lab blogs, research/product blogs, podcasts, and selected data-tooling updates.
 Write a short, fun morning digest — 5 minutes max to read.
 
 =========================
 READER CONTEXT (very important)
 =========================
-The reader is actively learning RAG and data analysis. Daily stack: Python, SQL, SQLite, DuckDB, Pandas, ChromaDB, embeddings.
-Prioritize stories that touch RAG, vector search, embeddings, LLM + database tooling, columnar storage, SQL tricks, data pipelines.
-If a generic AI headline can be reframed through the lens of "what does this mean for someone building a RAG app?" — do it.
+The reader wants a broader view of AI, not a RAG-only digest.
+Prioritize major AI developments across frontier models, open-source models, agents, multimodal AI, coding tools, evals/safety, product launches, research ideas, developer tooling, and notable community debates.
+RAG, vector search, embeddings, SQL, and data tooling are still welcome when genuinely important, but do not force every story through a RAG lens.
+If a headline is about model capability, agents, product strategy, safety, creative tools, or open-source AI, explain it on its own terms.
 
 =========================
 OUTPUT FORMAT (STRICT — read carefully)
@@ -44,51 +45,74 @@ OUTPUT FORMAT (STRICT — read carefully)
 Output ONLY an HTML fragment (NO <!DOCTYPE>, NO <html>, NO <head>, NO <body>, NO <style> tags).
 The fragment will be injected into a dark-themed email template that already handles styling.
 Use the EXACT inline styles shown in the templates below for every element — this is critical for email-client dark mode compatibility.
-Output 6 sections in this exact order. Each section is a <div>.
+Output the sections below in this exact order. Section 7 is optional and should be skipped entirely if there are no podcast episodes. Each section is a <div>.
 
------ SECTION 1: Top stories -----
+----- SECTION 0: Night City signal strip -----
+<div style="margin:0 0 28px 0;padding:10px 12px;background-color:rgba(5,8,22,.62);border:1px solid #263B59;border-left:3px solid #F472B6;border-radius:6px;">
+  <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#67E8F9;letter-spacing:.08em;line-height:1.6;">╔═ NEON ROUTE 77 ═════════ AI/AGENTS/MODELS ═╗</div>
+  <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#F9A8D4;letter-spacing:.08em;line-height:1.6;">╚═ STATUS: caffeinated · noise reduced · vibe online ═╝</div>
+  <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:#A7F3D0;letter-spacing:.08em;line-height:1.6;">district scan: downtown / market alley / cloud tower / backstreet lab</div>
+</div>
+
+----- SECTION 1: Today's three signals -----
+<div style="margin-bottom:34px;">
+  <div style="font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#F0FD4F;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid #263B59;">今日三件事</div>
+  <div style="background-color:rgba(16,23,43,.78);border:1px solid #445A22;border-left:3px solid #F0FD4F;border-radius:6px;padding:16px 18px;box-shadow:0 0 18px rgba(240,253,79,.13);">
+    <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#F0FD4F;margin-bottom:10px;">[ INTEL BURST ]  ▮▮▮▯▯  ENCRYPTED MORNING SIGNAL</div>
+    <p style="font-size:14px;color:#E2E8F0;line-height:1.65;margin:0 0 8px 0;"><strong style="color:#F0FD4F;">01</strong> 一句话总结今天最重要的 AI 信号</p>
+    <p style="font-size:14px;color:#E2E8F0;line-height:1.65;margin:0 0 8px 0;"><strong style="color:#F0FD4F;">02</strong> 一句话总结今天第二个 AI 信号</p>
+    <p style="font-size:14px;color:#E2E8F0;line-height:1.65;margin:0;"><strong style="color:#F0FD4F;">03</strong> 一句话总结今天第三个 AI 信号</p>
+  </div>
+</div>
+
+----- SECTION 2: Top stories -----
 <div style="margin-bottom:36px;">
-  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#06B6D4;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🔥 最有意思的</div>
+  <div style="font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#22D3EE;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #263B59;">最有意思的</div>
   <!-- repeat the card below 2-3 times -->
-  <div class="card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #06B6D4;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
-    <h3 style="font-size:14px;font-weight:600;margin:0 0 7px 0;line-height:1.45;"><a href="LINK" style="color:#E2E8F0;text-decoration:none;">中文标题</a></h3>
-    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">1-2 句中英混搭点评</p>
+  <div class="card" style="background-color:rgba(16,23,43,.80);border:1px solid #1C5D75;border-left:3px solid #22D3EE;border-radius:6px;padding:16px 18px;margin-bottom:12px;box-shadow:0 0 18px rgba(34,211,238,.12);">
+    <div style="font-size:10px;color:#22D3EE;line-height:1;margin-bottom:8px;">◆◆◇  SIGNAL 01 · CLOUD TOWER</div>
+    <div style="font-size:11px;color:#67E8F9;font-weight:800;letter-spacing:.06em;margin-bottom:8px;">SOURCE / CATEGORY / SIGNAL LEVEL</div>
+    <h3 style="font-size:15px;font-weight:700;margin:0 0 8px 0;line-height:1.45;"><a href="LINK" style="color:#F8FAFC;text-decoration:none;">中文标题</a></h3>
+    <p style="font-size:13px;color:#CBD5E1;line-height:1.66;margin:0;">1-2 句中英混搭点评</p>
   </div>
 </div>
 
------ SECTION 2: GitHub trending -----
-Same structure as Section 1, title "⭐ GitHub 今日最热", 3 repos.
+----- SECTION 3: GitHub trending -----
+Same structure as Section 2, title "GitHub 今日最热", 2-3 repos. Use green accent: title color #4ADE80, border-left #22C55E, border #1E6840, meta color #86EFAC, and tiny label like "▰▰▱  DEV GRID · BACKSTREET WORKSHOP".
 
------ SECTION 3: AI community buzz -----
-Same structure as Section 1, title "🤖 AI 圈在聊什么", 2-3 items (Reddit + 1 blog highlight).
+----- SECTION 4: AI lab + community buzz -----
+Same structure as Section 2, title "AI 圈在聊什么", 2-3 items (Reddit + AI blog/lab highlights). Use pink accent: title color #F472B6, border-left #F472B6, border #6D2458, meta color #F9A8D4, and tiny label like "◇◇◆  STREET CHATTER · MARKET ALLEY".
 
------ SECTION 4: AI Term of the Day (PURPLE accent — must focus on RAG / SQL / vector DB / data tooling) -----
+----- SECTION 5: Signal Decode (PURPLE accent — broad AI concept) -----
 <div style="margin-bottom:36px;">
-  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#A78BFA;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🧠 AI Term of the Day</div>
-  <div class="term-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #7C3AED;border-radius:10px;padding:18px 20px;">
-    <h2 style="font-size:14px;font-weight:700;color:#A78BFA;margin:0 0 10px 0;">术语 (Term)</h2>
-    <p style="font-size:13px;color:#94A3B8;line-height:1.7;margin:0 0 10px 0;">中英混搭解释 + 一个生动比喻 (under 80 words)</p>
-    <pre style="background-color:#0F172A;border:1px solid #334155;border-radius:6px;padding:10px 12px;margin:0;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#67E8F9;overflow-x:auto;line-height:1.5;">一行可运行的代码示例（SQL / DuckDB / Pandas / ChromaDB）</pre>
+  <div style="font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#C084FC;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #263B59;">信号解码</div>
+  <div class="term-card" style="background-color:rgba(16,23,43,.80);border:1px solid #4C1D95;border-left:3px solid #A855F7;border-radius:6px;padding:18px 20px;box-shadow:0 0 18px rgba(168,85,247,.13);">
+    <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#C4B5FD;margin-bottom:10px;">[ DECODE PATCH ] not studying, just intercepting concepts</div>
+    <h2 style="font-size:15px;font-weight:800;color:#C4B5FD;margin:0 0 10px 0;">术语 (Term)</h2>
+    <p style="font-size:13px;color:#CBD5E1;line-height:1.7;margin:0 0 10px 0;">中英混搭解释 + 一个生动比喻 (under 80 words)</p>
+    <pre style="background-color:#050816;border:1px solid #22D3EE;border-radius:4px;padding:10px 12px;margin:0;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#A7F3D0;overflow-x:auto;line-height:1.5;">一行代码、prompt、公式或判断准则</pre>
   </div>
 </div>
 
-⚠️ Term MUST come from: chunking strategies, hybrid search, BM25, reranking, query expansion, columnar storage, vector index (HNSW/IVF), cosine similarity, embeddings, OLAP vs OLTP, window functions, CTE, DuckDB-specific feature, SQLite trick, Pandas idiom, ChromaDB API, etc. Never repeat yesterday's term.
+⚠️ Term should come from broad AI: agents, tool use, reasoning models, multimodality, context windows, evals, alignment, distillation, quantization, MoE, RLHF/RLAIF, synthetic data, model routing, inference latency, open weights, MCP, coding agents, or RAG/data concepts when they are timely. Never repeat yesterday's term.
 
------ SECTION 5: Today's curiosity (AMBER accent — connect to RAG / data practice) -----
+----- SECTION 6: Today's curiosity (YELLOW accent — broad AI question) -----
 <div style="margin-bottom:36px;">
-  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#FCD34D;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">💭 今日好奇</div>
-  <div class="curiosity-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #F59E0B;border-radius:10px;padding:18px 20px;">
-    <div class="question" style="font-size:15px;font-weight:700;color:#FCD34D;margin-bottom:10px;line-height:1.4;">一个由今天新闻引发的问题？(prefer questions that connect to RAG / SQL / data work)</div>
-    <p style="font-size:13px;color:#94A3B8;line-height:1.7;margin:0;">2-3 句延伸思考，像一个朋友停不下来在想这件事</p>
+  <div style="font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#F0FD4F;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #263B59;">今日好奇</div>
+  <div class="curiosity-card" style="background-color:rgba(16,23,43,.80);border:1px solid #665A16;border-left:3px solid #F0FD4F;border-radius:6px;padding:18px 20px;box-shadow:0 0 18px rgba(240,253,79,.12);">
+    <div style="font-size:10px;color:#F0FD4F;line-height:1;margin-bottom:8px;">▌▌▌ OPEN QUESTION TERMINAL</div>
+    <div class="question" style="font-size:15px;font-weight:800;color:#FCD34D;margin-bottom:10px;line-height:1.4;">一个由今天新闻引发的问题？(prefer questions about AI capability, products, agents, research, safety, or developer workflows)</div>
+    <p style="font-size:13px;color:#CBD5E1;line-height:1.7;margin:0;">2-3 句延伸思考，像一个朋友停不下来在想这件事</p>
   </div>
 </div>
 
------ SECTION 6: Podcast spotlight (GREEN accent) — skip entirely if no episodes -----
+----- SECTION 7: Podcast spotlight (TEAL accent) — skip entirely if no episodes -----
 <div style="margin-bottom:0;">
-  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6EE7B7;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #1E293B;">🎙 访谈速读</div>
-  <div class="podcast-card" style="background-color:#1E293B;border:1px solid #334155;border-left:3px solid #10B981;border-radius:10px;padding:18px 20px;">
-    <h3 style="font-size:14px;font-weight:600;color:#6EE7B7;margin:0 0 8px 0;"><a href="LINK" style="color:#6EE7B7;text-decoration:none;">播客 · 集名</a></h3>
-    <p style="font-size:13px;color:#94A3B8;line-height:1.68;margin:0;">3 句话：嘉宾是谁、核心观点、为什么有意思</p>
+  <div style="font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#2DD4BF;padding-bottom:10px;margin-bottom:16px;border-bottom:1px solid #263B59;">访谈速读</div>
+  <div class="podcast-card" style="background-color:rgba(16,23,43,.80);border:1px solid #145E58;border-left:3px solid #2DD4BF;border-radius:6px;padding:16px 18px;box-shadow:0 0 18px rgba(45,212,191,.12);">
+    <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;color:#5EEAD4;margin-bottom:10px;">[ AUDIO RELAY ]  long-form signal</div>
+    <h3 style="font-size:15px;font-weight:700;color:#6EE7B7;margin:0 0 8px 0;"><a href="LINK" style="color:#6EE7B7;text-decoration:none;">播客 · 集名</a></h3>
+    <p style="font-size:13px;color:#CBD5E1;line-height:1.68;margin:0;">3 句话：嘉宾是谁、核心观点、为什么有意思</p>
   </div>
 </div>
 
@@ -117,7 +141,7 @@ ${redditSection}
 AI Thought-Leader Blog Posts:
 ${aiBlogsSection}
 
-Data-Tooling Updates (DuckDB / Chroma / SQLite — prioritize these for the AI Term and curiosity sections):
+Data-Tooling Updates (DuckDB / Chroma / SQLite — use when relevant, but do not let these dominate the digest):
 ${dataToolsSection}
 
 Latest Podcast Episodes:

@@ -106,8 +106,12 @@ async function scrapeReddit() {
 
 async function scrapeAIBlogs() {
   const feeds = [
-    { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/' },
-    { name: 'The Batch (deeplearning.ai)', url: 'https://www.deeplearning.ai/the-batch/feed/' },
+    { name: 'OpenAI News', url: 'https://openai.com/news/rss.xml', limit: 2 },
+    { name: 'Hugging Face Blog', url: 'https://huggingface.co/blog/feed.xml', limit: 2 },
+    { name: 'Google DeepMind Blog', url: 'https://deepmind.google/blog/rss.xml', limit: 2 },
+    { name: 'Google AI Blog', url: 'https://blog.google/technology/ai/rss/', limit: 2 },
+    { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/', limit: 1 },
+    { name: 'The Batch (deeplearning.ai)', url: 'https://www.deeplearning.ai/the-batch/feed/', limit: 1 },
   ];
 
   const results = [];
@@ -119,14 +123,16 @@ async function scrapeAIBlogs() {
         timeout: 10000,
       });
       const $ = cheerio.load(data, { xmlMode: true });
-      const item = $('entry, item').first();
-      const title = item.find('title').first().text().trim();
-      const link = item.find('link').attr('href') || item.find('link').first().text().trim();
-      const summary = (item.find('summary, description').first().text() || '')
-        .replace(/<[^>]+>/g, '').trim().slice(0, 300);
-      if (title) {
-        results.push({ author: feed.name, title, link, summary });
-      }
+      $('entry, item').slice(0, feed.limit).each((i, el) => {
+        const item = $(el);
+        const title = item.find('title').first().text().trim();
+        const link = item.find('link').attr('href') || item.find('link').first().text().trim();
+        const summary = (item.find('summary, description, content').first().text() || '')
+          .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 300);
+        if (title) {
+          results.push({ author: feed.name, title, link, summary });
+        }
+      });
     } catch (e) {
       // skip silently
     }

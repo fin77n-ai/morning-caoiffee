@@ -30,18 +30,26 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 
 ### Data sources
 - Hacker News — top 15 stories
-- Hugging Face Blog — latest 8 posts
+- GitHub Trending — top 5 repositories
+- Reddit AI communities — MachineLearning, LocalLLaMA, artificial
+- AI labs and blogs — OpenAI, Hugging Face, Google DeepMind, Google AI, Simon Willison, The Batch
+- Podcasts — Dwarkesh and Lex Fridman
+- Data tooling — DuckDB, ChromaDB, SQLite
 
 ### Email sections
 1. 🔥 Top AI Stories — with commentary + source links
-2. 🤖 New Models & Research — HuggingFace picks, no blank cards
-3. ☕ Quick Takes — bullet points with links
-4. 🧠 AI Term of the Day — fun 中英混搭 explanation
+2. ⭐ GitHub Trending — useful AI/open-source picks
+3. 🤖 AI Community Buzz — Reddit + AI lab/blog highlights
+4. 🧠 AI Term of the Day — broad AI concept, not RAG-only
+5. 💭 Today's Curiosity — a bigger question from the news
+6. 🎙 Podcast Spotlight — skipped when no episodes
 
 ### Tone of the email
 - 中英混搭, humorous, smart
 - Like a bilingual friend texting you over coffee
-- Claude generates full HTML email directly
+- DeepSeek generates the HTML fragment directly
+- Keep it broad-AI first: models, agents, multimodal AI, coding tools, evals/safety, product launches, research, open-source, and community debates
+- RAG/data tooling can appear when genuinely relevant, but should not dominate by default
 
 ### Key files
 - `src/scraper.js` — fetches titles + URLs from sources
