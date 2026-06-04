@@ -2,7 +2,7 @@ name: Morning cAoIffee ☕
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 23:00 UTC = 07:00 AM China time (UTC+8)
+    - cron: '31 22 * * *' # 22:31 UTC = 06:31 AM China time (UTC+8)
   workflow_dispatch:        # allow manual trigger from GitHub UI
 
 jobs:
