@@ -5,31 +5,49 @@ const client = new OpenAI({
   baseURL: 'https://api.deepseek.com',
 });
 
-async function summarize(data) {
-  console.log('Asking DeepSeek to summarize...');
-
+function buildPrompt(data) {
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  const optimizationNote = data.optimization
+    ? `Optimization profile ${data.optimization.profileVersion}; output counts ${JSON.stringify(data.optimization.outputCounts)}.`
+    : 'No pre-summarization optimization metadata provided.';
+  const failedSources = (data.sourceHealth || []).filter((source) => source.status === 'failed');
+  const sourceHealthNote = failedSources.length > 0
+    ? `Source health warning: ${failedSources.map((source) => `${source.source} failed`).join('; ')}. Do not invent items from failed sources.`
+    : 'All tracked sources reported healthy.';
+
+  const itemMeta = (item) => {
+    const parts = [];
+    if (item.rank) parts.push(`rank #${item.rank}`);
+    if (item.categoryLabel) parts.push(item.categoryLabel);
+    if (item.optimizationScore) parts.push(`optimization score ${item.optimizationScore}`);
+    if (item.reason) parts.push(item.reason);
+    return parts.length ? ` | ${parts.join(' | ')}` : '';
+  };
+
   const podcastSection = data.podcasts && data.podcasts.length > 0
-    ? data.podcasts.map((p, i) => `${i + 1}. [${p.podcast}] ${p.title} | ${p.link} | ${p.description}`).join('\n')
+    ? data.podcasts.map((p, i) => `${i + 1}. [${p.podcast}] ${p.title} | ${p.link} | ${p.description}${itemMeta(p)}`).join('\n')
     : 'No new episodes today.';
 
   const redditSection = data.reddit && data.reddit.length > 0
-    ? data.reddit.map((p, i) => `${i + 1}. [r/${p.subreddit}] ${p.title} | ${p.url} | 👍 ${p.score} | 💬 ${p.comments}`).join('\n')
+    ? data.reddit.map((p, i) => `${i + 1}. [r/${p.subreddit}] ${p.title} | ${p.url} | 👍 ${p.score} | 💬 ${p.comments}${itemMeta(p)}`).join('\n')
     : 'No Reddit posts today.';
 
   const aiBlogsSection = data.aiBlogs && data.aiBlogs.length > 0
-    ? data.aiBlogs.map((b, i) => `${i + 1}. [${b.author}] ${b.title} | ${b.link} | ${b.summary}`).join('\n')
+    ? data.aiBlogs.map((b, i) => `${i + 1}. [${b.author}] ${b.title} | ${b.link} | ${b.summary}${itemMeta(b)}`).join('\n')
     : 'No blog posts today.';
 
   const dataToolsSection = data.dataTools && data.dataTools.length > 0
-    ? data.dataTools.map((b, i) => `${i + 1}. [${b.source}] ${b.title} | ${b.link} | ${b.summary}`).join('\n')
+    ? data.dataTools.map((b, i) => `${i + 1}. [${b.source}] ${b.title} | ${b.link} | ${b.summary}${itemMeta(b)}`).join('\n')
     : 'No data-tool updates today.';
 
-  const prompt = `
+  return `
 You are a curious, bilingual friend who loves the whole AI ecosystem. Today is ${today}.
 Below is fresh data from Hacker News, GitHub Trending, Reddit AI communities, AI lab blogs, research/product blogs, podcasts, and selected data-tooling updates.
 Write a short, fun morning digest — 5 minutes max to read.
+The input has already been pre-ranked and deduped by a local content optimizer. Respect rank, category, score, and reason metadata when choosing what to feature.
+${optimizationNote}
+${sourceHealthNote}
 
 =========================
 READER CONTEXT (very important)
@@ -38,6 +56,7 @@ The reader wants a broader view of AI, not a RAG-only digest.
 Prioritize major AI developments across frontier models, open-source models, agents, multimodal AI, coding tools, evals/safety, product launches, research ideas, developer tooling, and notable community debates.
 RAG, vector search, embeddings, SQL, and data tooling are still welcome when genuinely important, but do not force every story through a RAG lens.
 If a headline is about model capability, agents, product strategy, safety, creative tools, or open-source AI, explain it on its own terms.
+Do not resurrect low-ranked RAG/data-tooling items just because the prompt has a data-tooling section. Use those items only when their rank and reason make them genuinely relevant today.
 
 =========================
 OUTPUT FORMAT (STRICT — read carefully)
@@ -130,10 +149,10 @@ TONE & RULES
 --- DATA ---
 =========================
 Hacker News Top Stories:
-${data.hackerNews.map((item, i) => `${i + 1}. ${item.title} | ${item.url}`).join('\n')}
+${data.hackerNews.map((item, i) => `${i + 1}. ${item.title} | ${item.url}${itemMeta(item)}`).join('\n')}
 
 GitHub Trending Repos:
-${data.githubTrending.map((item, i) => `${i + 1}. ${item.name} | ${item.url} | ${item.description} | ⭐ ${item.stars}`).join('\n')}
+${data.githubTrending.map((item, i) => `${i + 1}. ${item.name} | ${item.url} | ${item.description} | ⭐ ${item.stars}${itemMeta(item)}`).join('\n')}
 
 Reddit AI Community Posts:
 ${redditSection}
@@ -147,6 +166,12 @@ ${dataToolsSection}
 Latest Podcast Episodes:
 ${podcastSection}
 `;
+}
+
+async function summarize(data) {
+  console.log('Asking DeepSeek to summarize...');
+
+  const prompt = buildPrompt(data);
 
   const completion = await client.chat.completions.create({
     model: 'deepseek-v4-flash',
@@ -165,4 +190,4 @@ ${podcastSection}
     .trim();
 }
 
-module.exports = { summarize };
+module.exports = { summarize, buildPrompt };

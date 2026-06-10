@@ -2,46 +2,121 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 async function scrapeHackerNews() {
-  const { data } = await axios.get('https://news.ycombinator.com');
-  const $ = cheerio.load(data);
-  const items = [];
+  try {
+    const { data } = await axios.get('https://news.ycombinator.com', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 10000,
+    });
+    const $ = cheerio.load(data);
+    const items = [];
 
-  $('.athing').each((i, el) => {
-    if (i >= 15) return false;
-    const titleEl = $(el).find('.titleline > a');
-    const text = titleEl.text().trim();
-    const href = titleEl.attr('href');
-    if (text) items.push({ title: text, url: href || '#' });
-  });
+    $('.athing').each((i, el) => {
+      if (i >= 15) return false;
+      const titleEl = $(el).find('.titleline > a');
+      const text = titleEl.text().trim();
+      const href = titleEl.attr('href');
+      if (text) items.push({ title: text, url: href || '#' });
+    });
 
-  return items;
+    return items;
+  } catch (e) {
+    throw new Error(`Hacker News failed: ${e.message}`);
+  }
 }
 
 async function scrapeGitHubTrending() {
-  const { data } = await axios.get('https://github.com/trending', {
-    headers: { 'Accept-Language': 'en-US,en;q=0.9' }
-  });
-  const $ = cheerio.load(data);
-  const items = [];
+  try {
+    const { data } = await axios.get('https://github.com/trending', {
+      headers: { 'Accept-Language': 'en-US,en;q=0.9', 'User-Agent': 'Mozilla/5.0' },
+      timeout: 10000,
+    });
+    const $ = cheerio.load(data);
+    const items = [];
 
-  $('article.Box-row').each((i, el) => {
-    if (i >= 5) return false;
-    const repoEl = $(el).find('h2 a');
-    const name = repoEl.text().replace(/\s+/g, '').trim();
-    const href = repoEl.attr('href');
-    const description = $(el).find('p').text().trim();
-    const stars = $(el).find('.octicon-star').parent().text().trim();
-    if (name && href) {
-      items.push({
-        name,
-        url: `https://github.com${href}`,
-        description: description || '',
-        stars: stars || '',
-      });
-    }
-  });
+    $('article.Box-row').each((i, el) => {
+      if (i >= 5) return false;
+      const repoEl = $(el).find('h2 a');
+      const name = repoEl.text().replace(/\s+/g, '').trim();
+      const href = repoEl.attr('href');
+      const description = $(el).find('p').text().trim();
+      const stars = $(el).find('.octicon-star').parent().text().trim();
+      if (name && href) {
+        items.push({
+          name,
+          url: `https://github.com${href}`,
+          description: description || '',
+          stars: stars || '',
+        });
+      }
+    });
 
-  return items;
+    return items;
+  } catch (e) {
+    throw new Error(`GitHub Trending failed: ${e.message}`);
+  }
+}
+
+async function scrapeSource(sourceName, fn) {
+  try {
+    const items = await fn();
+    return {
+      items,
+      health: { source: sourceName, status: 'ok', count: items.length },
+    };
+  } catch (e) {
+    return {
+      items: [],
+      health: { source: sourceName, status: 'failed', count: 0, error: e.message },
+    };
+  }
+}
+
+async function scrapeFeedItems(feed, parseItems) {
+  try {
+    const { data } = await axios.get(feed.url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 10000,
+    });
+    const items = parseItems(data, feed);
+    return {
+      items,
+      health: { source: feed.name, status: 'ok', count: items.length },
+    };
+  } catch (e) {
+    return {
+      items: [],
+      health: { source: feed.name, status: 'failed', count: 0, error: e.message },
+    };
+  }
+}
+
+async function scrapeRedditSubreddit(sub) {
+  try {
+    const { data } = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=3`, {
+      headers: { 'User-Agent': 'morning-caoiffee/1.0' },
+      timeout: 10000,
+    });
+    const items = data.data.children
+      .filter(p => !p.data.stickied)
+      .slice(0, 3)
+      .map(p => ({
+        subreddit: sub,
+        title: p.data.title,
+        url: `https://reddit.com${p.data.permalink}`,
+        score: p.data.score,
+        comments: p.data.num_comments,
+      }));
+
+    return {
+      items,
+      health: { source: `Reddit r/${sub}`, status: 'ok', count: items.length },
+    };
+  } catch (e) {
+    return {
+      items: [],
+      health: { source: `Reddit r/${sub}`, status: 'failed', count: 0, error: e.message },
+    };
+  }
 }
 
 async function scrapePodcasts() {
@@ -51,57 +126,37 @@ async function scrapePodcasts() {
   ];
 
   const results = [];
+  const health = [];
 
   for (const feed of feeds) {
-    try {
-      const { data } = await axios.get(feed.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        timeout: 10000,
-      });
+    const result = await scrapeFeedItems(feed, (data) => {
       const $ = cheerio.load(data, { xmlMode: true });
       const item = $('item').first();
       const title = item.find('title').first().text().trim();
       const link = item.find('link').first().text().trim();
       const description = item.find('description').first().text().replace(/<[^>]+>/g, '').trim().slice(0, 300);
       const pubDate = item.find('pubDate').first().text().trim();
-      if (title) {
-        results.push({ podcast: feed.name, title, link, description, pubDate });
-      }
-    } catch (e) {
-      // skip failed feeds silently
-    }
+      return title ? [{ podcast: feed.name, title, link, description, pubDate }] : [];
+    });
+    results.push(...result.items);
+    health.push(result.health);
   }
 
-  return results;
+  return { items: results, health };
 }
 
 async function scrapeReddit() {
   const subreddits = ['MachineLearning', 'LocalLLaMA', 'artificial'];
   const results = [];
+  const health = [];
 
   for (const sub of subreddits) {
-    try {
-      const { data } = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=3`, {
-        headers: { 'User-Agent': 'morning-caoiffee/1.0' },
-        timeout: 10000,
-      });
-      const posts = data.data.children
-        .filter(p => !p.data.stickied)
-        .slice(0, 3)
-        .map(p => ({
-          subreddit: sub,
-          title: p.data.title,
-          url: `https://reddit.com${p.data.permalink}`,
-          score: p.data.score,
-          comments: p.data.num_comments,
-        }));
-      results.push(...posts);
-    } catch (e) {
-      // skip silently
-    }
+    const result = await scrapeRedditSubreddit(sub);
+    results.push(...result.items);
+    health.push(result.health);
   }
 
-  return results;
+  return { items: results, health };
 }
 
 async function scrapeAIBlogs() {
@@ -115,14 +170,12 @@ async function scrapeAIBlogs() {
   ];
 
   const results = [];
+  const health = [];
 
   for (const feed of feeds) {
-    try {
-      const { data } = await axios.get(feed.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        timeout: 10000,
-      });
+    const result = await scrapeFeedItems(feed, (data) => {
       const $ = cheerio.load(data, { xmlMode: true });
+      const items = [];
       $('entry, item').slice(0, feed.limit).each((i, el) => {
         const item = $(el);
         const title = item.find('title').first().text().trim();
@@ -130,85 +183,102 @@ async function scrapeAIBlogs() {
         const summary = (item.find('summary, description, content').first().text() || '')
           .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 300);
         if (title) {
-          results.push({ author: feed.name, title, link, summary });
+          items.push({ author: feed.name, title, link, summary });
         }
       });
-    } catch (e) {
-      // skip silently
-    }
+      return items;
+    });
+    results.push(...result.items);
+    health.push(result.health);
   }
 
-  return results;
+  return { items: results, health };
 }
 
 async function scrapeDataTools() {
   const results = [];
+  const health = [];
 
   // DuckDB blog (RSS)
-  try {
-    const { data } = await axios.get('https://duckdb.org/feed.xml', {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      timeout: 10000,
-    });
+  const duckDb = await scrapeFeedItems({ name: 'DuckDB', url: 'https://duckdb.org/feed.xml' }, (data) => {
     const $ = cheerio.load(data, { xmlMode: true });
+    const items = [];
     $('item, entry').slice(0, 3).each((i, el) => {
       const item = $(el);
       const title = item.find('title').first().text().trim();
       const link = item.find('link').attr('href') || item.find('link').first().text().trim();
       const summary = (item.find('summary, description').first().text() || '')
         .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
-      if (title) results.push({ source: 'DuckDB', title, link, summary });
+      if (title) items.push({ source: 'DuckDB', title, link, summary });
     });
-  } catch (e) { /* skip silently */ }
+    return items;
+  });
+  results.push(...duckDb.items);
+  health.push(duckDb.health);
 
   // ChromaDB GitHub releases (atom)
-  try {
-    const { data } = await axios.get('https://github.com/chroma-core/chroma/releases.atom', {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      timeout: 10000,
-    });
+  const chroma = await scrapeFeedItems({ name: 'ChromaDB', url: 'https://github.com/chroma-core/chroma/releases.atom' }, (data) => {
     const $ = cheerio.load(data, { xmlMode: true });
+    const items = [];
     $('entry').slice(0, 2).each((i, el) => {
       const item = $(el);
       const title = item.find('title').first().text().trim();
       const link = item.find('link').attr('href') || '';
       const summary = (item.find('content').first().text() || '')
         .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
-      if (title) results.push({ source: 'ChromaDB', title, link, summary });
+      if (title) items.push({ source: 'ChromaDB', title, link, summary });
     });
-  } catch (e) { /* skip silently */ }
+    return items;
+  });
+  results.push(...chroma.items);
+  health.push(chroma.health);
 
   // SQLite news
-  try {
-    const { data } = await axios.get('https://www.sqlite.org/news.html', {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      timeout: 10000,
-    });
+  const sqlite = await scrapeFeedItems({ name: 'SQLite', url: 'https://www.sqlite.org/news.html' }, (data) => {
     const $ = cheerio.load(data);
     const firstH3 = $('h3').first();
     const title = firstH3.text().replace(/\s+/g, ' ').trim();
+    const items = [];
     if (title) {
       const summary = firstH3.nextUntil('h3').text().replace(/\s+/g, ' ').trim().slice(0, 240);
-      results.push({ source: 'SQLite', title, link: 'https://www.sqlite.org/news.html', summary });
+      items.push({ source: 'SQLite', title, link: 'https://www.sqlite.org/news.html', summary });
     }
-  } catch (e) { /* skip silently */ }
+    return items;
+  });
+  results.push(...sqlite.items);
+  health.push(sqlite.health);
 
-  return results;
+  return { items: results, health };
 }
 
 async function scrapeAll() {
   console.log('Scraping sources...');
 
   const [hackerNews, githubTrending, podcasts, reddit, aiBlogs, dataTools] = await Promise.all([
-    scrapeHackerNews(),
-    scrapeGitHubTrending(),
+    scrapeSource('Hacker News', scrapeHackerNews),
+    scrapeSource('GitHub Trending', scrapeGitHubTrending),
     scrapePodcasts(),
     scrapeReddit(),
     scrapeAIBlogs(),
     scrapeDataTools(),
   ]);
 
-  return { hackerNews, githubTrending, podcasts, reddit, aiBlogs, dataTools };
+  return {
+    hackerNews: hackerNews.items,
+    githubTrending: githubTrending.items,
+    podcasts: podcasts.items,
+    reddit: reddit.items,
+    aiBlogs: aiBlogs.items,
+    dataTools: dataTools.items,
+    sourceHealth: [
+      hackerNews.health,
+      githubTrending.health,
+      ...podcasts.health,
+      ...reddit.health,
+      ...aiBlogs.health,
+      ...dataTools.health,
+    ],
+  };
 }
 
 module.exports = { scrapeAll };

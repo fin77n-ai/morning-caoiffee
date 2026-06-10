@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "check": "node --check src/*.js scripts/*.js",
+    "dry-run": "node scripts/dry-run.js",
+    "preview:optimized": "node scripts/preview-optimized-content.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,10 +14,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "openai": "^4.0.0",
-    "axios": "^1.15.2",
+    "axios": "^1.17.0",
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
-    "nodemailer": "^8.0.5"
+    "nodemailer": "^8.0.5",
+    "openai": "^4.0.0"
   }
 }
