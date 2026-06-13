@@ -7,7 +7,7 @@
     "check": "node --check src/*.js scripts/*.js",
     "dry-run": "node scripts/dry-run.js",
     "preview:optimized": "node scripts/preview-optimized-content.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",

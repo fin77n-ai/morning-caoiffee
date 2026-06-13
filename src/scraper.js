@@ -1,6 +1,8 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+let redditAccessToken;
+
 async function scrapeHackerNews() {
   try {
     const { data } = await axios.get('https://news.ycombinator.com', {
@@ -92,10 +94,7 @@ async function scrapeFeedItems(feed, parseItems) {
 
 async function scrapeRedditSubreddit(sub) {
   try {
-    const { data } = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=3`, {
-      headers: { 'User-Agent': 'morning-caoiffee/1.0' },
-      timeout: 10000,
-    });
+    const data = await fetchRedditListing(sub);
     const items = data.data.children
       .filter(p => !p.data.stickied)
       .slice(0, 3)
@@ -117,6 +116,53 @@ async function scrapeRedditSubreddit(sub) {
       health: { source: `Reddit r/${sub}`, status: 'failed', count: 0, error: e.message },
     };
   }
+}
+
+async function fetchRedditListing(sub) {
+  const headers = { 'User-Agent': redditUserAgent() };
+
+  if (hasRedditOAuthConfig()) {
+    const token = await getRedditAccessToken();
+    const { data } = await axios.get(`https://oauth.reddit.com/r/${sub}/hot?limit=3`, {
+      headers: { ...headers, Authorization: `Bearer ${token}` },
+      timeout: 10000,
+    });
+    return data;
+  }
+
+  const { data } = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=3`, {
+    headers,
+    timeout: 10000,
+  });
+  return data;
+}
+
+async function getRedditAccessToken() {
+  if (redditAccessToken) return redditAccessToken;
+
+  const params = new URLSearchParams({ grant_type: 'client_credentials' });
+  const { data } = await axios.post('https://www.reddit.com/api/v1/access_token', params, {
+    auth: {
+      username: process.env.REDDIT_CLIENT_ID,
+      password: process.env.REDDIT_CLIENT_SECRET,
+    },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': redditUserAgent(),
+    },
+    timeout: 10000,
+  });
+
+  redditAccessToken = data.access_token;
+  return redditAccessToken;
+}
+
+function hasRedditOAuthConfig(env = process.env) {
+  return Boolean(env.REDDIT_CLIENT_ID && env.REDDIT_CLIENT_SECRET);
+}
+
+function redditUserAgent(env = process.env) {
+  return env.REDDIT_USER_AGENT || 'morning-caoiffee/1.0 by fin77n-ai';
 }
 
 async function scrapePodcasts() {
@@ -159,6 +205,26 @@ async function scrapeReddit() {
   return { items: results, health };
 }
 
+async function scrapeTheBatch() {
+  const { data } = await axios.get('https://www.deeplearning.ai/the-batch', {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+    timeout: 10000,
+  });
+  const $ = cheerio.load(data);
+  const nextData = $('#__NEXT_DATA__').text();
+  if (!nextData) return [];
+
+  const pageData = JSON.parse(nextData);
+  const posts = pageData.props?.pageProps?.posts || [];
+  return posts.slice(0, 1).map((post) => ({
+    author: 'The Batch (deeplearning.ai)',
+    title: post.title,
+    link: `https://www.deeplearning.ai/the-batch/${post.slug}`,
+    summary: cleanText(post.excerpt || post.custom_excerpt || '').slice(0, 300),
+    pubDate: post.published_at,
+  })).filter((post) => post.title && post.link);
+}
+
 async function scrapeAIBlogs() {
   const feeds = [
     { name: 'OpenAI News', url: 'https://openai.com/news/rss.xml', limit: 2 },
@@ -166,7 +232,6 @@ async function scrapeAIBlogs() {
     { name: 'Google DeepMind Blog', url: 'https://deepmind.google/blog/rss.xml', limit: 2 },
     { name: 'Google AI Blog', url: 'https://blog.google/technology/ai/rss/', limit: 2 },
     { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/', limit: 1 },
-    { name: 'The Batch (deeplearning.ai)', url: 'https://www.deeplearning.ai/the-batch/feed/', limit: 1 },
   ];
 
   const results = [];
@@ -180,8 +245,7 @@ async function scrapeAIBlogs() {
         const item = $(el);
         const title = item.find('title').first().text().trim();
         const link = item.find('link').attr('href') || item.find('link').first().text().trim();
-        const summary = (item.find('summary, description, content').first().text() || '')
-          .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 300);
+        const summary = cleanText(item.find('summary, description, content').first().text() || '').slice(0, 300);
         if (title) {
           items.push({ author: feed.name, title, link, summary });
         }
@@ -192,7 +256,18 @@ async function scrapeAIBlogs() {
     health.push(result.health);
   }
 
+  const batch = await scrapeSource('The Batch (deeplearning.ai)', scrapeTheBatch);
+  results.push(...batch.items);
+  health.push(batch.health);
+
   return { items: results, health };
+}
+
+function cleanText(value) {
+  return String(value)
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 async function scrapeDataTools() {
@@ -281,4 +356,8 @@ async function scrapeAll() {
   };
 }
 
-module.exports = { scrapeAll };
+module.exports = {
+  scrapeAll,
+  hasRedditOAuthConfig,
+  redditUserAgent,
+};

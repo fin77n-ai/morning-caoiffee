@@ -17,10 +17,13 @@ jobs:
           node-version: '24'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Check source files
         run: npm run check
+
+      - name: Run tests
+        run: npm test
 
       - name: Run Morning cAoIffee
         env:
@@ -28,4 +31,7 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GMAIL_TO: ${{ secrets.GMAIL_TO }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
         run: node src/index.js

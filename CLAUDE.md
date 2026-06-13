@@ -23,15 +23,15 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 - **Node.js** — runtime
 - **Express** (future) — local server
 - **axios + cheerio** — web scraping
-- **@anthropic-ai/sdk** — Claude API (via third-party: ai.jc-space.cloud)
+- **openai SDK** — DeepSeek-compatible chat completions API
 - **nodemailer** — Gmail sender
 - **dotenv** — env management
-- **GitHub Actions** (upcoming) — automated daily trigger
+- **GitHub Actions** — automated daily trigger
 
 ### Data sources
 - Hacker News — top 15 stories
 - GitHub Trending — top 5 repositories
-- Reddit AI communities — MachineLearning, LocalLLaMA, artificial
+- Reddit AI communities — MachineLearning, LocalLLaMA, artificial (OAuth-supported when credentials are configured)
 - AI labs and blogs — OpenAI, Hugging Face, Google DeepMind, Google AI, Simon Willison, The Batch
 - Podcasts — Dwarkesh and Lex Fridman
 - Data tooling — DuckDB, ChromaDB, SQLite
@@ -57,8 +57,9 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 - `src/mailer.js` — sends email via Gmail
 - `src/index.js` — runs everything in sequence
 - `.env` — API keys (never commit this)
+- Optional Reddit env: `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT`
 
 ## What's next
-- [ ] GitHub Actions for daily 7am automation
+- [x] GitHub Actions for daily 7am automation
 - [ ] More news sources (e.g. The Verge, Anthropic blog)
 - [ ] Eventually merge into Claudio (the AI radio station project)
