@@ -3,6 +3,8 @@ const cheerio = require('cheerio');
 
 let redditAccessToken;
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function scrapeHackerNews() {
   try {
     const { data } = await axios.get('https://news.ycombinator.com', {
@@ -93,6 +95,34 @@ async function scrapeFeedItems(feed, parseItems) {
 }
 
 async function scrapeRedditSubreddit(sub) {
+  if (!hasRedditOAuthConfig()) {
+    try {
+      const items = await scrapeRedditRssSubreddit(sub);
+      return {
+        items,
+        health: { source: `Reddit r/${sub} RSS`, status: 'ok', count: items.length },
+      };
+    } catch (rssError) {
+      try {
+        const items = await scrapeRedditOldSubreddit(sub);
+        return {
+          items,
+          health: { source: `Reddit r/${sub} old.reddit`, status: 'ok', count: items.length },
+        };
+      } catch (oldError) {
+        return {
+          items: [],
+          health: {
+            source: `Reddit r/${sub}`,
+            status: 'failed',
+            count: 0,
+            error: `RSS fallback failed: ${rssError.message}; old.reddit fallback failed: ${oldError.message}`,
+          },
+        };
+      }
+    }
+  }
+
   try {
     const data = await fetchRedditListing(sub);
     const items = data.data.children
@@ -110,12 +140,99 @@ async function scrapeRedditSubreddit(sub) {
       items,
       health: { source: `Reddit r/${sub}`, status: 'ok', count: items.length },
     };
-  } catch (e) {
-    return {
-      items: [],
-      health: { source: `Reddit r/${sub}`, status: 'failed', count: 0, error: e.message },
-    };
+  } catch (jsonError) {
+    try {
+      const items = await scrapeRedditRssSubreddit(sub);
+      return {
+        items,
+        health: { source: `Reddit r/${sub} RSS`, status: 'ok', count: items.length },
+      };
+    } catch (rssError) {
+      try {
+        const items = await scrapeRedditOldSubreddit(sub);
+        return {
+          items,
+          health: { source: `Reddit r/${sub} old.reddit`, status: 'ok', count: items.length },
+        };
+      } catch (oldError) {
+        return {
+          items: [],
+          health: {
+            source: `Reddit r/${sub}`,
+            status: 'failed',
+            count: 0,
+            error: `${jsonError.message}; RSS fallback failed: ${rssError.message}; old.reddit fallback failed: ${oldError.message}`,
+          },
+        };
+      }
+    }
   }
+}
+
+async function scrapeRedditRssSubreddit(sub) {
+  const { data } = await axios.get(`https://www.reddit.com/r/${sub}/.rss`, {
+    headers: { 'User-Agent': redditUserAgent() },
+    timeout: 10000,
+  });
+  const $ = cheerio.load(data, { xmlMode: true });
+  const items = [];
+
+  $('entry').slice(0, 3).each((i, el) => {
+    const entry = $(el);
+    const title = entry.find('title').first().text().trim();
+    const url = entry.find('link').first().attr('href') || '';
+    const summary = cleanText(entry.find('content').first().text()).slice(0, 240);
+    if (title && url) {
+      items.push({
+        subreddit: sub,
+        title,
+        url,
+        score: 0,
+        comments: 0,
+        summary,
+      });
+    }
+  });
+
+  if (!items.length) {
+    throw new Error('No RSS entries found');
+  }
+
+  return items;
+}
+
+async function scrapeRedditOldSubreddit(sub) {
+  const { data } = await axios.get(`https://old.reddit.com/r/${sub}/hot/`, {
+    headers: { 'User-Agent': redditUserAgent() },
+    timeout: 10000,
+  });
+  const $ = cheerio.load(data);
+  const items = [];
+
+  $('.thing').slice(0, 8).each((i, el) => {
+    const post = $(el);
+    if (post.hasClass('stickied')) return;
+
+    const titleEl = post.find('p.title a.title').first();
+    const title = titleEl.text().trim();
+    let url = titleEl.attr('href') || '';
+    const commentsText = post.find('a.comments').first().text();
+    const comments = Number((commentsText.match(/\d+/) || ['0'])[0]);
+    const scoreText = post.find('.score.unvoted').first().attr('title')
+      || post.find('.score.unvoted').first().text();
+    const score = Number((scoreText.match(/\d+/) || ['0'])[0]);
+
+    if (url.startsWith('/')) url = `https://old.reddit.com${url}`;
+    if (title && url) {
+      items.push({ subreddit: sub, title, url, score, comments });
+    }
+  });
+
+  if (!items.length) {
+    throw new Error('No old.reddit posts found');
+  }
+
+  return items.slice(0, 3);
 }
 
 async function fetchRedditListing(sub) {
@@ -196,7 +313,8 @@ async function scrapeReddit() {
   const results = [];
   const health = [];
 
-  for (const sub of subreddits) {
+  for (const [index, sub] of subreddits.entries()) {
+    if (index > 0) await sleep(2500);
     const result = await scrapeRedditSubreddit(sub);
     results.push(...result.items);
     health.push(result.health);
