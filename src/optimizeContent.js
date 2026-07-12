@@ -1,13 +1,14 @@
 const { contentProfile } = require('./contentProfile');
 
 function optimizeContent(data, profile = contentProfile) {
+  const dropped = { blocked: 0, offTopic: 0 };
   const optimized = {
-    hackerNews: optimizeGroup(data.hackerNews, 'hackerNews', profile),
-    githubTrending: optimizeGroup(data.githubTrending, 'githubTrending', profile),
-    podcasts: optimizeGroup(data.podcasts, 'podcasts', profile),
-    reddit: optimizeGroup(data.reddit, 'reddit', profile),
-    aiBlogs: optimizeGroup(data.aiBlogs, 'aiBlogs', profile),
-    dataTools: optimizeGroup(data.dataTools, 'dataTools', profile),
+    hackerNews: optimizeGroup(data.hackerNews, 'hackerNews', profile, dropped),
+    githubTrending: optimizeGroup(data.githubTrending, 'githubTrending', profile, dropped),
+    podcasts: optimizeGroup(data.podcasts, 'podcasts', profile, dropped),
+    reddit: optimizeGroup(data.reddit, 'reddit', profile, dropped),
+    aiBlogs: optimizeGroup(data.aiBlogs, 'aiBlogs', profile, dropped),
+    dataTools: optimizeGroup(data.dataTools, 'dataTools', profile, dropped),
     sourceHealth: data.sourceHealth || [],
   };
 
@@ -16,36 +17,42 @@ function optimizeContent(data, profile = contentProfile) {
     generatedAt: new Date().toISOString(),
     inputCounts: countGroups(data),
     outputCounts: countGroups(optimized),
+    droppedCounts: dropped,
     failedSources: (optimized.sourceHealth || []).filter((source) => source.status === 'failed').length,
-    note: 'Items were ranked, deduped, and capped before summarization.',
+    note: 'Items were ranked, deduped, blocklist-filtered, and capped before summarization.',
   };
 
   return optimized;
 }
 
-function optimizeGroup(items = [], groupName, profile) {
+function optimizeGroup(items = [], groupName, profile, dropped = { blocked: 0, offTopic: 0 }) {
   const seen = new Set();
   const ranked = [];
+  const requireMatch = (profile.requireTopicMatch ?? []).includes(groupName);
 
   for (const item of items) {
     const key = duplicateKey(item);
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    ranked.push(scoreItem(item, groupName, profile));
+
+    const text = searchableText(item);
+    if (isBlocked(text, profile)) {
+      dropped.blocked += 1;
+      continue;
+    }
+
+    const scored = scoreItem(item, groupName, profile);
+    if (requireMatch && scored.matches === 0) {
+      dropped.offTopic += 1;
+      continue;
+    }
+    ranked.push(scored);
   }
 
   ranked.sort((a, b) => b.score - a.score);
 
   const limit = profile.limits[groupName] ?? ranked.length;
   const selected = ranked.slice(0, limit);
-  const wildcard = ranked
-    .slice(limit)
-    .find((item) => item.category !== selected[0]?.category && item.score >= 1.2);
-
-  if (wildcard && selected.length > 2) {
-    selected[selected.length - 1] = wildcard;
-    selected.sort((a, b) => b.score - a.score);
-  }
 
   return selected.map((item, index) => ({
     ...item.original,
@@ -73,9 +80,23 @@ function scoreItem(item, groupName, profile) {
     original: item,
     category: topic.name,
     categoryLabel: topic.label,
+    matches: topic.matches,
     score,
     reason: buildReason(topic, sourceBoost, socialBoost),
   };
+}
+
+// 词边界匹配：'eval' 不再命中 retrieval，'app' 不再命中 happy
+function keywordHits(text, keywords) {
+  return keywords.filter((keyword) =>
+    new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(text)
+  ).length;
+}
+
+function isBlocked(text, profile) {
+  const blockHits = keywordHits(text, profile.blockKeywords ?? []);
+  if (!blockHits) return false;
+  return keywordHits(text, profile.blockExemptions ?? []) === 0;
 }
 
 function bestTopic(text, profile) {
@@ -87,7 +108,7 @@ function bestTopic(text, profile) {
   };
 
   for (const [name, topic] of Object.entries(profile.topics)) {
-    const matches = topic.keywords.filter((keyword) => text.includes(keyword)).length;
+    const matches = keywordHits(text, topic.keywords);
     const weightedMatches = matches * topic.weight;
     const bestWeightedMatches = best.matches * best.weight;
     if (weightedMatches > bestWeightedMatches) {
@@ -132,6 +153,10 @@ function normalize(value) {
 function socialSignalBoost(item, groupName) {
   if (groupName === 'reddit') {
     return Math.min((item.score || 0) / 500, 1.5) + Math.min((item.comments || 0) / 150, 1);
+  }
+
+  if (groupName === 'hackerNews') {
+    return Math.min((item.points || 0) / 300, 1.5) + Math.min((item.comments || 0) / 200, 1);
   }
 
   if (groupName === 'githubTrending') {

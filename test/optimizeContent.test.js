@@ -88,3 +88,46 @@ test('keeps failed source health in optimization metadata', () => {
 
   assert.equal(optimized.optimization.failedSources, 1);
 });
+
+test('blocklist vetoes hard-science items unless AI-exempted', () => {
+  const profile = { ...testProfile, blockKeywords: ['quantum'], blockExemptions: ['llm'] };
+  const optimized = optimizeContent(baseData({
+    hackerNews: [
+      { title: 'Quantum entanglement breakthrough confirmed', url: 'https://example.com/q1' },
+      { title: 'Quantum tricks for faster LLM agent serving', url: 'https://example.com/q2' },
+      { title: 'Agent workflow news roundup', url: 'https://example.com/a1' },
+    ],
+  }), profile);
+
+  const urls = optimized.hackerNews.map((item) => item.url);
+  assert.ok(!urls.includes('https://example.com/q1'));
+  assert.ok(urls.includes('https://example.com/q2'));
+  assert.equal(optimized.optimization.droppedCounts.blocked, 1);
+});
+
+test('keyword matching respects word boundaries', () => {
+  const optimized = optimizeContent(baseData({
+    aiBlogs: [
+      { title: 'The vectorized approach to rendering', link: 'https://example.com/v1' },
+      { title: 'Vector database showdown', link: 'https://example.com/v2' },
+    ],
+  }), testProfile);
+
+  const v1 = optimized.aiBlogs.find((item) => item.link === 'https://example.com/v1');
+  const v2 = optimized.aiBlogs.find((item) => item.link === 'https://example.com/v2');
+  assert.equal(v1.category, 'generalAI');
+  assert.equal(v2.category, 'data');
+});
+
+test('requireTopicMatch drops zero-match items from noisy groups', () => {
+  const profile = { ...testProfile, requireTopicMatch: ['hackerNews'] };
+  const optimized = optimizeContent(baseData({
+    hackerNews: [
+      { title: 'Agent workflow launch', url: 'https://example.com/a' },
+      { title: 'Random cooking blog post', url: 'https://example.com/c' },
+    ],
+  }), profile);
+
+  assert.deepEqual(optimized.hackerNews.map((item) => item.url), ['https://example.com/a']);
+  assert.equal(optimized.optimization.droppedCounts.offTopic, 1);
+});

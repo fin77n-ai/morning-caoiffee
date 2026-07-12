@@ -7,6 +7,31 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function scrapeHackerNews() {
   try {
+    const { data } = await axios.get(
+      'https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=25',
+      { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 10000 },
+    );
+    const items = (data.hits || [])
+      .map((hit) => ({
+        title: (hit.title || '').trim(),
+        // 自帖（Ask HN 等）没有外链，用讨论页补上，消灭相对链接和 '#'
+        url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
+        points: hit.points || 0,
+        comments: hit.num_comments || 0,
+        commentsUrl: `https://news.ycombinator.com/item?id=${hit.objectID}`,
+        pubDate: hit.created_at || '',
+      }))
+      .filter((item) => item.title);
+    if (!items.length) throw new Error('Algolia returned no front_page hits');
+    return items;
+  } catch (apiError) {
+    return scrapeHackerNewsHtml(apiError);
+  }
+}
+
+// 兜底：Algolia 挂了退回抓首页 HTML（没有分数/讨论链接，但保住基本盘）
+async function scrapeHackerNewsHtml(apiError) {
+  try {
     const { data } = await axios.get('https://news.ycombinator.com', {
       headers: { 'User-Agent': 'Mozilla/5.0' },
       timeout: 10000,
@@ -19,12 +44,18 @@ async function scrapeHackerNews() {
       const titleEl = $(el).find('.titleline > a');
       const text = titleEl.text().trim();
       const href = titleEl.attr('href');
-      if (text) items.push({ title: text, url: href || '#' });
+      if (text && href) {
+        items.push({
+          title: text,
+          url: href.startsWith('http') ? href : `https://news.ycombinator.com/${href}`,
+        });
+      }
     });
 
+    if (!items.length) throw new Error('front page returned no parsable items');
     return items;
   } catch (e) {
-    throw new Error(`Hacker News failed: ${e.message}`);
+    throw new Error(`Hacker News failed: API ${apiError.message}; HTML ${e.message}`);
   }
 }
 

@@ -29,7 +29,7 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 - **GitHub Actions** — automated daily trigger
 
 ### Data sources
-- Hacker News — top 15 stories
+- Hacker News — front page top 25 via Algolia API (points/comments/discussion links; HTML scrape as fallback)
 - GitHub Trending — top 5 repositories
 - Reddit AI communities — MachineLearning, LocalLLaMA, artificial (OAuth-supported when credentials are configured)
 - AI labs and blogs — OpenAI, Hugging Face, Google DeepMind, Google AI, Simon Willison, The Batch

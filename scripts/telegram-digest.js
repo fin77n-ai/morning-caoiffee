@@ -11,7 +11,41 @@ const client = new OpenAI({
 async function generateTelegramDigest() {
   const rawData = await scrapeAll();
   const data = optimizeContent(rawData);
-  return summarizeForTelegram(data);
+  logSourceHealth(data);
+  const digest = await summarizeForTelegram(data);
+  warnUnknownUrls(digest, data);
+  return digest;
+}
+
+// 源健康只进 Actions 日志，不占读者正文
+function logSourceHealth(data) {
+  const health = data.sourceHealth || [];
+  const failed = health.filter((source) => source.status === 'failed');
+  console.log(`Source health: ${health.length - failed.length}/${health.length} ok`);
+  for (const source of failed) {
+    console.log(`- FAILED ${source.source}: ${source.error || 'unknown'}`);
+  }
+  if (data.optimization?.droppedCounts) {
+    console.log(`Dropped: ${JSON.stringify(data.optimization.droppedCounts)}`);
+  }
+}
+
+// 防链接幻觉的最后一道闸：先只告警观察，确认误报率再考虑剔除
+function warnUnknownUrls(digest, data) {
+  const known = new Set();
+  for (const group of ['hackerNews', 'githubTrending', 'reddit', 'aiBlogs', 'podcasts']) {
+    for (const item of data[group] || []) {
+      for (const url of [item.url, item.link, item.commentsUrl]) {
+        if (url) known.add(url.replace(/\/+$/, ''));
+      }
+    }
+  }
+  const used = digest.match(/https?:\/\/[^\s)>\]]+/g) || [];
+  for (const url of used) {
+    if (!known.has(url.replace(/[.,;:!?]*$/, '').replace(/\/+$/, ''))) {
+      console.warn(`WARN unknown URL in digest (possible hallucination): ${url}`);
+    }
+  }
 }
 
 async function main() {
@@ -22,13 +56,19 @@ async function main() {
   console.log('--- TELEGRAM_DIGEST_END ---');
 }
 
-async function summarizeForTelegram(data) {
+async function summarizeForTelegram(data, attempt = 1) {
   const prompt = buildTelegramPrompt(data);
   const completion = await client.chat.completions.create({
     model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
     max_tokens: 2200,
     messages: [{ role: 'user', content: prompt }],
   });
+
+  // 被 max_tokens 拦腰截断的稿子不能发出去，重试一次
+  if (completion.choices[0].finish_reason === 'length' && attempt < 2) {
+    console.warn('Digest truncated by max_tokens, retrying once...');
+    return summarizeForTelegram(data, attempt + 1);
+  }
 
   return completion.choices[0].message.content
     .replace(/^```(?:text)?\s*/i, '')
@@ -42,10 +82,8 @@ function buildTelegramPrompt(data) {
     month: 'long',
     day: 'numeric',
     weekday: 'long',
+    timeZone: process.env.DIGEST_TZ || 'Asia/Shanghai',
   });
-  const failedSources = (data.sourceHealth || [])
-    .filter((source) => source.status === 'failed')
-    .map((source) => source.source);
 
   return `
 You are D, a witty bilingual AI-news editor writing a Telegram morning digest for one reader.
@@ -60,7 +98,7 @@ This will be read inside Telegram on a phone. Make it much clearer than an email
 - No long bullet walls.
 - Prefer concrete "what happened / why it matters / what to watch" over generic summaries.
 - Preserve product, model, company, and project names exactly as written in DATA.
-Max 3200 Chinese characters.
+Max 1600 Chinese characters. Tight and punchy beats complete.
 If a source failed, do not invent content from it.
 
 Format exactly:
@@ -70,14 +108,17 @@ Format exactly:
 1. Headline
    为什么重要：...
    继续观察：...
+   链接：URL
 
 2. Headline
    为什么重要：...
    继续观察：...
+   链接：URL
 
 3. Headline
    为什么重要：...
    继续观察：...
+   链接：URL
 
 ━━━━━━━━━━━━
 最值得点开
@@ -102,13 +143,13 @@ Format exactly:
 ━━━━━━━━━━━━
 社区信号
 1. Reddit/HN topic
-   大家在争什么：...
-   我的判断：...
+   这帖在聊什么：...
+   为什么值得围观：...
    链接：URL
 
 2. Reddit/HN topic
-   大家在争什么：...
-   我的判断：...
+   这帖在聊什么：...
+   为什么值得围观：...
    链接：URL
 
 ━━━━━━━━━━━━
@@ -123,23 +164,19 @@ Format exactly:
 问题：...
 为什么值得想：...
 
-━━━━━━━━━━━━
-源健康
-Status line only.
-
-${data.sourceHealth.length - failedSources.length}/${data.sourceHealth.length} ok${failedSources.length ? `; failed: ${failedSources.join(', ')}` : ''}
-
 Selection rules:
 - Use the highest ranked items first.
 - Prefer frontier models, agents, coding tools, open-source models, evals/safety, multimodal AI, developer tools, and important community debates.
 - Do not over-focus on RAG/data tooling unless the item is genuinely important today.
-- Every item in "最值得点开", "开源 / GitHub", and "社区信号" must include a real URL from DATA.
+- 同一事件全篇只允许出现一次：已进"先看这 3 件事"的条目不得再出现在其他栏目。
+- Every URL you write must be copied verbatim from DATA. Never construct or guess a URL.
+- For 社区信号, describe only what the title/metadata supports — do not invent debates or comment threads. Prefer the discussion URL when DATA provides one.
 - If GitHub has no strong item, write "今天没有特别值得追的 GitHub 项目。"
 - Keep each item to 2-3 short lines. Telegram hates giant paragraphs. Be kind to thumbs.
 
 DATA
 Hacker News:
-${formatItems(data.hackerNews, (item) => `${item.title} | ${item.url} | ${meta(item)}`)}
+${formatItems(data.hackerNews, (item) => `${item.title} | ${item.url} | ${item.points || 0} points, ${item.comments || 0} comments | discussion: ${item.commentsUrl || item.url} | ${meta(item)}`)}
 
 GitHub Trending:
 ${formatItems(data.githubTrending, (item) => `${item.name} | ${item.url} | ${item.description || ''} | ${item.stars || ''} | ${meta(item)}`)}
@@ -149,9 +186,6 @@ ${formatItems(data.reddit, (item) => `${item.title} | ${item.url} | score ${item
 
 AI Blogs:
 ${formatItems(data.aiBlogs, (item) => `${item.title} | ${item.link} | ${item.summary || ''} | ${meta(item)}`)}
-
-Data Tools:
-${formatItems(data.dataTools, (item) => `${item.title} | ${item.link} | ${item.summary || ''} | ${meta(item)}`)}
 
 Podcasts:
 ${formatItems(data.podcasts, (item) => `${item.title} | ${item.link} | ${item.description || ''} | ${meta(item)}`)}
@@ -164,11 +198,7 @@ function formatItems(items = [], formatter) {
 }
 
 function meta(item) {
-  return [
-    item.rank ? `rank ${item.rank}` : '',
-    item.categoryLabel || '',
-    item.reason || '',
-  ].filter(Boolean).join(' / ');
+  return item.rank ? `rank ${item.rank}` : '';
 }
 
 module.exports = { generateTelegramDigest };
