@@ -1,6 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const { generateTelegramDigest } = require('./telegram-digest');
+const { recordSentDigest } = require('../src/sentHistory');
 
 // Telegram 单条消息上限 4096 字符；留余量。
 // 优先按 ━━━ 分隔线整栏切段（"看点"和"链接"永不分家），单栏超长再退回按行切。
@@ -79,6 +80,14 @@ async function main() {
     console.log(`Sent chunk ${index + 1}/${chunks.length} (${chunk.length} chars)`);
   }
   console.log('Digest delivered.');
+
+  // 发送成功才记账（记账失败不算发送失败，别让 Actions 标红吓人）
+  try {
+    const recorded = recordSentDigest(digest);
+    console.log(`Sent history recorded: ${recorded} keys.`);
+  } catch (historyErr) {
+    console.warn('Failed to record sent history:', historyErr.message);
+  }
 }
 
 main().catch(async (err) => {

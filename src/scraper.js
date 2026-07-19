@@ -68,23 +68,28 @@ async function scrapeGitHubTrending() {
     const $ = cheerio.load(data);
     const items = [];
 
+    // 抓满 25 条交给过滤层选优（老版只抓 5 条，AI 命中率看天吃饭）
     $('article.Box-row').each((i, el) => {
-      if (i >= 5) return false;
+      if (i >= 25) return false;
       const repoEl = $(el).find('h2 a');
       const name = repoEl.text().replace(/\s+/g, '').trim();
       const href = repoEl.attr('href');
       const description = $(el).find('p').text().trim();
-      const stars = $(el).find('.octicon-star').parent().text().trim();
+      // 总星数和今日新增是两个不同元素：总星在 /stargazers 链接里，今日新增在右下角 float 元素里
+      const stars = $(el).find(`a[href="${href}/stargazers"]`).text().trim();
+      const starsToday = $(el).find('.float-sm-right').text().trim();
       if (name && href) {
         items.push({
           name,
           url: `https://github.com${href}`,
           description: description || '',
           stars: stars || '',
+          starsToday: starsToday || '',
         });
       }
     });
 
+    if (!items.length) throw new Error('trending page returned no parsable repos');
     return items;
   } catch (e) {
     throw new Error(`GitHub Trending failed: ${e.message}`);
@@ -246,7 +251,9 @@ async function scrapeRedditOldSubreddit(sub) {
 
     const titleEl = post.find('p.title a.title').first();
     const title = titleEl.text().trim();
-    let url = titleEl.attr('href') || '';
+    // 读者要的是讨论页，不是帖子指向的裸图/外链（i.redd.it 的 jpeg 点开毫无上下文）
+    const permalink = post.attr('data-permalink') || post.find('a.comments').first().attr('href') || '';
+    let url = permalink || titleEl.attr('href') || '';
     const commentsText = post.find('a.comments').first().text();
     const comments = Number((commentsText.match(/\d+/) || ['0'])[0]);
     const scoreText = post.find('.score.unvoted').first().attr('title')
@@ -330,7 +337,11 @@ async function scrapePodcasts() {
       const link = item.find('link').first().text().trim();
       const description = item.find('description').first().text().replace(/<[^>]+>/g, '').trim().slice(0, 300);
       const pubDate = item.find('pubDate').first().text().trim();
-      return title ? [{ podcast: feed.name, title, link, description, pubDate }] : [];
+      if (!title) return [];
+      // 播客低频更新：feed 第一条可能是几周前的旧集，超 7 天不收（此前会连续多天重复推荐同一集）
+      const ageDays = (Date.now() - Date.parse(pubDate)) / 86400000;
+      if (Number.isFinite(ageDays) && ageDays > 7) return [];
+      return [{ podcast: feed.name, title, link, description, pubDate }];
     });
     results.push(...result.items);
     health.push(result.health);
@@ -380,6 +391,7 @@ async function scrapeAIBlogs() {
     { name: 'Hugging Face Blog', url: 'https://huggingface.co/blog/feed.xml', limit: 2 },
     { name: 'Google DeepMind Blog', url: 'https://deepmind.google/blog/rss.xml', limit: 2 },
     { name: 'Google AI Blog', url: 'https://blog.google/technology/ai/rss/', limit: 2 },
+    { name: 'Qwen Blog', url: 'https://qwenlm.github.io/blog/index.xml', limit: 2 },
     { name: 'Simon Willison', url: 'https://simonwillison.net/atom/everything/', limit: 1 },
   ];
 
@@ -395,21 +407,79 @@ async function scrapeAIBlogs() {
         const title = item.find('title').first().text().trim();
         const link = item.find('link').attr('href') || item.find('link').first().text().trim();
         const summary = cleanText(item.find('summary, description, content').first().text() || '').slice(0, 300);
+        // RSS 里现成的发布时间，以前白白扔掉，现在供新鲜度衰减用
+        const pubDate = item.find('pubDate, published, updated').first().text().trim();
         if (title) {
-          items.push({ author: feed.name, title, link, summary });
+          items.push({ author: feed.name, title, link, summary, pubDate });
         }
       });
+      if (!items.length) throw new Error(`${feed.name} feed returned no parsable entries`);
       return items;
     });
     results.push(...result.items);
     health.push(result.health);
   }
 
-  const batch = await scrapeSource('The Batch (deeplearning.ai)', scrapeTheBatch);
-  results.push(...batch.items);
-  health.push(batch.health);
+  const extraSources = [
+    ['The Batch (deeplearning.ai)', scrapeTheBatch],
+    ['Anthropic News', scrapeAnthropicNews],
+    ['HF Daily Papers', scrapeHFDailyPapers],
+  ];
+  for (const [name, fn] of extraSources) {
+    const result = await scrapeSource(name, fn);
+    results.push(...result.items);
+    health.push(result.health);
+  }
 
   return { items: results, health };
+}
+
+// Anthropic 官网没有 RSS，抓 /news 页的文章锚点（页面顶部即最新）
+async function scrapeAnthropicNews() {
+  const { data } = await axios.get('https://www.anthropic.com/news', {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+    timeout: 10000,
+  });
+  const $ = cheerio.load(data);
+  const seen = new Set();
+  const items = [];
+  $('a[href^="/news/"]').each((i, el) => {
+    if (items.length >= 3) return false;
+    const href = $(el).attr('href');
+    const title = cleanText($(el).text());
+    if (!href || seen.has(href) || !title || title.length < 15) return;
+    seen.add(href);
+    items.push({
+      author: 'Anthropic News',
+      title: title.slice(0, 200),
+      link: `https://www.anthropic.com${href}`,
+      summary: '',
+    });
+  });
+  if (!items.length) throw new Error('Anthropic news page returned no parsable articles');
+  return items;
+}
+
+// Hugging Face 每日论文榜：按社区 upvotes 取前 3，AI 研究一手信号
+async function scrapeHFDailyPapers() {
+  const { data } = await axios.get('https://huggingface.co/api/daily_papers?limit=30', {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+    timeout: 10000,
+  });
+  const items = (Array.isArray(data) ? data : [])
+    .map((entry) => entry.paper || {})
+    .filter((paper) => paper.id && paper.title)
+    .sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+    .slice(0, 3)
+    .map((paper) => ({
+      author: 'HF Daily Papers',
+      title: cleanText(paper.title).slice(0, 200),
+      link: `https://huggingface.co/papers/${paper.id}`,
+      summary: cleanText(paper.summary || '').slice(0, 300),
+      pubDate: paper.publishedAt || '',
+    }));
+  if (!items.length) throw new Error('HF daily_papers API returned no papers');
+  return items;
 }
 
 function cleanText(value) {
@@ -419,72 +489,15 @@ function cleanText(value) {
     .trim();
 }
 
-async function scrapeDataTools() {
-  const results = [];
-  const health = [];
-
-  // DuckDB blog (RSS)
-  const duckDb = await scrapeFeedItems({ name: 'DuckDB', url: 'https://duckdb.org/feed.xml' }, (data) => {
-    const $ = cheerio.load(data, { xmlMode: true });
-    const items = [];
-    $('item, entry').slice(0, 3).each((i, el) => {
-      const item = $(el);
-      const title = item.find('title').first().text().trim();
-      const link = item.find('link').attr('href') || item.find('link').first().text().trim();
-      const summary = (item.find('summary, description').first().text() || '')
-        .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
-      if (title) items.push({ source: 'DuckDB', title, link, summary });
-    });
-    return items;
-  });
-  results.push(...duckDb.items);
-  health.push(duckDb.health);
-
-  // ChromaDB GitHub releases (atom)
-  const chroma = await scrapeFeedItems({ name: 'ChromaDB', url: 'https://github.com/chroma-core/chroma/releases.atom' }, (data) => {
-    const $ = cheerio.load(data, { xmlMode: true });
-    const items = [];
-    $('entry').slice(0, 2).each((i, el) => {
-      const item = $(el);
-      const title = item.find('title').first().text().trim();
-      const link = item.find('link').attr('href') || '';
-      const summary = (item.find('content').first().text() || '')
-        .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
-      if (title) items.push({ source: 'ChromaDB', title, link, summary });
-    });
-    return items;
-  });
-  results.push(...chroma.items);
-  health.push(chroma.health);
-
-  // SQLite news
-  const sqlite = await scrapeFeedItems({ name: 'SQLite', url: 'https://www.sqlite.org/news.html' }, (data) => {
-    const $ = cheerio.load(data);
-    const firstH3 = $('h3').first();
-    const title = firstH3.text().replace(/\s+/g, ' ').trim();
-    const items = [];
-    if (title) {
-      const summary = firstH3.nextUntil('h3').text().replace(/\s+/g, ' ').trim().slice(0, 240);
-      items.push({ source: 'SQLite', title, link: 'https://www.sqlite.org/news.html', summary });
-    }
-    return items;
-  });
-  results.push(...sqlite.items);
-  health.push(sqlite.health);
-
-  return { items: results, health };
-}
-
 async function scrapeAll() {
   console.log('Scraping sources...');
 
-  const [hackerNews, githubTrending, podcasts, reddit, aiBlogs, dataTools] = await Promise.all([
+  const [hackerNews, githubTrending, podcasts, reddit, aiBlogs] = await Promise.all([
     scrapeSource('Hacker News', scrapeHackerNews),
     scrapeSource('GitHub Trending', scrapeGitHubTrending),
     scrapePodcasts(),
     scrapeReddit(),
     scrapeAIBlogs(),
-    scrapeDataTools(),
   ]);
 
   return {
@@ -493,14 +506,12 @@ async function scrapeAll() {
     podcasts: podcasts.items,
     reddit: reddit.items,
     aiBlogs: aiBlogs.items,
-    dataTools: dataTools.items,
     sourceHealth: [
       hackerNews.health,
       githubTrending.health,
       ...podcasts.health,
       ...reddit.health,
       ...aiBlogs.health,
-      ...dataTools.health,
     ],
   };
 }

@@ -51,20 +51,6 @@ const sampleData = {
       summary: 'A research post about model capability and evaluation.',
     },
   ],
-  dataTools: [
-    {
-      source: 'DuckDB',
-      title: 'DuckDB release improves SQL analytics',
-      link: 'https://example.com/duckdb',
-      summary: 'New database features for local analytics.',
-    },
-    {
-      source: 'ChromaDB',
-      title: 'Chroma release adds embedding pipeline improvements',
-      link: 'https://example.com/chroma',
-      summary: 'Vector search updates for RAG workflows.',
-    },
-  ],
   podcasts: [
     {
       podcast: 'Dwarkesh Podcast',
@@ -97,5 +83,4 @@ printGroup('Hacker News', optimized.hackerNews);
 printGroup('GitHub Trending', optimized.githubTrending);
 printGroup('Reddit', optimized.reddit);
 printGroup('AI Blogs', optimized.aiBlogs);
-printGroup('Data Tools', optimized.dataTools);
 printGroup('Podcasts', optimized.podcasts);

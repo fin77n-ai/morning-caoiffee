@@ -30,11 +30,16 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 
 ### Data sources
 - Hacker News — front page top 25 via Algolia API (points/comments/discussion links; HTML scrape as fallback)
-- GitHub Trending — top 5 repositories
+- GitHub Trending — top 25 candidates, filter layer picks the best (today-stars drive the social boost)
 - Reddit AI communities — MachineLearning, LocalLLaMA, artificial (OAuth-supported when credentials are configured)
-- AI labs and blogs — OpenAI, Hugging Face, Google DeepMind, Google AI, Simon Willison, The Batch
-- Podcasts — Dwarkesh and Lex Fridman
-- Data tooling — DuckDB, ChromaDB, SQLite
+- AI labs and blogs — OpenAI, Anthropic News, Hugging Face, HF Daily Papers, Google DeepMind, Google AI, Qwen, Simon Willison, The Batch
+- Podcasts — Dwarkesh and Lex Fridman (episodes older than 7 days are skipped)
+- ~~Data tooling~~ — removed 2026-07-13 (structurally conflicted with reader preference)
+
+### Anti-repeat & freshness (2026-07-13)
+- `data/sent-history.json` — rolling 7-day ledger of URLs actually featured in sent digests; the Actions workflow commits it back after each send. Items in the ledger are excluded from the next candidate pool (fail-open: unreadable ledger = empty set).
+- Cross-source global dedup — one story can't appear via blog + HN + Reddit simultaneously (priority: aiBlogs > HN > GitHub > Reddit > podcasts).
+- Freshness decay for aiBlogs/podcasts — `score *= exp(-ageDays/3)`, dropped entirely past 14 days.
 
 ### Email sections
 1. 🔥 Top AI Stories — with commentary + source links
@@ -61,5 +66,5 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 
 ## What's next
 - [x] GitHub Actions for daily 7am automation
-- [ ] More news sources (e.g. The Verge, Anthropic blog)
+- [x] More news sources (Anthropic News, Qwen, HF Daily Papers — 2026-07-13)
 - [ ] Eventually merge into Claudio (the AI radio station project)

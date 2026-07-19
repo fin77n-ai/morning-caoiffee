@@ -2,6 +2,7 @@ require('dotenv').config();
 const OpenAI = require('openai');
 const { scrapeAll } = require('../src/scraper');
 const { optimizeContent } = require('../src/optimizeContent');
+const { loadRecentKeys } = require('../src/sentHistory');
 
 const client = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY,
@@ -10,7 +11,9 @@ const client = new OpenAI({
 
 async function generateTelegramDigest() {
   const rawData = await scrapeAll();
-  const data = optimizeContent(rawData);
+  // 近 7 天发过的条目直接不进候选池（读失败 fail-open 为空集，宁重复勿沉默）
+  const excludeKeys = loadRecentKeys();
+  const data = optimizeContent(rawData, undefined, { excludeKeys });
   logSourceHealth(data);
   const digest = await summarizeForTelegram(data);
   warnUnknownUrls(digest, data);
@@ -32,17 +35,19 @@ function logSourceHealth(data) {
 
 // 防链接幻觉的最后一道闸：先只告警观察，确认误报率再考虑剔除
 function warnUnknownUrls(digest, data) {
+  // 剥锚点再比对：Simon Willison 的 atom 链接自带 #atom-everything 这类 fragment，会造成假阳性
+  const canonical = (url) => url.replace(/#.*$/, '').replace(/[.,;:!?]*$/, '').replace(/\/+$/, '');
   const known = new Set();
   for (const group of ['hackerNews', 'githubTrending', 'reddit', 'aiBlogs', 'podcasts']) {
     for (const item of data[group] || []) {
       for (const url of [item.url, item.link, item.commentsUrl]) {
-        if (url) known.add(url.replace(/\/+$/, ''));
+        if (url) known.add(canonical(url));
       }
     }
   }
   const used = digest.match(/https?:\/\/[^\s)>\]]+/g) || [];
   for (const url of used) {
-    if (!known.has(url.replace(/[.,;:!?]*$/, '').replace(/\/+$/, ''))) {
+    if (!known.has(canonical(url))) {
       console.warn(`WARN unknown URL in digest (possible hallucination): ${url}`);
     }
   }

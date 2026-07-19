@@ -5,6 +5,9 @@ on:
     - cron: '0 23 * * *'   # 23:00 UTC = 07:00 北京 / 08:00 东京
   workflow_dispatch:        # 手动触发（测试用）
 
+permissions:
+  contents: write   # 发送后把 data/sent-history.json 提交回仓库（跨天反重复账本）
+
 jobs:
   send-telegram-digest:
     runs-on: ubuntu-latest
@@ -28,3 +31,17 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node scripts/send-telegram-digest.js
+
+      - name: Persist sent history
+        if: success()
+        run: |
+          git config user.name "morning-caoiffee-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/sent-history.json
+          if git diff --cached --quiet; then
+            echo "No sent-history changes to commit."
+          else
+            git commit -m "chore: record sent history"
+            git pull --rebase origin main
+            git push origin main
+          fi

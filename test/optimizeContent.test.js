@@ -1,7 +1,11 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
-const { optimizeContent } = require('../src/optimizeContent');
+const { optimizeContent, normalize } = require('../src/optimizeContent');
+const { loadRecentKeys, recordSentDigest } = require('../src/sentHistory');
 
 const testProfile = {
   version: 'test-profile',
@@ -22,7 +26,6 @@ const testProfile = {
     githubTrending: 1,
     reddit: 1,
     aiBlogs: 1,
-    dataTools: 1,
     podcasts: 1,
   },
   limits: {
@@ -30,7 +33,6 @@ const testProfile = {
     githubTrending: 2,
     reddit: 2,
     aiBlogs: 2,
-    dataTools: 2,
     podcasts: 2,
   },
 };
@@ -42,7 +44,6 @@ function baseData(overrides = {}) {
     podcasts: [],
     reddit: [],
     aiBlogs: [],
-    dataTools: [],
     sourceHealth: [],
     ...overrides,
   };
@@ -130,4 +131,60 @@ test('requireTopicMatch drops zero-match items from noisy groups', () => {
 
   assert.deepEqual(optimized.hackerNews.map((item) => item.url), ['https://example.com/a']);
   assert.equal(optimized.optimization.droppedCounts.offTopic, 1);
+});
+
+test('cross-source dedup keeps the higher-authority group occurrence', () => {
+  const optimized = optimizeContent(baseData({
+    aiBlogs: [{ title: 'Agent workflow launch', link: 'https://example.com/big-news' }],
+    hackerNews: [
+      { title: 'Agent workflow launch on HN', url: 'https://example.com/big-news' },
+      { title: 'Agent workflow second story', url: 'https://example.com/second' },
+    ],
+  }), testProfile);
+
+  assert.equal(optimized.aiBlogs.length, 1);
+  assert.deepEqual(optimized.hackerNews.map((item) => item.url), ['https://example.com/second']);
+  assert.equal(optimized.optimization.droppedCounts.crossSource, 1);
+});
+
+test('excludeKeys drops items already sent on previous days', () => {
+  const excludeKeys = new Set([normalize('https://example.com/old-story')]);
+  const optimized = optimizeContent(baseData({
+    hackerNews: [
+      { title: 'Agent old story', url: 'https://example.com/old-story' },
+      { title: 'Agent new story', url: 'https://example.com/new-story' },
+    ],
+  }), testProfile, { excludeKeys });
+
+  assert.deepEqual(optimized.hackerNews.map((item) => item.url), ['https://example.com/new-story']);
+  assert.equal(optimized.optimization.droppedCounts.repeated, 1);
+});
+
+test('stale blog posts are dropped, fresh ones survive', () => {
+  const now = Date.now();
+  const optimized = optimizeContent(baseData({
+    aiBlogs: [
+      { title: 'Agent post ancient', link: 'https://example.com/ancient', pubDate: new Date(now - 30 * 86400000).toISOString() },
+      { title: 'Agent post today', link: 'https://example.com/today', pubDate: new Date(now).toISOString() },
+    ],
+  }), testProfile);
+
+  assert.deepEqual(optimized.aiBlogs.map((item) => item.link), ['https://example.com/today']);
+  assert.equal(optimized.optimization.droppedCounts.stale, 1);
+});
+
+test('normalize keeps meaningful query params, strips tracking, keeps CJK', () => {
+  assert.notEqual(normalize('https://youtube.com/watch?v=abc'), normalize('https://youtube.com/watch?v=def'));
+  assert.equal(normalize('https://example.com/a?utm_source=x'), normalize('https://example.com/a'));
+  assert.ok(normalize('通义千问发布新模型').length > 0);
+});
+
+test('sent history roundtrip records and recalls normalized keys', () => {
+  const tmp = path.join(os.tmpdir(), `sent-history-test-${process.pid}.json`);
+  fs.rmSync(tmp, { force: true });
+  const count = recordSentDigest('看这条 https://example.com/story?utm_source=tg 不错', tmp);
+  assert.equal(count, 1);
+  const keys = loadRecentKeys(7, tmp);
+  assert.ok(keys.has(normalize('https://example.com/story')));
+  fs.rmSync(tmp, { force: true });
 });

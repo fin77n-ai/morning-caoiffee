@@ -1,16 +1,16 @@
 const { contentProfile } = require('./contentProfile');
 
-function optimizeContent(data, profile = contentProfile) {
-  const dropped = { blocked: 0, offTopic: 0 };
-  const optimized = {
-    hackerNews: optimizeGroup(data.hackerNews, 'hackerNews', profile, dropped),
-    githubTrending: optimizeGroup(data.githubTrending, 'githubTrending', profile, dropped),
-    podcasts: optimizeGroup(data.podcasts, 'podcasts', profile, dropped),
-    reddit: optimizeGroup(data.reddit, 'reddit', profile, dropped),
-    aiBlogs: optimizeGroup(data.aiBlogs, 'aiBlogs', profile, dropped),
-    dataTools: optimizeGroup(data.dataTools, 'dataTools', profile, dropped),
-    sourceHealth: data.sourceHealth || [],
-  };
+function optimizeContent(data, profile = contentProfile, options = {}) {
+  const dropped = { blocked: 0, offTopic: 0, repeated: 0, crossSource: 0, stale: 0 };
+  const excludeKeys = options.excludeKeys instanceof Set ? options.excludeKeys : new Set();
+  // 跨源去重共享一个 seen：官方博客 > HN > GitHub > Reddit > 播客，
+  // 同一条大新闻不再以三种身份刷屏
+  const seen = new Set();
+  const optimized = { sourceHealth: data.sourceHealth || [] };
+  const groupOrder = ['aiBlogs', 'hackerNews', 'githubTrending', 'reddit', 'podcasts'];
+  for (const groupName of groupOrder) {
+    optimized[groupName] = optimizeGroup(data[groupName], groupName, profile, dropped, seen, excludeKeys);
+  }
 
   optimized.optimization = {
     profileVersion: profile.version,
@@ -19,25 +19,52 @@ function optimizeContent(data, profile = contentProfile) {
     outputCounts: countGroups(optimized),
     droppedCounts: dropped,
     failedSources: (optimized.sourceHealth || []).filter((source) => source.status === 'failed').length,
-    note: 'Items were ranked, deduped, blocklist-filtered, and capped before summarization.',
+    note: 'Items were ranked, deduped (cross-source + sent-history), blocklist-filtered, freshness-decayed, and capped.',
   };
 
   return optimized;
 }
 
-function optimizeGroup(items = [], groupName, profile, dropped = { blocked: 0, offTopic: 0 }) {
-  const seen = new Set();
+// 新鲜度只约束有独立发布日期的低频源；HN/GitHub/Reddit 本身就是当日榜，不惩罚
+const FRESHNESS_GROUPS = new Set(['aiBlogs', 'podcasts']);
+const MAX_AGE_DAYS = 14;
+const FRESHNESS_HALF_LIFE_DAYS = 3;
+
+function freshnessFactor(item, groupName) {
+  if (!FRESHNESS_GROUPS.has(groupName) || !item.pubDate) return { factor: 1, stale: false };
+  const ageDays = (Date.now() - Date.parse(item.pubDate)) / 86400000;
+  if (!Number.isFinite(ageDays) || ageDays < 0) return { factor: 1, stale: false };
+  if (ageDays > MAX_AGE_DAYS) return { factor: 0, stale: true };
+  return { factor: Math.exp(-ageDays / FRESHNESS_HALF_LIFE_DAYS), stale: false };
+}
+
+function optimizeGroup(items = [], groupName, profile, dropped, seen = new Set(), excludeKeys = new Set()) {
   const ranked = [];
   const requireMatch = (profile.requireTopicMatch ?? []).includes(groupName);
 
   for (const item of items) {
     const key = duplicateKey(item);
-    if (!key || seen.has(key)) continue;
+    if (!key) continue;
+    if (seen.has(key)) {
+      dropped.crossSource += 1;
+      continue;
+    }
     seen.add(key);
+
+    if (excludeKeys.has(key)) {
+      dropped.repeated += 1;
+      continue;
+    }
 
     const text = searchableText(item);
     if (isBlocked(text, profile)) {
       dropped.blocked += 1;
+      continue;
+    }
+
+    const fresh = freshnessFactor(item, groupName);
+    if (fresh.stale) {
+      dropped.stale += 1;
       continue;
     }
 
@@ -46,6 +73,7 @@ function optimizeGroup(items = [], groupName, profile, dropped = { blocked: 0, o
       dropped.offTopic += 1;
       continue;
     }
+    scored.score *= fresh.factor;
     ranked.push(scored);
   }
 
@@ -70,11 +98,9 @@ function scoreItem(item, groupName, profile) {
   const sourceWeight = profile.sourceWeights[groupName] ?? 1;
   const socialBoost = socialSignalBoost(item, groupName);
   const sourceBoost = sourceQualityBoost(item);
-  const freshnessBoost = item.pubDate ? 0.05 : 0;
   const score = (topic.matches + 1) * topic.weight * sourceWeight
     + socialBoost
-    + sourceBoost
-    + freshnessBoost;
+    + sourceBoost;
 
   return {
     original: item,
@@ -142,12 +168,19 @@ function duplicateKey(item) {
 }
 
 function normalize(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/^https?:\/\/(www\.)?/, '')
-    .replace(/[?#].*$/, '')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
+  let str = String(value).toLowerCase().trim();
+  if (/^https?:\/\//.test(str)) {
+    str = str.replace(/^https?:\/\/(www\.)?/, '').replace(/#.*$/, '');
+    // 只剥跟踪参数：?v=xxx 这类有意义的 query 必须保留，否则不同 YouTube 视频会被误判为同一条
+    const [path, query = ''] = str.split('?');
+    const kept = query
+      .split('&')
+      .filter((part) => part && !/^(utm_|ref=|ref_|fbclid=|gclid=|source=)/.test(part))
+      .sort();
+    str = kept.length ? `${path}?${kept.join('&')}` : path;
+  }
+  // 白名单加入 CJK：纯中文标题不再被归一成空串而整条静默丢弃
+  return str.replace(/[^a-z0-9぀-ヿ一-鿿가-힯]+/g, ' ').trim();
 }
 
 function socialSignalBoost(item, groupName) {
@@ -160,8 +193,10 @@ function socialSignalBoost(item, groupName) {
   }
 
   if (groupName === 'githubTrending') {
-    const stars = parseStars(item.stars);
-    return Math.min(stars / 5000, 1.5);
+    // 今日新增星才反映"正在热"，总星数只是资历；有今日数据时优先用
+    const today = parseStars(item.starsToday);
+    if (today > 0) return Math.min(today / 500, 1.5);
+    return Math.min(parseStars(item.stars) / 5000, 1.5);
   }
 
   return 0;
@@ -169,8 +204,7 @@ function socialSignalBoost(item, groupName) {
 
 function sourceQualityBoost(item) {
   const source = String(item.author || item.source || item.podcast || '').toLowerCase();
-  if (/openai|deepmind|hugging face|google ai|simon willison|the batch/.test(source)) return 0.5;
-  if (/duckdb|sqlite|chroma/.test(source)) return 0.15;
+  if (/openai|anthropic|deepmind|hugging face|hf daily|google ai|qwen|simon willison|the batch/.test(source)) return 0.5;
   return 0;
 }
 
@@ -196,8 +230,7 @@ function countGroups(data) {
     podcasts: data.podcasts?.length || 0,
     reddit: data.reddit?.length || 0,
     aiBlogs: data.aiBlogs?.length || 0,
-    dataTools: data.dataTools?.length || 0,
   };
 }
 
-module.exports = { optimizeContent };
+module.exports = { optimizeContent, normalize };

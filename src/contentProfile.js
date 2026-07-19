@@ -1,5 +1,5 @@
 const contentProfile = {
-  version: '2026-07-13-v2',
+  version: '2026-07-13-v3',
   // 一票否决：命中且没有任何 AI 豁免词时整条丢弃（读者红线：不要物理/硬科学）
   blockKeywords: [
     'quantum', 'physics', 'particle', 'antimatter', 'dark matter', 'dark energy',
@@ -62,7 +62,6 @@ const contentProfile = {
     githubTrending: 1.1,
     reddit: 0.95,
     aiBlogs: 1.25,
-    dataTools: 0.78,
     podcasts: 0.9,
   },
   limits: {
@@ -70,7 +69,6 @@ const contentProfile = {
     githubTrending: 4,
     reddit: 6,
     aiBlogs: 8,
-    dataTools: 3,
     podcasts: 2,
   },
 };
