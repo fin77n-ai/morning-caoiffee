@@ -1,24 +1,4 @@
 {
-  "2026-07-19": [
-    "anthropic com news claude sonnet 5",
-    "blog google products and platforms products workspace gemini omni personal avatars",
-    "openai com index a scorecard for the ai age",
-    "q3edit com",
-    "nytimes com 2026 07 13 style backyard baseball video game teacher html",
-    "github com tirth8205 code review graph",
-    "github com knockoutez wigolo",
-    "news ycombinator com item id 48895763",
-    "reddit com r machinelearning comments 1uzyf66 did blatant ai slop just win a 25k usd deepmind",
-    "news ycombinator com item id 48966120",
-    "news ycombinator com item id 48965850",
-    "anthropic com news redeploying fable 5",
-    "simonwillison net 2026 jul 19 ai mania",
-    "anthropic com news hard questions",
-    "github com posthog posthog",
-    "github com kvcache ai ktransformers",
-    "reddit com r machinelearning comments 1v0pc9u am i focusing on the wrong skills as a cs student",
-    "news ycombinator com item id 48860719"
-  ],
   "2026-07-20": [
     "news risky biz risky bulletin hacker wipes romanias entire land registry database",
     "emergingtrajectories com lh frontier lab economics",
@@ -59,5 +39,16 @@
     "github com alibaba open code review",
     "github com citrolabs ego lite",
     "reddit com r machinelearning comments 1v4j1uk prompt injection in neurips 2026 d"
+  ],
+  "2026-07-26": [
+    "anthropic com news claude opus 5",
+    "claude com blog the new rules of context engineering for claude 5 generation models",
+    "debian org vote 2026 vote 002",
+    "huggingface co papers 2607 21461",
+    "huggingface co blog nunchaku diffusers",
+    "github com corebunch instatic",
+    "github com shiyu coder kronos",
+    "news ycombinator com item id 49050512",
+    "reddit com r machinelearning comments 1v6w394 i implemented the yolo26n model inference from"
   ]
 }
