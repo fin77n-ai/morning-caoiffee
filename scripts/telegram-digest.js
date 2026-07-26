@@ -63,11 +63,7 @@ async function main() {
 
 async function summarizeForTelegram(data, attempt = 1) {
   const prompt = buildTelegramPrompt(data);
-  const completion = await client.chat.completions.create({
-    model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
-    max_tokens: 2200,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const completion = await client.chat.completions.create(buildCompletionOptions(prompt));
 
   // 被 max_tokens 拦腰截断的稿子不能发出去，重试一次
   if (completion.choices[0].finish_reason === 'length' && attempt < 2) {
@@ -79,6 +75,15 @@ async function summarizeForTelegram(data, attempt = 1) {
     .replace(/^```(?:text)?\s*/i, '')
     .replace(/```\s*$/i, '')
     .trim();
+}
+
+function buildCompletionOptions(prompt) {
+  return {
+    model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-pro',
+    thinking: { type: 'disabled' },
+    max_tokens: 2200,
+    messages: [{ role: 'user', content: prompt }],
+  };
 }
 
 function buildTelegramPrompt(data) {
@@ -206,7 +211,7 @@ function meta(item) {
   return item.rank ? `rank ${item.rank}` : '';
 }
 
-module.exports = { generateTelegramDigest };
+module.exports = { generateTelegramDigest, buildCompletionOptions };
 
 if (require.main === module) {
   main().catch((err) => {
