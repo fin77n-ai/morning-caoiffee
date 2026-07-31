@@ -1,23 +1,4 @@
 {
-  "2026-07-23": [
-    "simonwillison net 2026 jul 22 openai cyberattack",
-    "deepmind google blog accelerating the frontiers of scientific discovery googles 40m commitment to the genesis mission",
-    "github com marcelroed gigatoken",
-    "hatchet run blog postgres survival guide",
-    "openai com index building ai infrastructure with the effingham county community",
-    "github com agegr pi web",
-    "github com ruvnet ruview",
-    "news ycombinator com item id 49010167",
-    "reddit com r machinelearning comments 1v3enzq happy openreview refresh day to all those who",
-    "news ycombinator com item id 49024620",
-    "news ycombinator com item id 49026810",
-    "news ycombinator com item id 49024643",
-    "openai com index health in chatgpt",
-    "simonwillison net 2026 jul 23 the first known runaway ai agent",
-    "github com alibaba open code review",
-    "github com citrolabs ego lite",
-    "reddit com r machinelearning comments 1v4j1uk prompt injection in neurips 2026 d"
-  ],
   "2026-07-26": [
     "anthropic com news claude opus 5",
     "claude com blog the new rules of context engineering for claude 5 generation models",
@@ -68,5 +49,16 @@
     "github com microsoft vibevoice",
     "blog cryptographyengineering com 2026 07 29 some notes about anthropics new results",
     "arxiv org abs 2607 25398"
+  ],
+  "2026-07-31": [
+    "github blog changelog 2026 07 30 stacked pull requests are now in public preview",
+    "android developers googleblog com 2026 07 google play age signals api safer experiences html",
+    "openai com index advancing the price performance frontier with gpt 5 6",
+    "obryant dev p 2x not 10x",
+    "simonwillison net 2026 jul 30 three real world incidents",
+    "github com chromedevtools chrome devtools mcp",
+    "github com different ai openwork",
+    "news ycombinator com item id 49112232",
+    "news ycombinator com item id 49108685"
   ]
 }
