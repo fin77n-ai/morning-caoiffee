@@ -1,24 +1,4 @@
 {
-  "2026-07-26": [
-    "anthropic com news claude opus 5",
-    "claude com blog the new rules of context engineering for claude 5 generation models",
-    "debian org vote 2026 vote 002",
-    "huggingface co papers 2607 21461",
-    "huggingface co blog nunchaku diffusers",
-    "github com corebunch instatic",
-    "github com shiyu coder kronos",
-    "news ycombinator com item id 49050512",
-    "reddit com r machinelearning comments 1v6w394 i implemented the yolo26n model inference from",
-    "anthropic com news redeploying fable 5",
-    "swag htmx org en cad products htmx 4 the game",
-    "simonwillison net 2026 jul 26 relay market",
-    "blog google products and platforms products search connected apps",
-    "imperialviolet org 2026 07 26 zstd lean html",
-    "github com ottermind chat2db",
-    "github com gmrandazzo cheapsecurity",
-    "reddit com r artificial comments 1v6ptgz anthropics opus 5 and probably more recent ai",
-    "reddit com r artificial comments 1v6ytlg i ran a faceless ai persona account for six weeks"
-  ],
   "2026-07-28": [
     "anthropic com news position open weights models",
     "deepmind google blog introducing gemini 3 6 flash 3 5 flash lite and 3 5 flash cyber",
@@ -79,5 +59,17 @@
     "github com tencentcloud tencentdb agent memory",
     "github com abus aikorea voice pro",
     "news ycombinator com item id 49136821"
+  ],
+  "2026-08-02": [
+    "anthropic com news claude opus 5",
+    "anthropic com news redeploying fable 5",
+    "github com esengine deepseek reasonix",
+    "frogs vaguespac es",
+    "simonwillison net 2026 aug 2 condense json",
+    "github com panniantong agent reach",
+    "github com lyogavin airllm",
+    "reddit com r machinelearning comments 1vdu92a neurips 2026 acs and reviewers have disappeared d",
+    "mattbeton com blog bitnet 6502 html",
+    "huggingface co papers 2607 28568"
   ]
 }
