@@ -1,15 +1,4 @@
 {
-  "2026-07-31": [
-    "github blog changelog 2026 07 30 stacked pull requests are now in public preview",
-    "android developers googleblog com 2026 07 google play age signals api safer experiences html",
-    "openai com index advancing the price performance frontier with gpt 5 6",
-    "obryant dev p 2x not 10x",
-    "simonwillison net 2026 jul 30 three real world incidents",
-    "github com chromedevtools chrome devtools mcp",
-    "github com different ai openwork",
-    "news ycombinator com item id 49112232",
-    "news ycombinator com item id 49108685"
-  ],
   "2026-08-01": [
     "quantamagazine org is ai reasoning right for the wrong reasons 20260731",
     "deepmind google blog gemini robotics er 2 powering robotics with video understanding task orchestration and multi robot collaboration",
@@ -72,5 +61,16 @@
     "reddit com r machinelearning comments 1vfrco1 i compressed bad apple into a 3mb neural network p",
     "news ycombinator com item id 49182996",
     "huggingface co papers 2608 02602"
+  ],
+  "2026-08-07": [
+    "artificialanalysis ai intelligence agentic index",
+    "scalex dev blog ai agent permissions stats",
+    "theregister com systems 2026 08 06 amd acquires ai chip startup taalas to boost inference performance by etching models into silicon 5284344",
+    "deepmind google blog weathernext ai model achieves breakthrough in forecasting cyclones",
+    "blog google innovation and ai technology developers tools ai agents intensive recap 2026",
+    "github com huangruiteng loopx",
+    "github com mattpocock skills",
+    "aleksagordic com blog vllm",
+    "provenmetal com"
   ]
 }
