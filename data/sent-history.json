@@ -1,23 +1,4 @@
 {
-  "2026-08-01": [
-    "quantamagazine org is ai reasoning right for the wrong reasons 20260731",
-    "deepmind google blog gemini robotics er 2 powering robotics with video understanding task orchestration and multi robot collaboration",
-    "dwarkesh com p why compute might get 10x more expensive",
-    "simonwillison net 2026 jul 31 stateless mcp",
-    "manifest build blog why we deprecated our llm router",
-    "github com github copilot sdk",
-    "github com zhaoxuya520 reverse skill",
-    "weeraman com because we can",
-    "reddit com r machinelearning comments 1vc1txc i have trained a model to predict my blood sugar p",
-    "anthropic com news hard questions",
-    "openai com index ten advances in mathematics",
-    "deepmind google blog were launching lyria 35 in google flow music with advances across musicality lyrics vocals and creative control",
-    "huggingface co papers 2607 28227",
-    "simonwillison net 2026 aug 1 greg brockman",
-    "github com tencentcloud tencentdb agent memory",
-    "github com abus aikorea voice pro",
-    "news ycombinator com item id 49136821"
-  ],
   "2026-08-02": [
     "anthropic com news claude opus 5",
     "anthropic com news redeploying fable 5",
@@ -81,5 +62,16 @@
     "github com primeintellect ai prime agent",
     "news ycombinator com item id 49214770",
     "news ycombinator com item id 49208458"
+  ],
+  "2026-08-08": [
+    "simonwillison net 2026 aug 7 openai timeline",
+    "simonwillison net 2026 aug 8 auto mode",
+    "eclipsefan org lat 43 4623 layers eclipse 2cbesselian 2cumbra live 2cshadow 3d 2ccloud projection 2cosm lon 3 8099 opacity besselian 3a0 2 2cumbra live 3a0 2 palier minute t max v 2 zoom 6",
+    "anthropic com news hard questions",
+    "huggingface co blog allenai tutormoments",
+    "github com denoland celld",
+    "github com tauricresearch tradingagents",
+    "reddit com r machinelearning comments 1vj8lag 73 neurips workshops and not a single one on",
+    "huggingface co papers 2608 05987"
   ]
 }
