@@ -1,16 +1,4 @@
 {
-  "2026-08-02": [
-    "anthropic com news claude opus 5",
-    "anthropic com news redeploying fable 5",
-    "github com esengine deepseek reasonix",
-    "frogs vaguespac es",
-    "simonwillison net 2026 aug 2 condense json",
-    "github com panniantong agent reach",
-    "github com lyogavin airllm",
-    "reddit com r machinelearning comments 1vdu92a neurips 2026 acs and reviewers have disappeared d",
-    "mattbeton com blog bitnet 6502 html",
-    "huggingface co papers 2607 28568"
-  ],
   "2026-08-04": [
     "blog comfy org p minimax h3 day 0 support in comfyui",
     "simonwillison net 2026 aug 3 dont be a meat proxy",
@@ -73,5 +61,16 @@
     "github com tauricresearch tradingagents",
     "reddit com r machinelearning comments 1vj8lag 73 neurips workshops and not a single one on",
     "huggingface co papers 2608 05987"
+  ],
+  "2026-08-09": [
+    "anthropic com news claude opus 5",
+    "deepmind google blog gemini robotics er 2 powering robotics with video understanding task orchestration and multi robot collaboration",
+    "simonwillison net 2026 aug 9 github models is now retired",
+    "dwarkesh com p era of continual learning",
+    "huggingface co papers 2608 01481",
+    "github com msitarzewski agency agents",
+    "github com zhulinsen daily stock analysis",
+    "news ycombinator com item id 49234271",
+    "news ycombinator com item id 49203626"
   ]
 }
