@@ -1,25 +1,4 @@
 {
-  "2026-08-05": [
-    "mistral ai news shieldstral",
-    "twitter com gwern status 2084739205071343837",
-    "arxiv org abs 2602 16763",
-    "openai com index third party cyber evaluations involving openai models",
-    "simonwillison net 2026 aug 4 minimax h3 mlx",
-    "github com browser use video use",
-    "github com uber adr",
-    "news ycombinator com item id 49170915",
-    "news ycombinator com item id 49145037",
-    "blog google company news inside google message ceo next chapter ai momentum",
-    "wired com story meta ran ads that contained ai generated child sexual abuse imagery",
-    "blog cloudflare com cloudflare os",
-    "neon com blog how castform neon beats frontier models on price and efficiency",
-    "cacm acm org blogcacm goodharts law comes for every benchmark you trust",
-    "github com obra superpowers",
-    "github com cloudflare computer",
-    "reddit com r machinelearning comments 1vfrco1 i compressed bad apple into a 3mb neural network p",
-    "news ycombinator com item id 49182996",
-    "huggingface co papers 2608 02602"
-  ],
   "2026-08-07": [
     "artificialanalysis ai intelligence agentic index",
     "scalex dev blog ai agent permissions stats",
@@ -83,5 +62,17 @@
     "github com calesthio openmontage",
     "news ycombinator com item id 49259339",
     "news ycombinator com item id 49256057"
+  ],
+  "2026-08-12": [
+    "tailscale com blog sqlite wal reset bug",
+    "deepmind google blog putting sign language ai into users hands",
+    "anthropic com news redeploying fable 5",
+    "openai com index how enterprises put ai to work",
+    "huggingface co papers 2608 10915",
+    "github com stablyai orca",
+    "github com lightricks ltx 2",
+    "github com hugohe3 ppt master",
+    "news ycombinator com item id 49269090",
+    "reddit com r machinelearning comments 1vmhks7 would you choose a phd advisor who gives you"
   ]
 }
