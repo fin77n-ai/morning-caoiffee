@@ -1,24 +1,4 @@
 {
-  "2026-08-07": [
-    "artificialanalysis ai intelligence agentic index",
-    "scalex dev blog ai agent permissions stats",
-    "theregister com systems 2026 08 06 amd acquires ai chip startup taalas to boost inference performance by etching models into silicon 5284344",
-    "deepmind google blog weathernext ai model achieves breakthrough in forecasting cyclones",
-    "blog google innovation and ai technology developers tools ai agents intensive recap 2026",
-    "github com huangruiteng loopx",
-    "github com mattpocock skills",
-    "aleksagordic com blog vllm",
-    "provenmetal com",
-    "theguardian com technology 2026 aug 06 new mexico court meta",
-    "blog cloudflare com kitesurf",
-    "github com google skills",
-    "simonwillison net 2026 aug 7 moonlight mayhem",
-    "openai com index responding next frontier critical cyber capabilities",
-    "github com addyosmani agent skills",
-    "github com primeintellect ai prime agent",
-    "news ycombinator com item id 49214770",
-    "news ycombinator com item id 49208458"
-  ],
   "2026-08-08": [
     "simonwillison net 2026 aug 7 openai timeline",
     "simonwillison net 2026 aug 8 auto mode",
@@ -85,5 +65,16 @@
     "github com cactus compute needle",
     "news ycombinator com item id 49285327",
     "news ycombinator com item id 49283063"
+  ],
+  "2026-08-14": [
+    "z ai blog glm 5 3",
+    "huggingface co qwen qwen3 8 27b fp8",
+    "blog google security how google is making private ai practical with homomorphic encryption",
+    "simonwillison net 2026 aug 14 dont classify hallucinate",
+    "huggingface co blog state of open models summer 2026",
+    "github com citrolabs ego lite",
+    "github com holaboss ai holaos",
+    "news ycombinator com item id 49303202",
+    "reddit com r machinelearning comments 1voazhm i compiled dooms renderer into a 21bparameter"
   ]
 }
