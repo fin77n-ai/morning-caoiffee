@@ -1,15 +1,4 @@
 {
-  "2026-08-08": [
-    "simonwillison net 2026 aug 7 openai timeline",
-    "simonwillison net 2026 aug 8 auto mode",
-    "eclipsefan org lat 43 4623 layers eclipse 2cbesselian 2cumbra live 2cshadow 3d 2ccloud projection 2cosm lon 3 8099 opacity besselian 3a0 2 2cumbra live 3a0 2 palier minute t max v 2 zoom 6",
-    "anthropic com news hard questions",
-    "huggingface co blog allenai tutormoments",
-    "github com denoland celld",
-    "github com tauricresearch tradingagents",
-    "reddit com r machinelearning comments 1vj8lag 73 neurips workshops and not a single one on",
-    "huggingface co papers 2608 05987"
-  ],
   "2026-08-09": [
     "anthropic com news claude opus 5",
     "deepmind google blog gemini robotics er 2 powering robotics with video understanding task orchestration and multi robot collaboration",
@@ -76,5 +65,16 @@
     "github com holaboss ai holaos",
     "news ycombinator com item id 49303202",
     "reddit com r machinelearning comments 1voazhm i compiled dooms renderer into a 21bparameter"
+  ],
+  "2026-08-15": [
+    "allen bargi org notes working with ai feels like leadership",
+    "anthropic com news hard questions",
+    "blog google products and platforms products workspace sheets canvas for google sheets spreadsheets",
+    "huggingface co papers 2608 13546",
+    "huggingface co blog amazon strands lerobot streaming data loop",
+    "github com tooljet tooljet",
+    "github com unslothai unsloth",
+    "news ycombinator com item id 49311651",
+    "news ycombinator com item id 49314403"
   ]
 }
