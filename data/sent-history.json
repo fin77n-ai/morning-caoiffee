@@ -1,15 +1,4 @@
 {
-  "2026-08-09": [
-    "anthropic com news claude opus 5",
-    "deepmind google blog gemini robotics er 2 powering robotics with video understanding task orchestration and multi robot collaboration",
-    "simonwillison net 2026 aug 9 github models is now retired",
-    "dwarkesh com p era of continual learning",
-    "huggingface co papers 2608 01481",
-    "github com msitarzewski agency agents",
-    "github com zhulinsen daily stock analysis",
-    "news ycombinator com item id 49234271",
-    "news ycombinator com item id 49203626"
-  ],
   "2026-08-10": [
     "news ycombinator com item id 49241679",
     "news ycombinator com item id 49239751",
@@ -76,5 +65,16 @@
     "github com unslothai unsloth",
     "news ycombinator com item id 49311651",
     "news ycombinator com item id 49314403"
+  ],
+  "2026-08-16": [
+    "w4g1 dev blog models are getting dumber on purpose",
+    "daringfireball net 2026 08 anthropics watermark text adulteration in claude is a perversion of writing",
+    "reuters com business nvidia scales back 250 billion openai data center guarantee wsj reports 2026 08 14",
+    "simonwillison net 2026 aug 16 qwen 38 27b",
+    "math ai org github io mathcode",
+    "github com opencut app opencut",
+    "github com cordiverse cordis",
+    "news ycombinator com item id 49277952",
+    "news ycombinator com item id 49292385"
   ]
 }
