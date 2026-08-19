@@ -1,16 +1,4 @@
 {
-  "2026-08-12": [
-    "tailscale com blog sqlite wal reset bug",
-    "deepmind google blog putting sign language ai into users hands",
-    "anthropic com news redeploying fable 5",
-    "openai com index how enterprises put ai to work",
-    "huggingface co papers 2608 10915",
-    "github com stablyai orca",
-    "github com lightricks ltx 2",
-    "github com hugohe3 ppt master",
-    "news ycombinator com item id 49269090",
-    "reddit com r machinelearning comments 1vmhks7 would you choose a phd advisor who gives you"
-  ],
   "2026-08-13": [
     "deepseek com harness en",
     "deepmind google blog introducing gemini 3 7 flash",
@@ -76,5 +64,16 @@
     "github com jundot omlx",
     "reddit com r machinelearning comments 1vrk7t5 trained an diffusion model that runs on 264kb of",
     "news ycombinator com item id 49351330"
+  ],
+  "2026-08-19": [
+    "fx sh",
+    "grapheneos social grapheneos 117057099753905023",
+    "github com anthropics claude code issues 6235",
+    "openai com index replit",
+    "openai com index offering zero data retention for frontier models",
+    "github com harry0703 moneyprinterturbo",
+    "github com santifer career ops",
+    "reddit com r localllama comments 1voojjz megathread qwen 38 27b release day",
+    "reddit com r machinelearning comments 1vszsit same grpo recipe on three fromscratch llms"
   ]
 }
