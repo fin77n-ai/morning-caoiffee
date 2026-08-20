@@ -1,15 +1,4 @@
 {
-  "2026-08-13": [
-    "deepseek com harness en",
-    "deepmind google blog introducing gemini 3 7 flash",
-    "openai com index previewing ultrafast",
-    "openai com index builders guide to gpt 5 6",
-    "huggingface co blog icml 2026 open reproductions",
-    "github com nvidia nemo switchyard",
-    "github com cactus compute needle",
-    "news ycombinator com item id 49285327",
-    "news ycombinator com item id 49283063"
-  ],
   "2026-08-14": [
     "z ai blog glm 5 3",
     "huggingface co qwen qwen3 8 27b fp8",
@@ -75,5 +64,16 @@
     "github com santifer career ops",
     "reddit com r localllama comments 1voojjz megathread qwen 38 27b release day",
     "reddit com r machinelearning comments 1vszsit same grpo recipe on three fromscratch llms"
+  ],
+  "2026-08-20": [
+    "modular com blog mojo open source",
+    "blog curiousquail com im upset again about a co creator of rss being prosecuted for something meta is doing with little consequence",
+    "simedw com 2026 08 20 midi autocomplete",
+    "dreadnode io research every model cheats prompt level mitigation of cheating on offensive cyber tasks",
+    "github com zachahn vomit",
+    "github com posthog posthog",
+    "github com mattpocock skills",
+    "news ycombinator com item id 49378768",
+    "news ycombinator com item id 49378950"
   ]
 }
