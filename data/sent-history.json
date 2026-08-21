@@ -1,15 +1,4 @@
 {
-  "2026-08-14": [
-    "z ai blog glm 5 3",
-    "huggingface co qwen qwen3 8 27b fp8",
-    "blog google security how google is making private ai practical with homomorphic encryption",
-    "simonwillison net 2026 aug 14 dont classify hallucinate",
-    "huggingface co blog state of open models summer 2026",
-    "github com citrolabs ego lite",
-    "github com holaboss ai holaos",
-    "news ycombinator com item id 49303202",
-    "reddit com r machinelearning comments 1voazhm i compiled dooms renderer into a 21bparameter"
-  ],
   "2026-08-15": [
     "allen bargi org notes working with ai feels like leadership",
     "anthropic com news hard questions",
@@ -75,5 +64,16 @@
     "github com mattpocock skills",
     "news ycombinator com item id 49378768",
     "news ycombinator com item id 49378950"
+  ],
+  "2026-08-21": [
+    "api docs deepseek com guides vision",
+    "anthropic com news redeploying fable 5",
+    "nari labs com blog qwen3 tts speed cost frontier",
+    "huggingface co papers 2608 19880",
+    "openai com index introducing ai futures",
+    "github com obra superpowers",
+    "github com affaan m ecc",
+    "reddit com r machinelearning comments 1vulfei does telling an llm to be concise actually save",
+    "news ycombinator com item id 49346135"
   ]
 }
