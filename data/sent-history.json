@@ -1,15 +1,4 @@
 {
-  "2026-08-15": [
-    "allen bargi org notes working with ai feels like leadership",
-    "anthropic com news hard questions",
-    "blog google products and platforms products workspace sheets canvas for google sheets spreadsheets",
-    "huggingface co papers 2608 13546",
-    "huggingface co blog amazon strands lerobot streaming data loop",
-    "github com tooljet tooljet",
-    "github com unslothai unsloth",
-    "news ycombinator com item id 49311651",
-    "news ycombinator com item id 49314403"
-  ],
   "2026-08-16": [
     "w4g1 dev blog models are getting dumber on purpose",
     "daringfireball net 2026 08 anthropics watermark text adulteration in claude is a perversion of writing",
@@ -75,5 +64,16 @@
     "github com affaan m ecc",
     "reddit com r machinelearning comments 1vulfei does telling an llm to be concise actually save",
     "news ycombinator com item id 49346135"
+  ],
+  "2026-08-22": [
+    "anthropic com news hard questions",
+    "blog modelcontextprotocol io posts mcp roadmap",
+    "simonwillison net 2026 aug 22 linus torvalds",
+    "munderdiffl in",
+    "lambda symbolics com autolith",
+    "github com openai codex",
+    "github com multica ai andrej karpathy skills",
+    "sgoedecke github io watermark quiz",
+    "forum level1techs com t why your local llm feels dumber than it is 253917"
   ]
 }
