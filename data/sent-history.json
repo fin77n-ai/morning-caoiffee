@@ -1,15 +1,4 @@
 {
-  "2026-08-17": [
-    "githubstatus com incidents zkxwbgr0cnmx",
-    "blog roboflow com openai gpt 5 6",
-    "wiz io blog red agent snowflake copilot cicd bug",
-    "simonwillison net 2026 aug 17 we tracked a shipment of rare books it ended at an amazon ai tra",
-    "anthropic com news claude opus 5",
-    "github com mukul975 anthropic cybersecurity skills",
-    "github com akitaonrails ai memory",
-    "news ycombinator com item id 49331033",
-    "news ycombinator com item id 49295179"
-  ],
   "2026-08-18": [
     "cursor com changelog origin code hosting",
     "simonwillison net 2026 aug 18 mojo is now open source",
@@ -75,5 +64,16 @@
     "github com voltagent awesome agent skills",
     "news ycombinator com item id 49407507",
     "reddit com r machinelearning comments 1vwb18q archival vs non archival workshop r"
+  ],
+  "2026-08-24": [
+    "larsfaye com articles ai coding will prevent expertise",
+    "developers openai com api docs pricing",
+    "sf thijs gg",
+    "anthropic com news claude opus 5",
+    "boydkane com essays llms could control their host machines by exploiting inference engines",
+    "github com tashfeenahmed freellmapi",
+    "github com tinyhumansai openhuman",
+    "news ycombinator com item id 49421948",
+    "news ycombinator com item id 49418255"
   ]
 }
