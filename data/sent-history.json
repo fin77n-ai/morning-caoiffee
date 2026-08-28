@@ -1,15 +1,4 @@
 {
-  "2026-08-21": [
-    "api docs deepseek com guides vision",
-    "anthropic com news redeploying fable 5",
-    "nari labs com blog qwen3 tts speed cost frontier",
-    "huggingface co papers 2608 19880",
-    "openai com index introducing ai futures",
-    "github com obra superpowers",
-    "github com affaan m ecc",
-    "reddit com r machinelearning comments 1vulfei does telling an llm to be concise actually save",
-    "news ycombinator com item id 49346135"
-  ],
   "2026-08-22": [
     "anthropic com news hard questions",
     "blog modelcontextprotocol io posts mcp roadmap",
@@ -65,5 +54,17 @@
     "github com tt a1i archify",
     "news ycombinator com item id 49454728",
     "news ycombinator com item id 49458418"
+  ],
+  "2026-08-28": [
+    "anthropic com news model hardware standard research preview",
+    "simonwillison net 2026 aug 27 breaking claude code opus 5 auto mode",
+    "deepmind google blog gemini omni 1 1 flash lets you build with more control",
+    "calv info small models have arrived",
+    "terminal bench science ai announcement",
+    "github com calesthio openmontage",
+    "github com thedotmack claude mem",
+    "github com jetbrains go modern guidelines",
+    "news ycombinator com item id 49471407",
+    "news ycombinator com item id 49471714"
   ]
 }
