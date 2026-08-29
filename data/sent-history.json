@@ -1,15 +1,4 @@
 {
-  "2026-08-22": [
-    "anthropic com news hard questions",
-    "blog modelcontextprotocol io posts mcp roadmap",
-    "simonwillison net 2026 aug 22 linus torvalds",
-    "munderdiffl in",
-    "lambda symbolics com autolith",
-    "github com openai codex",
-    "github com multica ai andrej karpathy skills",
-    "sgoedecke github io watermark quiz",
-    "forum level1techs com t why your local llm feels dumber than it is 253917"
-  ],
   "2026-08-23": [
     "xda developers com qwen 3 8 27b reverse engineering job frontier model",
     "simonwillison net 2026 aug 23 anthropics best ai model struggles to attract users as cheaper t",
@@ -66,5 +55,16 @@
     "github com jetbrains go modern guidelines",
     "news ycombinator com item id 49471407",
     "news ycombinator com item id 49471714"
+  ],
+  "2026-08-29": [
+    "openai com index our decision on cursor following its acquisition by spacex",
+    "arxiv org abs 2608 23691",
+    "anthropic com news claude text watermark",
+    "github com lakr233 vphone cli",
+    "simonwillison net 2026 aug 28 just a rumour of a bug",
+    "github com chromedevtools chrome devtools mcp",
+    "github com k dense ai scientific agent skills",
+    "reddit com r machinelearning comments 1w10tax i implemented a very tiny image generation model",
+    "news ycombinator com item id 49485416"
   ]
 }
