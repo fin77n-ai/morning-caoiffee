@@ -1,15 +1,4 @@
 {
-  "2026-08-23": [
-    "xda developers com qwen 3 8 27b reverse engineering job frontier model",
-    "simonwillison net 2026 aug 23 anthropics best ai model struggles to attract users as cheaper t",
-    "deepmind google blog from atari to eve online building on 15 years of ai research in games",
-    "huggingface co papers 2608 20335",
-    "openai com index stampli",
-    "github com nousresearch hermes agent",
-    "github com voltagent awesome agent skills",
-    "news ycombinator com item id 49407507",
-    "reddit com r machinelearning comments 1vwb18q archival vs non archival workshop r"
-  ],
   "2026-08-24": [
     "larsfaye com articles ai coding will prevent expertise",
     "developers openai com api docs pricing",
@@ -66,5 +55,16 @@
     "github com k dense ai scientific agent skills",
     "reddit com r machinelearning comments 1w10tax i implemented a very tiny image generation model",
     "news ycombinator com item id 49485416"
+  ],
+  "2026-08-30": [
+    "simonwillison net 2026 aug 29 hy4",
+    "deepmind google blog piloting the worlds first double blind ai evaluations",
+    "huggingface co papers 2608 27345",
+    "github com stemdeckapp stemdeck",
+    "coldtake dev blog domain driven agents",
+    "github com addyosmani agent skills",
+    "github com bilawalsidhu gods eye view",
+    "news ycombinator com item id 49426995",
+    "reddit com r machinelearning comments 1w1wt1s you can beat sota time series anomaly detection"
   ]
 }
