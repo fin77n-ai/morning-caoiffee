@@ -1,16 +1,4 @@
 {
-  "2026-08-27": [
-    "simonwillison net 2026 aug 26 qwen38 flash next",
-    "deepmind google blog intelligent transcription with gemini 3 5 transcribe",
-    "openai com index bringing chatgpt for teachers to more us school districts",
-    "lexfridman com dhh 2",
-    "dwarkesh com p dylan patel 3",
-    "github com browser use browser use",
-    "github com agricidaniel claude obsidian",
-    "github com tt a1i archify",
-    "news ycombinator com item id 49454728",
-    "news ycombinator com item id 49458418"
-  ],
   "2026-08-28": [
     "anthropic com news model hardware standard research preview",
     "simonwillison net 2026 aug 27 breaking claude code opus 5 auto mode",
@@ -80,5 +68,17 @@
     "github com jingyaogong minimind",
     "news ycombinator com item id 49520022",
     "news ycombinator com item id 49529132"
+  ],
+  "2026-09-03": [
+    "help mistral ai en articles 455207 can i opt out of my input or output data being used for training",
+    "nytimes com 2026 09 02 technology google ad tech remedies html",
+    "metr org blog 2026 08 26 openai hugging face incident investigation",
+    "dwarkesh com p ajeya cotra",
+    "deepmind google blog introducing gemini 3 8 flash and 38 flash cyber",
+    "github com pacifio atlas",
+    "github com google research timesfm",
+    "github com debpalash voicestudio",
+    "news ycombinator com item id 49536411",
+    "reddit com r machinelearning comments 1w5h9se i scraped 594 billion tiktok videos and 323"
   ]
 }
