@@ -1,16 +1,4 @@
 {
-  "2026-08-28": [
-    "anthropic com news model hardware standard research preview",
-    "simonwillison net 2026 aug 27 breaking claude code opus 5 auto mode",
-    "deepmind google blog gemini omni 1 1 flash lets you build with more control",
-    "calv info small models have arrived",
-    "terminal bench science ai announcement",
-    "github com calesthio openmontage",
-    "github com thedotmack claude mem",
-    "github com jetbrains go modern guidelines",
-    "news ycombinator com item id 49471407",
-    "news ycombinator com item id 49471714"
-  ],
   "2026-08-29": [
     "openai com index our decision on cursor following its acquisition by spacex",
     "arxiv org abs 2608 23691",
@@ -80,5 +68,16 @@
     "github com debpalash voicestudio",
     "news ycombinator com item id 49536411",
     "reddit com r machinelearning comments 1w5h9se i scraped 594 billion tiktok videos and 323"
+  ],
+  "2026-09-04": [
+    "simonwillison net 2026 sep 3 gpt6 astra",
+    "news ycombinator com item id 49548452",
+    "news ycombinator com item id 49554520",
+    "ifm ai blog k2",
+    "zed dev blog agentic xanadu",
+    "github com magnitudedev magnitude",
+    "github com dietrichgebert ponytail",
+    "news ycombinator com item id 49551096",
+    "news ycombinator com item id 49555691"
   ]
 }
