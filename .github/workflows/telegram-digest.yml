@@ -3,7 +3,20 @@ name: Telegram Morning Digest ☕
 on:
   schedule:
     - cron: '0 23 * * *'   # 23:00 UTC = 07:00 北京 / 08:00 东京
-  workflow_dispatch:        # 手动触发（测试用）
+  workflow_dispatch:
+    inputs:
+      preview:
+        description: 'Generate a preview without sending or updating history'
+        type: boolean
+        default: true
+      fresh_reader:
+        description: 'Preview only: ignore history to review a full sample edition'
+        type: boolean
+        default: false
+
+concurrency:
+  group: telegram-digest
+  cancel-in-progress: false
 
 permissions:
   contents: write   # 发送后把 data/sent-history.json 提交回仓库（跨天反重复账本）
@@ -24,20 +37,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check and test
+        run: npm run check && npm test
+
+      - name: Generate preview
+        if: github.event_name == 'workflow_dispatch' && inputs.preview
+        env:
+          TZ: Asia/Shanghai
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: node scripts/telegram-digest.js ${{ inputs.fresh_reader && '--fresh-reader' || '' }}
+
       - name: Generate and send Telegram digest
+        if: github.event_name != 'workflow_dispatch' || !inputs.preview
         env:
           TZ: Asia/Shanghai
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: node scripts/send-telegram-digest.js
+        run: |
+          test "$GITHUB_REF_NAME" = main
+          node scripts/send-telegram-digest.js
 
       - name: Persist sent history
-        if: success()
+        if: success() && (github.event_name != 'workflow_dispatch' || !inputs.preview)
         run: |
           git config user.name "morning-caoiffee-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/sent-history.json
+          git add data/sent-history.json data/story-history.json
           if git diff --cached --quiet; then
             echo "No sent-history changes to commit."
           else
@@ -45,3 +71,11 @@ jobs:
             git pull --rebase origin main
             git push origin main
           fi
+
+      - name: Save readable preview
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: telegram-preview
+          path: work/telegram-preview/
+          retention-days: 14

@@ -1,61 +1,8 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const axios = require('axios');
-const { generateTelegramDigest } = require('./telegram-digest');
+const { generateTelegramEdition, savePreview } = require('./telegram-digest');
 const { recordSentDigest } = require('../src/sentHistory');
-
-// Telegram 单条消息上限 4096 字符；留余量。
-// 优先按 ━━━ 分隔线整栏切段（"看点"和"链接"永不分家），单栏超长再退回按行切。
-function splitDigest(text, limit = 3500) {
-  const blocks = [];
-  let current = [];
-  for (const line of text.split('\n')) {
-    if (/^━+$/.test(line.trim()) && current.length) {
-      blocks.push(current.join('\n'));
-      current = [line];
-    } else {
-      current.push(line);
-    }
-  }
-  if (current.length) blocks.push(current.join('\n'));
-
-  const chunks = [];
-  let packed = '';
-  for (const block of blocks) {
-    if (block.length > limit) {
-      if (packed.trim()) chunks.push(packed);
-      packed = '';
-      chunks.push(...splitByLines(block, limit));
-      continue;
-    }
-    if (packed && packed.length + block.length + 1 > limit) {
-      chunks.push(packed);
-      packed = block;
-    } else {
-      packed = packed ? `${packed}\n${block}` : block;
-    }
-  }
-  if (packed.trim()) chunks.push(packed);
-  return chunks;
-}
-
-function splitByLines(text, limit = 3500) {
-  const chunks = [];
-  let current = '';
-  for (let line of text.split('\n')) {
-    while (line.length > limit) {
-      chunks.push(line.slice(0, limit));
-      line = line.slice(limit);
-    }
-    if (current && current.length + line.length + 1 > limit) {
-      chunks.push(current);
-      current = line;
-    } else {
-      current = current ? `${current}\n${line}` : line;
-    }
-  }
-  if (current.trim()) chunks.push(current);
-  return chunks;
-}
+const { recordSentStories } = require('../src/storyHistory');
 
 async function sendMessage(token, chatId, text) {
   await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -63,6 +10,23 @@ async function sendMessage(token, chatId, text) {
     text,
     link_preview_options: { is_disabled: true },
   }, { timeout: 30000 });
+}
+
+async function deliverEdition(edition, {
+  preview = false, send,
+  recordStories = recordSentStories, recordUrls = recordSentDigest,
+} = {}) {
+  if (preview) return;
+  if (!edition.text || edition.text.length > 3200) throw new Error('Invalid V2 message length');
+  await send(edition.text);
+  try {
+    recordStories(edition.stories);
+    recordUrls(edition.text);
+  } catch (error) {
+    const failure = new Error(`Digest delivered, but history could not be saved: ${error.message}`);
+    failure.delivered = true;
+    throw failure;
+  }
 }
 
 async function main() {
@@ -73,30 +37,21 @@ async function main() {
   }
 
   console.log('Morning cAoIffee Telegram digest is brewing...');
-  const digest = await generateTelegramDigest();
-  const chunks = splitDigest(digest.trim());
-  for (const [index, chunk] of chunks.entries()) {
-    await sendMessage(token, chatId, chunk);
-    console.log(`Sent chunk ${index + 1}/${chunks.length} (${chunk.length} chars)`);
-  }
+  const edition = await generateTelegramEdition();
+  savePreview(edition, 'work/telegram-preview');
+  await deliverEdition(edition, { send: text => sendMessage(token, chatId, text) });
   console.log('Digest delivered.');
-
-  // 发送成功才记账（记账失败不算发送失败，别让 Actions 标红吓人）
-  try {
-    const recorded = recordSentDigest(digest);
-    console.log(`Sent history recorded: ${recorded} keys.`);
-  } catch (historyErr) {
-    console.warn('Failed to record sent history:', historyErr.message);
-  }
 }
 
-main().catch(async (err) => {
-  console.error(err.response ? JSON.stringify(err.response.data) : err);
+module.exports = { deliverEdition };
+
+if (require.main === module) main().catch(async (err) => {
+  console.error(err.message);
   // 旅行周读者收到沉默是最差体验：尽力发一条罢工通知（只带错误首行，不带响应体）
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_DEFAULT_CHAT_ID;
-    if (token && chatId) {
+    if (token && chatId && !err.delivered) {
       const reason = String(err.message || err).split('\n')[0].slice(0, 200);
       await sendMessage(token, chatId, `⚠️ 今天早报罢工了：${reason}\n详情在 GitHub Actions 日志里，明天见。`);
     }

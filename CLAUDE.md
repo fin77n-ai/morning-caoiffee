@@ -19,6 +19,26 @@
 
 A personal AI-powered morning digest that scrapes AI news and sends a beautifully designed email every morning.
 
+### Telegram V2 (2026-09-05)
+
+- Daily automation uses `scripts/send-telegram-digest.js`; the email flow remains manual.
+- `src/curateDigest.js`: select at most six candidate articles across sources, merge same-day events, enrich them, then write a structured short digest. Maximum one lead, two briefs and one optional discovery; no fixed glossary or question.
+- `src/extractArticle.js`: use RSS content or Mozilla Readability + jsdom for bounded public-page extraction. Missing full text falls back to the supplied summary and is labeled as incomplete evidence for the editor.
+- `src/storyHistory.js`: retain 30 days of sent event facts and full-text hashes. Unchanged full text is filtered deterministically; different-URL/paraphrased repeats and genuine updates are compared by the model against history. Semantic deduplication is not infallible.
+- Migration: URLs only present in the legacy seven-day ledger stay suppressed until that window expires because their old facts are unknown. Events already tracked by V2 remain eligible for verified same-URL updates.
+- Preview `--fresh-reader` (Actions input `fresh_reader: true`) ignores history for a full sample edition; this can repeat previously sent news and never applies to actual sending. The preview metadata records this mode.
+- Final links come from input IDs, never model-authored URLs. Quotes must exist in the input evidence. This checks citation traceability, not the semantic truth of every generated claim; sample review remains necessary.
+- Maximum three model calls: select, draft, then mandatory factual copy-edit. The last pass also fixes draft validation errors; its output must pass the same mechanical checks. Invalid selection or failed final review aborts; an unreviewed draft is never sent. Quiet days may stop after selection. Live samples showed that two calls plus quotation matching did not reliably preserve comparison scope, so the third call is reserved for review instead of an optional retry.
+- Render only the final reviewed Chinese facts: first fact becomes the heading, the rest form its short paragraph. Draft headline/body/change prose is not sent or stored as event content; it could broaden an otherwise correct fact. Updates receive a program-generated label. This narrows paraphrase drift but still does not prove that each Chinese fact follows from its quote.
+- If the final pass still produces an invalid story (quote, source IDs, mixed event group or missing facts), omit that entire story and record why in preview metadata. Keep the first valid item per event and apply section limits in code; promote the first remaining brief if the lead was removed. All remaining items still undergo the normal cross-story and length checks. Never truncate a quote to make a claim appear supported.
+- Only successful delivery records event and legacy URL history. Corrupt event history fails visibly; sending and Git persistence cannot be made atomic.
+- `npm run preview:telegram` uses the configured DeepSeek key, prints a preview, and writes `work/telegram-preview/` without sending or recording history. `-- --input path.json` replays a candidate file or local full snapshot; `-- --output directory` changes the preview location.
+- Local full replay snapshots live in ignored `work/digest-snapshots/`. Actions archives final text, short evidence and bounded candidate metadata for 14 days, not full article bodies. Only use public sources in this public-repository workflow.
+- Workflow manual dispatch defaults to preview. Scheduled runs send; manual real sends are restricted to `main`. Concurrent executions are serialized.
+- `npm run check` checks every JS file; `npm test` requires no credentials and never sends messages.
+
+The sections below describe the legacy email format and earlier optimizer history; Telegram V2 rules above take precedence for the scheduled digest.
+
 ### Tech stack
 - **Node.js** — runtime
 - **Express** (future) — local server

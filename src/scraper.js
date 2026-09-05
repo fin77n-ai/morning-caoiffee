@@ -407,10 +407,12 @@ async function scrapeAIBlogs() {
         const title = item.find('title').first().text().trim();
         const link = item.find('link').attr('href') || item.find('link').first().text().trim();
         const summary = cleanText(item.find('summary, description, content').first().text() || '').slice(0, 300);
+        const content = (item.find('content\\:encoded').first().text() || item.find('content').first().text() ||
+          item.find('summary, description').first().text() || '').slice(0, 30000);
         // RSS 里现成的发布时间，以前白白扔掉，现在供新鲜度衰减用
         const pubDate = item.find('pubDate, published, updated').first().text().trim();
         if (title) {
-          items.push({ author: feed.name, title, link, summary, pubDate });
+          items.push({ author: feed.name, title, link, summary, content, pubDate });
         }
       });
       if (!items.length) throw new Error(`${feed.name} feed returned no parsable entries`);
@@ -434,30 +436,34 @@ async function scrapeAIBlogs() {
   return { items: results, health };
 }
 
-// Anthropic 官网没有 RSS，抓 /news 页的文章锚点（页面顶部即最新）
+// Anthropic 官网没有 RSS；置顶文章可能比列表旧，按发布日期取最新。
 async function scrapeAnthropicNews() {
   const { data } = await axios.get('https://www.anthropic.com/news', {
     headers: { 'User-Agent': 'Mozilla/5.0' },
     timeout: 10000,
   });
-  const $ = cheerio.load(data);
+  return parseAnthropicNews(data);
+}
+
+function parseAnthropicNews(html) {
+  const $ = cheerio.load(html);
   const seen = new Set();
   const items = [];
   $('a[href^="/news/"]').each((i, el) => {
-    if (items.length >= 3) return false;
     const href = $(el).attr('href');
-    const title = cleanText($(el).text());
+    const title = cleanText($(el).find('h2, h3, h4').first().text() || $(el).text());
     if (!href || seen.has(href) || !title || title.length < 15) return;
     seen.add(href);
     items.push({
       author: 'Anthropic News',
       title: title.slice(0, 200),
       link: `https://www.anthropic.com${href}`,
-      summary: '',
+      summary: cleanText($(el).find('p').first().text()).slice(0, 300),
+      pubDate: $(el).find('time').first().attr('datetime') || $(el).find('time').first().text().trim(),
     });
   });
   if (!items.length) throw new Error('Anthropic news page returned no parsable articles');
-  return items;
+  return items.sort((a, b) => (Date.parse(b.pubDate) || 0) - (Date.parse(a.pubDate) || 0)).slice(0, 3);
 }
 
 // Hugging Face 每日论文榜：按社区 upvotes 取前 3，AI 研究一手信号
@@ -520,4 +526,5 @@ module.exports = {
   scrapeAll,
   hasRedditOAuthConfig,
   redditUserAgent,
+  parseAnthropicNews,
 };

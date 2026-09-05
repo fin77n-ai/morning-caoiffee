@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "check": "node --check src/*.js scripts/*.js",
+    "check": "node scripts/check-syntax.js",
     "dry-run": "node scripts/dry-run.js",
     "preview:optimized": "node scripts/preview-optimized-content.js",
     "telegram-digest": "node scripts/telegram-digest.js",
+    "preview:telegram": "node scripts/telegram-digest.js",
     "video-candidates": "node scripts/video-candidates.js",
     "test": "node --test"
   },
@@ -16,9 +17,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "axios": "^1.17.0",
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
+    "ipaddr.js": "^2.5.0",
+    "jsdom": "^29.1.1",
     "nodemailer": "^8.0.5",
     "openai": "^4.0.0"
   }
