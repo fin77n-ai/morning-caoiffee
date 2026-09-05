@@ -173,7 +173,11 @@ function renderDigest(stories, now, sourceHealth = [], limitedEvidence = false) 
 }
 
 async function curateDigest(data, { complete, history = [], recentKeys = new Set(), extract = extractArticle, now = new Date() } = {}) {
-  const candidates = prepareCandidates(data, recentKeys);
+  // During migration the legacy ledger has URLs but no facts to verify a delta against.
+  // Keep those suppressed until its seven-day window expires; tracked events remain eligible for updates.
+  const trackedUrls = new Set(history.flatMap(story => story.urls.map(normalize)));
+  const candidates = prepareCandidates(data, recentKeys)
+    .filter(item => !item.previouslySent || trackedUrls.has(normalize(item.url)));
   const base = { version: 2, generatedAt: now.toISOString(), candidates, sourceHealth: data.sourceHealth || [] };
   const empty = extra => ({ ...base, ...extra, stories: [], text: renderDigest([], now, data.sourceHealth,
     extra.articles.some(item => item.article.status === 'unavailable')) });

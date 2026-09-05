@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { curateDigest, prepareCandidates } = require('../src/curateDigest');
 const { generateTelegramEdition, savePreview } = require('../scripts/telegram-digest');
 const { extractArticle } = require('../src/extractArticle');
+const { normalize } = require('../src/optimizeContent');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -39,6 +40,15 @@ test('selection and writing share a single repair budget', async () => {
   let calls = 0;
   await assert.rejects(curateDigest(raw, { now, extract, complete: async () => { calls++; return replies.shift(); } }), /Invalid body/);
   assert.equal(calls, 3);
+});
+
+test('legacy-only URLs do not repeat on migration without old facts to verify an update', async () => {
+  const edition = await curateDigest(raw, { now, history: [],
+    recentKeys: new Set([normalize(raw.aiBlogs[0].link)]),
+    complete: async () => assert.fail('legacy-only repeat entered selection'),
+    extract: async () => assert.fail('legacy-only repeat entered extraction'),
+  });
+  assert.equal(edition.stories.length, 0);
 });
 
 test('one strong item stays one item, with source links and no forced homework', async () => {
@@ -82,7 +92,8 @@ test('same URL can carry a verified update and keep the original event identity'
     contentHashes: { 'https://example.com/video': 'old-hash' }, firstSentAt: '2026-09-04T00:00:00Z', lastSentAt: '2026-09-04T00:00:00Z' }];
   const replies = [{ groups: [{ ids: [id], reason: 'possible update' }] },
     draft(id, { historyId: 'event-old', novelty: 'update', change: '此前需要候补，现在向所有用户开放。' })];
-  const edition = await curateDigest(raw, { now, history, extract, complete: async () => replies.shift() });
+  const edition = await curateDigest(raw, { now, history, extract,
+    recentKeys: new Set([normalize(raw.aiBlogs[0].link)]), complete: async () => replies.shift() });
   assert.equal(edition.stories[0].id, 'event-old');
   assert.match(edition.text, /此前需要候补/);
 });
