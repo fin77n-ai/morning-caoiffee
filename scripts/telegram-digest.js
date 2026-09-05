@@ -52,6 +52,7 @@ function savePreview(edition, directory) {
   fs.writeFileSync(path.join(directory, 'digest.txt'), edition.text + '\n');
   fs.writeFileSync(path.join(directory, 'edition.json'), JSON.stringify({
     version: edition.version, generatedAt: edition.generatedAt, stories: edition.stories,
+    previewMode: edition.previewMode || 'normal',
     usage: edition.usage, sourceHealth: edition.sourceHealth,
     articleReadings: edition.articles.map(item => ({ id: item.id, url: item.url,
       status: item.article.status, excerptLength: item.article.text.length })),
@@ -73,8 +74,11 @@ async function main() {
   const rawData = input?.rawData || input;
   const directory = outputIndex >= 0 ? args[outputIndex + 1] : path.join('work', 'telegram-preview');
   const cached = new Map((input?.articles || []).map(item => [item.url, item.article]));
+  const freshReader = args.includes('--fresh-reader');
   const edition = await generateTelegramEdition({ rawData,
+    ...(freshReader ? { history: [], recentKeys: new Set() } : {}),
     extract: item => cached.has(item.url) ? cached.get(item.url) : extractArticle(item) });
+  edition.previewMode = freshReader ? 'fresh-reader' : 'normal';
   savePreview(edition, directory);
   // Local replay snapshot is deliberately separate from the uploadable preview.
   const snapshotDirectory = path.join('work', 'digest-snapshots');
@@ -82,6 +86,7 @@ async function main() {
   fs.writeFileSync(path.join(snapshotDirectory, `${edition.generatedAt.replace(/[:.]/g, '-')}.json`), JSON.stringify(edition, null, 2));
   console.log(edition.text);
   console.log(`Preview saved to ${directory}; no message sent and no history updated.`);
+  if (freshReader) console.log('Fresh-reader sample: existing history was ignored for this preview only.');
 }
 
 module.exports = { generateTelegramDigest, generateTelegramEdition, buildCompletionOptions, savePreview };
