@@ -83,6 +83,7 @@ Preserve the source's status and attribution: a commitment is not money already 
 An author's informal test is that author's observation, not a universal ranking. Do not add speculative links between model families.
 One same-day group can appear in only one story. Use only candidate IDs from DATA.
 Every story must have 1-3 factual statements, each with a short verbatim quote from that source's title/summary/article text.
+Quotes must be contiguous exact substrings, 12-500 characters each: no ellipses, paraphrasing, punctuation edits or joining separate passages.
 Every factual claim in headline, body and change must be supported by those cited facts; omit unsupported conclusions.
 Each quote must support the whole associated fact, including numbers and availability status. Choose fewer facts with complete evidence.
 Preserve the exact scope of comparisons: beating one named model variant is not beating its whole family or all previous models.
@@ -129,7 +130,9 @@ function validateDraft(result, items, groups, history) {
       const source = sources.find(item => item.id === fact.sourceId);
       const quote = plain(fact.quote);
       const evidence = source && plain(`${source.title} ${source.summary} ${source.article.text}`);
-      if (!source || quote.length < 12 || quote.length > 500 || !evidence.includes(quote)) throw new Error('Invalid evidence quote');
+      if (!source) throw new Error('Invalid evidence quote: sourceId must belong to this story');
+      if (quote.length < 12 || quote.length > 500) throw new Error(`Invalid evidence quote for ${source.id}: use 12-500 characters`);
+      if (!evidence.includes(quote)) throw new Error(`Invalid evidence quote for ${source.id}: copy an exact contiguous substring; unmatched quote starts ${JSON.stringify(quote.slice(0, 120))}`);
       return prose(fact.text, 'fact', 180);
     });
     const previous = story.historyId == null ? null : history.find(item => item.id === story.historyId);
