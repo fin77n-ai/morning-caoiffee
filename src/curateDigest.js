@@ -55,18 +55,22 @@ function validateSelection(result, candidates) {
   if (!Array.isArray(result?.groups) || result.groups.length > 6) throw new Error('Invalid selection groups');
   const known = new Set(candidates.map(item => item.id));
   const used = new Set();
-  let sources = 0;
   for (const group of result.groups) {
     if (!Array.isArray(group.ids) || !group.ids.length || group.ids.length > 3) throw new Error('Invalid group IDs');
     for (const id of group.ids) {
       if (!known.has(id) || used.has(id)) throw new Error('Unknown or repeated selection ID');
       used.add(id);
-      sources++;
     }
     if (typeof group.reason !== 'string' || group.reason.length > 300) throw new Error('Invalid selection reason');
   }
-  if (sources > 6) throw new Error('Select at most six source articles total');
-  return result.groups;
+  // Models may respect six events yet attach multiple sources to each.
+  // Enforce the read budget in ranked order; never fetch more than six URLs.
+  let remaining = 6;
+  return result.groups.flatMap(group => {
+    const ids = group.ids.slice(0, remaining);
+    remaining -= ids.length;
+    return ids.length ? [{ ...group, ids }] : [];
+  });
 }
 
 function writingPrompt(items, groups, history, now) {

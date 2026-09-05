@@ -41,6 +41,22 @@ test('invalid selection stops before drafting or sending', async () => {
   assert.equal(calls, 1);
 });
 
+test('selection source budget is capped even when six events have multiple sources', async () => {
+  const data = { aiBlogs: Array.from({ length: 8 }, (_, index) => ({
+    title: `Example AI update ${index}`, link: `https://example.com/${index}`, summary: text,
+  })) };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const reads = [];
+  const edition = await curateDigest(data, { now,
+    complete: async (_prompt, stage) => stage === 'select' ? {
+      groups: [ids.slice(0, 3), ids.slice(3, 6), ids.slice(6)].map(group => ({ ids: group, reason: 'Related sources' })),
+    } : { stories: [] },
+    extract: async item => { reads.push(item.id); return extract(); },
+  });
+  assert.deepEqual(reads, ids.slice(0, 6));
+  assert.equal(edition.selection.length, 2);
+});
+
 test('legacy-only URLs do not repeat on migration without old facts to verify an update', async () => {
   const edition = await curateDigest(raw, { now, history: [],
     recentKeys: new Set([normalize(raw.aiBlogs[0].link)]),
