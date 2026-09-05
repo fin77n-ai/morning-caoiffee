@@ -112,7 +112,7 @@ test('a citation still invalid after review drops the story and its history fact
   } });
   assert.equal(calls, 3);
   assert.deepEqual(edition.stories, []);
-  assert.equal(edition.omissions[0].reason, 'invalid_evidence_quote');
+  assert.match(edition.omissions[0].reason, /Invalid evidence quote/);
   assert.match(edition.text, /可核实的信息有限/);
 });
 
@@ -128,6 +128,17 @@ test('an invalid lead quote does not discard a supported brief', async () => {
   assert.equal(edition.stories[0].slot, 'lead');
   assert.deepEqual(edition.stories[0].urls, ['https://example.com/second']);
   assert.doesNotMatch(edition.text, /无证据/);
+});
+
+test('the final gate retains one supported story per event even if review duplicates it', async () => {
+  const data = { ...raw, hackerNews: [{ title: 'Same release elsewhere', url: 'https://example.com/coverage', summary: text }] };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => {
+    if (stage === 'select') return { groups: [{ ids, reason: 'Same event' }] };
+    return { stories: [draft(ids[0]).stories[0], draft(ids[1], { slot: 'brief' }).stories[0]] };
+  } });
+  assert.equal(edition.stories.length, 1);
+  assert.equal(edition.omissions[0].reason, 'Repeated event');
 });
 
 test('unchanged full text is skipped even when the model proposes it again', async () => {

@@ -231,15 +231,25 @@ Keep commitments distinct from delivery; attribute subjective tests to their aut
 For readability keep the lead to one numerical comparison, and brief items to one or two plain sentences. Omit weak stories rather than filling slots.
 Mechanical problem to fix: ${JSON.stringify(problem || 'none')}.
 DRAFT ${JSON.stringify(draft || null)}`, 'review');
-  if (!Array.isArray(result?.stories) || result.stories.length > 4) throw new Error('Invalid story count');
+  if (!Array.isArray(result?.stories)) throw new Error('Invalid story count');
   const omissions = [];
+  const usedGroups = new Set();
+  const usedEvents = new Set();
+  const counts = { lead: 0, brief: 0, discovery: 0 };
+  const limits = { lead: 1, brief: 2, discovery: 1 };
   const supported = result.stories.filter(story => {
     try {
-      validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, activeGroups, history);
+      if (!story || !Object.hasOwn(counts, story.slot)) throw new Error('Invalid story slot');
+      const [validated] = validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, activeGroups, history);
+      const groupIndex = activeGroups.findIndex(group => story.candidateIds.every(id => group.ids.includes(id)));
+      if (usedGroups.has(groupIndex) || usedEvents.has(validated.id)) throw new Error('Repeated event');
+      if (counts[story.slot] >= limits[story.slot]) throw new Error('Section limit');
+      usedGroups.add(groupIndex);
+      usedEvents.add(validated.id);
+      counts[story.slot]++;
       return true;
     } catch (error) {
-      if (!error.message.startsWith('Invalid evidence quote')) throw error;
-      omissions.push({ candidateIds: story.candidateIds, reason: 'invalid_evidence_quote' });
+      omissions.push({ candidateIds: story?.candidateIds || [], reason: error.message.split(':')[0] });
       return false;
     }
   });
