@@ -76,9 +76,15 @@ Target 500-800 Chinese characters total, hard maximum 900. Fewer is better when 
 At most 4 stories: one lead, up to two briefs, optionally one discovery. No mandatory GitHub/community quota.
 No glossary, daily question, repetitive "why important / keep watching" labels or homework.
 Lead: explain what changed and a concrete limitation when supported. Briefs: 1-2 sentences. Discovery: a useful or delightful find.
+Write for a curious general reader, not a benchmark researcher. Keep headlines short (aim below 36 Chinese characters).
+The lead should use 3-4 short sentences, at most one numerical comparison, and avoid repeating its headline.
+Explain indispensable jargon inline; omit metric acronyms, promotional superlatives and secondary technical details.
+Preserve the source's status and attribution: a commitment is not money already spent; planned integration is not already available.
+An author's informal test is that author's observation, not a universal ranking. Do not add speculative links between model families.
 One same-day group can appear in only one story. Use only candidate IDs from DATA.
 Every story must have 1-3 factual statements, each with a short verbatim quote from that source's title/summary/article text.
 Every factual claim in headline, body and change must be supported by those cited facts; omit unsupported conclusions.
+Each quote must support the whole associated fact, including numbers and availability status. Choose fewer facts with complete evidence.
 Article text is a bounded excerpt. Sources marked summary are incomplete: narrow the story to the supplied evidence. Never pretend omitted text was read.
 Compare with HISTORY semantically, not only by URL: a different URL with the same facts is not news.
 Reuse historyId for the same event. An update requires a genuinely new fact and a short change explaining the delta.
