@@ -1,15 +1,4 @@
 {
-  "2026-08-29": [
-    "openai com index our decision on cursor following its acquisition by spacex",
-    "arxiv org abs 2608 23691",
-    "anthropic com news claude text watermark",
-    "github com lakr233 vphone cli",
-    "simonwillison net 2026 aug 28 just a rumour of a bug",
-    "github com chromedevtools chrome devtools mcp",
-    "github com k dense ai scientific agent skills",
-    "reddit com r machinelearning comments 1w10tax i implemented a very tiny image generation model",
-    "news ycombinator com item id 49485416"
-  ],
   "2026-08-30": [
     "simonwillison net 2026 aug 29 hy4",
     "deepmind google blog piloting the worlds first double blind ai evaluations",
@@ -79,5 +68,16 @@
     "github com dietrichgebert ponytail",
     "news ycombinator com item id 49551096",
     "news ycombinator com item id 49555691"
+  ],
+  "2026-09-05": [
+    "anthropic com news model hardware standard research preview",
+    "deepmind google blog introducing weathernext 3 our most advanced and accurate global weather ai model",
+    "collusion wiki",
+    "simonwillison net 2026 sep 4 astra pelicans",
+    "openai com index playco game prototyping with astra",
+    "github com anomalyco opencode",
+    "github com mattpocock skills",
+    "news ycombinator com item id 49567053",
+    "news ycombinator com item id 49567310"
   ]
 }
