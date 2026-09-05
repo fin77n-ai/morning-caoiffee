@@ -33,13 +33,12 @@ test('healthy source lists with unreadable articles report limited evidence, not
   assert.doesNotMatch(edition.text, /没有值得展开的新变化/);
 });
 
-test('selection and writing share a single repair budget', async () => {
-  const id = prepareCandidates(raw)[0].id;
-  const replies = [{ groups: [{ ids: ['unknown'], reason: 'Invalid' }] },
-    { groups: [{ ids: [id], reason: 'Valid selection' }] }, draft(id, { body: '' })];
+test('invalid selection stops before drafting or sending', async () => {
   let calls = 0;
-  await assert.rejects(curateDigest(raw, { now, extract, complete: async () => { calls++; return replies.shift(); } }), /Invalid body/);
-  assert.equal(calls, 3);
+  await assert.rejects(curateDigest(raw, { now, extract, complete: async () => {
+    calls++; return { groups: [{ ids: ['unknown'], reason: 'Invalid' }] };
+  } }), /selection ID/);
+  assert.equal(calls, 1);
 });
 
 test('legacy-only URLs do not repeat on migration without old facts to verify an update', async () => {
@@ -51,9 +50,35 @@ test('legacy-only URLs do not repeat on migration without old facts to verify an
   assert.equal(edition.stories.length, 0);
 });
 
+test('only the final fact-check pass is rendered and retained as event memory', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  const stages = [];
+  const edition = await curateDigest(raw, { now, extract, complete: async (prompt, stage) => {
+    stages.push(stage);
+    if (stage === 'select') return { groups: [{ ids: [id], reason: 'test' }] };
+    if (stage === 'write') return draft(id, { body: '适用于所有模型的无条件胜利。',
+      facts: [{ text: '适用于所有模型的无条件胜利。', sourceId: id, quote: 'Local export is now available to all users.' }] });
+    assert.match(prompt, /适用于所有模型的无条件胜利/);
+    return draft(id, { body: '本地导出现在向所有用户开放。' });
+  } });
+  assert.deepEqual(stages, ['select', 'write', 'review']);
+  assert.match(edition.text, /本地导出现在向所有用户开放/);
+  assert.doesNotMatch(edition.text, /无条件胜利/);
+  assert.deepEqual(edition.stories[0].facts, ['本地导出向所有用户开放']);
+});
+
+test('failed final review never falls back to an unreviewed valid draft', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  await assert.rejects(curateDigest(raw, { now, extract, complete: async (_prompt, stage) => {
+    if (stage === 'select') return { groups: [{ ids: [id], reason: 'test' }] };
+    if (stage === 'write') return draft(id);
+    throw new Error('review unavailable');
+  } }), /review unavailable/);
+});
+
 test('one strong item stays one item, with source links and no forced homework', async () => {
   const id = prepareCandidates(raw)[0].id;
-  const replies = [{ groups: [{ ids: [id], reason: 'New local capability' }] }, draft(id)];
+  const replies = [{ groups: [{ ids: [id], reason: 'New local capability' }] }, draft(id), draft(id)];
   const edition = await curateDigest(raw, { now, extract, complete: async () => replies.shift() });
   assert.equal(edition.stories.length, 1);
   assert.match(edition.text, /https:\/\/example.com\/video/);
@@ -92,6 +117,7 @@ test('same URL can carry a verified update and keep the original event identity'
     contentHashes: { 'https://example.com/video': 'old-hash' }, firstSentAt: '2026-09-04T00:00:00Z', lastSentAt: '2026-09-04T00:00:00Z' }];
   const replies = [{ groups: [{ ids: [id], reason: 'possible update' }] },
     draft(id, { historyId: 'event-old', novelty: 'update', change: '此前需要候补，现在向所有用户开放。' })];
+  replies.push(replies[1]);
   const edition = await curateDigest(raw, { now, history, extract,
     recentKeys: new Set([normalize(raw.aiBlogs[0].link)]), complete: async () => replies.shift() });
   assert.equal(edition.stories[0].id, 'event-old');
@@ -134,6 +160,7 @@ test('publication and a separate incident about the same product can both appear
     ...draft(ids[1]).stories[0], slot: 'brief', headline: '导出服务出现故障', body: '原因仍在调查。',
     facts: [{ text: '导出服务故障正在调查', sourceId: ids[1], quote: 'An export service incident is being investigated.' }],
   }] }];
+  replies.push(replies[1]);
   const edition = await curateDigest(data, { now, complete: async () => replies.shift(),
     extract: async item => item.url.endsWith('/incident') ? { text: article, status: 'full', hash: 'incident-hash' } : extract() });
   assert.equal(edition.stories.length, 2);
@@ -144,7 +171,7 @@ test('whole preview chain uses optimizer, Readability, evidence checks, renderin
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const todayData = { ...raw, aiBlogs: [{ ...raw.aiBlogs[0], pubDate: new Date().toISOString() }] };
   const id = prepareCandidates(todayData)[0].id;
-  const replies = [{ groups: [{ ids: [id], reason: 'test' }] }, draft(id)];
+  const replies = [{ groups: [{ ids: [id], reason: 'test' }] }, draft(id), draft(id)];
   const edition = await generateTelegramEdition({ rawData: todayData, history: [], recentKeys: new Set(),
     complete: async () => replies.shift(), extract: item => extractArticle(item, { fetch: async () => ({
       html: `<article><h1>Local video export</h1><p>${text.repeat(5)}</p></article>`,

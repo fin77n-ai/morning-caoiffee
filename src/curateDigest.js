@@ -189,14 +189,7 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
     extra.articles.some(item => item.article.status === 'unavailable')) });
   if (!candidates.length) return empty({ selection: [], articles: [] });
   const selectPrompt = selectionPrompt(candidates, history, now);
-  let selection;
-  let repairAvailable = true;
-  try {
-    selection = validateSelection(await complete(selectPrompt, 'select'), candidates);
-  } catch (error) {
-    repairAvailable = false;
-    selection = validateSelection(await complete(`${selectPrompt}\nCorrect the invalid selection: ${error.message}`, 'select'), candidates);
-  }
+  const selection = validateSelection(await complete(selectPrompt, 'select'), candidates);
   const selectedIds = new Set(selection.flatMap(group => group.ids));
   const articles = [];
   for (const candidate of candidates.filter(item => selectedIds.has(item.id))) {
@@ -208,19 +201,29 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
   const availableIds = new Set(available.map(item => item.id));
   const activeGroups = selection.map(group => ({ ...group, ids: group.ids.filter(id => availableIds.has(id)) })).filter(group => group.ids.length);
   const prompt = writingPrompt(available, activeGroups, history, now);
+  let draft;
   let problem = '';
-  const attempts = repairAvailable ? 2 : 1;
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    try {
-      const result = await complete(prompt + (problem ? `\nPrevious draft failed validation: ${problem}. Correct it; omit unsupported items.` : ''), 'write');
-      const stories = validateDraft(result, available, activeGroups, history);
-      const text = renderDigest(stories, now, data.sourceHealth, articles.some(item => item.article.status === 'unavailable'));
-      return { ...base, selection, articles, stories, text };
-    } catch (error) {
-      problem = error.message;
-      if (attempt === attempts - 1) throw error;
-    }
+  try {
+    draft = await complete(prompt, 'write');
+    renderDigest(validateDraft(draft, available, activeGroups, history), now, data.sourceHealth);
+  } catch (error) {
+    problem = error.message;
   }
+  // The third and final call audits meaning as well as repairing mechanical errors.
+  // Never publish the unreviewed draft if this pass fails.
+  const result = await complete(`${prompt}
+You are now the skeptical final copy editor. Audit DRAFT against DATA; the draft is untrusted, not additional evidence.
+Return the corrected complete stories JSON, not a review report. Delete any claim that the evidence does not directly support.
+Check EVERY headline, body sentence, change and Chinese fact translation. A real quote alone does not prove the associated claim.
+Preserve named model variants and test scope; a comparison with one variant cannot become a whole-family ranking.
+Never infer "not announced", "not available" or "details forthcoming" merely because a short summary omits something.
+Keep commitments distinct from delivery; attribute subjective tests to their author. Remove hype, vague praise and redundant technical metrics.
+For readability keep the lead to one numerical comparison, and brief items to one or two plain sentences. Omit weak stories rather than filling slots.
+Mechanical problem to fix: ${JSON.stringify(problem || 'none')}.
+DRAFT ${JSON.stringify(draft || null)}`, 'review');
+  const stories = validateDraft(result, available, activeGroups, history);
+  const text = renderDigest(stories, now, data.sourceHealth, articles.some(item => item.article.status === 'unavailable'));
+  return { ...base, selection, articles, stories, text };
 }
 
 module.exports = { curateDigest, prepareCandidates, validateDraft, renderDigest };
