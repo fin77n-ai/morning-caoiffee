@@ -102,15 +102,32 @@ test('one strong item stays one item, with source links and no forced homework',
   assert.equal(edition.stories[0].facts[0], '本地导出向所有用户开放');
 });
 
-test('rejects invented citations, requests one repair, then fails without sending', async () => {
+test('a citation still invalid after review drops the story and its history facts', async () => {
   const id = prepareCandidates(raw)[0].id;
   let calls = 0;
-  await assert.rejects(curateDigest(raw, { now, extract, complete: async () => {
+  const edition = await curateDigest(raw, { now, extract, complete: async () => {
     calls++;
     if (calls === 1) return { groups: [{ ids: [id], reason: 'test' }] };
     return draft(id, { facts: [{ text: '虚构', sourceId: id, quote: 'This quote does not exist.' }] });
-  } }), /quote/);
+  } });
   assert.equal(calls, 3);
+  assert.deepEqual(edition.stories, []);
+  assert.equal(edition.omissions[0].reason, 'invalid_evidence_quote');
+  assert.match(edition.text, /可核实的信息有限/);
+});
+
+test('an invalid lead quote does not discard a supported brief', async () => {
+  const data = { ...raw, hackerNews: [{ title: 'Second release', url: 'https://example.com/second', summary: text }] };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => {
+    if (stage === 'select') return { groups: ids.map(id => ({ ids: [id], reason: 'Separate releases' })) };
+    return { stories: [draft(ids[0], { facts: [{ text: '无证据', sourceId: ids[0], quote: 'x'.repeat(501) }] }).stories[0],
+      draft(ids[1], { slot: 'brief' }).stories[0]] };
+  } });
+  assert.equal(edition.stories.length, 1);
+  assert.equal(edition.stories[0].slot, 'lead');
+  assert.deepEqual(edition.stories[0].urls, ['https://example.com/second']);
+  assert.doesNotMatch(edition.text, /无证据/);
 });
 
 test('unchanged full text is skipped even when the model proposes it again', async () => {

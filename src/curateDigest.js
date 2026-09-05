@@ -231,9 +231,25 @@ Keep commitments distinct from delivery; attribute subjective tests to their aut
 For readability keep the lead to one numerical comparison, and brief items to one or two plain sentences. Omit weak stories rather than filling slots.
 Mechanical problem to fix: ${JSON.stringify(problem || 'none')}.
 DRAFT ${JSON.stringify(draft || null)}`, 'review');
-  const stories = validateDraft(result, available, activeGroups, history);
-  const text = renderDigest(stories, now, data.sourceHealth, articles.some(item => item.article.status === 'unavailable'));
-  return { ...base, selection, articles, stories, text };
+  if (!Array.isArray(result?.stories) || result.stories.length > 4) throw new Error('Invalid story count');
+  const omissions = [];
+  const supported = result.stories.filter(story => {
+    try {
+      validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, activeGroups, history);
+      return true;
+    } catch (error) {
+      if (!error.message.startsWith('Invalid evidence quote')) throw error;
+      omissions.push({ candidateIds: story.candidateIds, reason: 'invalid_evidence_quote' });
+      return false;
+    }
+  });
+  // A rejected lead must not discard otherwise valid briefs, or their sources.
+  if (omissions.length && supported.length && !supported.some(story => story.slot === 'lead')) {
+    supported[0] = { ...supported[0], slot: 'lead' };
+  }
+  const stories = validateDraft({ stories: supported }, available, activeGroups, history);
+  const text = renderDigest(stories, now, data.sourceHealth, omissions.length > 0 || articles.some(item => item.article.status === 'unavailable'));
+  return { ...base, selection, articles, stories, text, omissions };
 }
 
 module.exports = { curateDigest, prepareCandidates, validateDraft, renderDigest };

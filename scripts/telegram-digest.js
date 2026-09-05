@@ -53,6 +53,7 @@ function savePreview(edition, directory) {
   fs.writeFileSync(path.join(directory, 'edition.json'), JSON.stringify({
     version: edition.version, generatedAt: edition.generatedAt, stories: edition.stories,
     previewMode: edition.previewMode || 'normal',
+    omissions: edition.omissions || [],
     usage: edition.usage, sourceHealth: edition.sourceHealth,
     articleReadings: edition.articles.map(item => ({ id: item.id, url: item.url,
       status: item.article.status, excerptLength: item.article.text.length })),
