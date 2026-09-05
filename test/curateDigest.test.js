@@ -75,10 +75,10 @@ test('only the final fact-check pass is rendered and retained as event memory', 
     if (stage === 'write') return draft(id, { body: '适用于所有模型的无条件胜利。',
       facts: [{ text: '适用于所有模型的无条件胜利。', sourceId: id, quote: 'Local export is now available to all users.' }] });
     assert.match(prompt, /适用于所有模型的无条件胜利/);
-    return draft(id, { body: '本地导出现在向所有用户开放。' });
+    return draft(id, { body: '适用于所有模型的无条件胜利。' });
   } });
   assert.deepEqual(stages, ['select', 'write', 'review']);
-  assert.match(edition.text, /本地导出现在向所有用户开放/);
+  assert.match(edition.text, /本地导出向所有用户开放/);
   assert.doesNotMatch(edition.text, /无条件胜利/);
   assert.deepEqual(edition.stories[0].facts, ['本地导出向所有用户开放']);
 });
@@ -137,7 +137,7 @@ test('same URL can carry a verified update and keep the original event identity'
   const edition = await curateDigest(raw, { now, history, extract,
     recentKeys: new Set([normalize(raw.aiBlogs[0].link)]), complete: async () => replies.shift() });
   assert.equal(edition.stories[0].id, 'event-old');
-  assert.match(edition.text, /此前需要候补/);
+  assert.match(edition.text, /新进展/);
 });
 
 test('quiet days distinguish unavailable sources from no important changes', async () => {
@@ -193,7 +193,7 @@ test('whole preview chain uses optimizer, Readability, evidence checks, renderin
       html: `<article><h1>Local video export</h1><p>${text.repeat(5)}</p></article>`,
     }) }) });
   savePreview(edition, directory);
-  assert.match(fs.readFileSync(path.join(directory, 'digest.txt'), 'utf8'), /视频可以在本地导出/);
+  assert.match(fs.readFileSync(path.join(directory, 'digest.txt'), 'utf8'), /本地导出向所有用户开放/);
   assert.equal(JSON.parse(fs.readFileSync(path.join(directory, 'edition.json'), 'utf8')).stories.length, 1);
   assert.equal(JSON.parse(fs.readFileSync(path.join(directory, 'candidates.json'), 'utf8')).aiBlogs.length, 1);
   assert.equal(edition.articles[0].article.status, 'full');

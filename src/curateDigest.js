@@ -89,6 +89,8 @@ One same-day group can appear in only one story. Use only candidate IDs from DAT
 Every story must have 1-3 factual statements, each with a short verbatim quote from that source's title/summary/article text.
 Quotes must be contiguous exact substrings, 12-500 characters each: no ellipses, paraphrasing, punctuation edits or joining separate passages.
 Every factual claim in headline, body and change must be supported by those cited facts; omit unsupported conclusions.
+The final message is assembled from the corrected Chinese facts only: first fact as its heading, remaining facts as its paragraph.
+Write each fact as a concise, self-contained sentence for the reader. Headline/body/change fields are editorial draft context only.
 Each quote must support the whole associated fact, including numbers and availability status. Choose fewer facts with complete evidence.
 Preserve the exact scope of comparisons: beating one named model variant is not beating its whole family or all previous models.
 Before returning, check headline, body and fact translations against the quotes for broader claims, omitted qualifiers and unsupported details.
@@ -147,10 +149,14 @@ function validateDraft(result, items, groups, history) {
     if (previous && facts.every(fact => previous.facts.some(old => normalize(old) === normalize(fact)))) {
       throw new Error('Update contains no new facts');
     }
-    const change = previous ? prose(story.change, 'change', 180) : '';
+    if (previous) prose(story.change, 'change', 180);
     if (!previous && story.change) throw new Error('New event cannot claim an untracked update');
-    const headline = prose(story.headline, 'headline', 100);
-    const body = prose(story.body, 'body', 700);
+    prose(story.headline, 'headline', 100);
+    prose(story.body, 'body', 700);
+    // Do not let a fluent second paraphrase broaden the reviewed facts again.
+    const headline = facts[0];
+    const body = facts.slice(1).join(' ');
+    const change = previous ? '新进展' : '';
     const id = previous?.id || `event-${shortId(sources[0].url + headline)}`;
     if (usedEvents.has(id)) throw new Error('Repeated historical event');
     usedEvents.add(id);
@@ -174,7 +180,7 @@ function renderDigest(stories, now, sourceHealth = [], limitedEvidence = false) 
   }
   for (const story of stories) {
     const label = { lead: '今天最值得知道的', brief: '顺手知道', discovery: '今天的小发现' }[story.slot];
-    blocks.push(`${label}\n${story.headline}\n${story.body}${story.change ? `\n新进展：${story.change}` : ''}\n${story.urls.join('\n')}`);
+    blocks.push(`${label}${story.change ? ' · 新进展' : ''}\n${story.headline}${story.body ? `\n${story.body}` : ''}\n${story.urls.join('\n')}`);
   }
   const text = blocks.join('\n\n');
   const withoutUrls = text.replace(/https?:\/\/\S+/g, '');
