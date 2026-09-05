@@ -85,6 +85,9 @@ One same-day group can appear in only one story. Use only candidate IDs from DAT
 Every story must have 1-3 factual statements, each with a short verbatim quote from that source's title/summary/article text.
 Every factual claim in headline, body and change must be supported by those cited facts; omit unsupported conclusions.
 Each quote must support the whole associated fact, including numbers and availability status. Choose fewer facts with complete evidence.
+Preserve the exact scope of comparisons: beating one named model variant is not beating its whole family or all previous models.
+Before returning, check headline, body and fact translations against the quotes for broader claims, omitted qualifiers and unsupported details.
+Use neutral descriptive headlines, not "new benchmark", "best", "wins over all predecessors" or similar promotional rankings.
 Article text is a bounded excerpt. Sources marked summary are incomplete: narrow the story to the supplied evidence. Never pretend omitted text was read.
 Compare with HISTORY semantically, not only by URL: a different URL with the same facts is not news.
 Reuse historyId for the same event. An update requires a genuinely new fact and a short change explaining the delta.
