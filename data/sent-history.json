@@ -1,15 +1,4 @@
 {
-  "2026-08-30": [
-    "simonwillison net 2026 aug 29 hy4",
-    "deepmind google blog piloting the worlds first double blind ai evaluations",
-    "huggingface co papers 2608 27345",
-    "github com stemdeckapp stemdeck",
-    "coldtake dev blog domain driven agents",
-    "github com addyosmani agent skills",
-    "github com bilawalsidhu gods eye view",
-    "news ycombinator com item id 49426995",
-    "reddit com r machinelearning comments 1w1wt1s you can beat sota time series anomaly detection"
-  ],
   "2026-08-31": [
     "anthropic com news claude opus 5",
     "reddit com r artificial comments 1w2edm0 sony and warner accuse anthropic of training",
@@ -79,5 +68,17 @@
     "github com mattpocock skills",
     "news ycombinator com item id 49567053",
     "news ycombinator com item id 49567310"
+  ],
+  "2026-09-06": [
+    "reddit com r machinelearning comments 1w89m36 gpt6 reportedly jailbroken within 24 hours using",
+    "simonwillison net 2026 sep 5 introducing gpt 6 astra for developers",
+    "anthropic com news claude text watermark",
+    "openai com index daybreak for frontline defenders",
+    "huggingface co papers 2609 03796",
+    "github com affaan m ecc",
+    "github com nousresearch hermes agent",
+    "github com anthropics skills",
+    "news ycombinator com item id 49580325",
+    "reddit com r machinelearning comments 1w30ti8 d monthly whos hiring and who wants to be hired"
   ]
 }
