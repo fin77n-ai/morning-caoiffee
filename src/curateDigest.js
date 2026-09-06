@@ -52,25 +52,23 @@ HISTORY ${JSON.stringify(historyContext(history))}`;
 }
 
 function validateSelection(result, candidates) {
-  if (!Array.isArray(result?.groups) || result.groups.length > 6) throw new Error('Invalid selection groups');
+  if (!Array.isArray(result?.groups)) throw new Error('Invalid selection groups');
   const known = new Set(candidates.map(item => item.id));
   const used = new Set();
-  for (const group of result.groups) {
-    if (!Array.isArray(group.ids) || !group.ids.length || group.ids.length > 3) throw new Error('Invalid group IDs');
-    for (const id of group.ids) {
-      if (!known.has(id) || used.has(id)) throw new Error('Unknown or repeated selection ID');
-      used.add(id);
-    }
-    if (typeof group.reason !== 'string' || group.reason.length > 300) throw new Error('Invalid selection reason');
-  }
-  // Models may respect six events yet attach multiple sources to each.
-  // Enforce the read budget in ranked order; never fetch more than six URLs.
+  const groups = [];
+  let rejectedCount = 0;
   let remaining = 6;
-  return result.groups.flatMap(group => {
-    const ids = group.ids.slice(0, remaining);
+  for (const group of result.groups) {
+    if (!Array.isArray(group?.ids)) { rejectedCount++; continue; }
+    const ids = group.ids.filter(id => {
+      if (!known.has(id) || used.has(id)) { rejectedCount++; return false; }
+      used.add(id);
+      return true;
+    }).slice(0, Math.min(3, remaining));
     remaining -= ids.length;
-    return ids.length ? [{ ...group, ids }] : [];
-  });
+    if (ids.length) groups.push({ ids, reason: plain(group.reason).slice(0, 300) });
+  }
+  return { groups, rejectedCount };
 }
 
 function writingPrompt(items, groups, history, now) {
@@ -149,10 +147,6 @@ function validateDraft(result, items, groups, history) {
     if (previous && facts.every(fact => previous.facts.some(old => normalize(old) === normalize(fact)))) {
       throw new Error('Update contains no new facts');
     }
-    if (previous) prose(story.change, 'change', 180);
-    if (!previous && story.change) throw new Error('New event cannot claim an untracked update');
-    prose(story.headline, 'headline', 100);
-    prose(story.body, 'body', 700);
     // Do not let a fluent second paraphrase broaden the reviewed facts again.
     const headline = facts[0];
     const body = facts.slice(1).join(' ');
@@ -196,10 +190,11 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
     .filter(item => !item.previouslySent || trackedUrls.has(normalize(item.url)));
   const base = { version: 2, generatedAt: now.toISOString(), candidates, sourceHealth: data.sourceHealth || [] };
   const empty = extra => ({ ...base, ...extra, stories: [], text: renderDigest([], now, data.sourceHealth,
-    extra.articles.some(item => item.article.status === 'unavailable')) });
+    base.selectionOmissions > 0 || extra.articles.some(item => item.article.status === 'unavailable')) });
   if (!candidates.length) return empty({ selection: [], articles: [] });
   const selectPrompt = selectionPrompt(candidates, history, now);
-  const selection = validateSelection(await complete(selectPrompt, 'select'), candidates);
+  const { groups: selection, rejectedCount } = validateSelection(await complete(selectPrompt, 'select'), candidates);
+  base.selectionOmissions = rejectedCount;
   const selectedIds = new Set(selection.flatMap(group => group.ids));
   const articles = [];
   for (const candidate of candidates.filter(item => selectedIds.has(item.id))) {
@@ -254,11 +249,20 @@ DRAFT ${JSON.stringify(draft || null)}`, 'review');
     }
   });
   // A rejected lead must not discard otherwise valid briefs, or their sources.
-  if (omissions.length && supported.length && !supported.some(story => story.slot === 'lead')) {
+  if (supported.length && !supported.some(story => story.slot === 'lead')) {
     supported[0] = { ...supported[0], slot: 'lead' };
   }
   const stories = validateDraft({ stories: supported }, available, activeGroups, history);
-  const text = renderDigest(stories, now, data.sourceHealth, omissions.length > 0 || articles.some(item => item.article.status === 'unavailable'));
+  let text;
+  while (true) {
+    try {
+      text = renderDigest(stories, now, data.sourceHealth, omissions.length > 0 || rejectedCount > 0 || articles.some(item => item.article.status === 'unavailable'));
+      break;
+    } catch (error) {
+      if (error.message !== 'Digest exceeds length budget' || !stories.length) throw error;
+      omissions.push({ urls: stories.pop().urls, reason: 'length_budget' });
+    }
+  }
   return { ...base, selection, articles, stories, text, omissions };
 }
 

@@ -54,6 +54,7 @@ function savePreview(edition, directory) {
     version: edition.version, generatedAt: edition.generatedAt, stories: edition.stories,
     previewMode: edition.previewMode || 'normal',
     omissions: edition.omissions || [],
+    selectionOmissions: edition.selectionOmissions || 0,
     usage: edition.usage, sourceHealth: edition.sourceHealth,
     articleReadings: edition.articles.map(item => ({ id: item.id, url: item.url,
       status: item.article.status, excerptLength: item.article.text.length })),

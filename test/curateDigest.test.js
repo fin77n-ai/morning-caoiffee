@@ -33,12 +33,27 @@ test('healthy source lists with unreadable articles report limited evidence, not
   assert.doesNotMatch(edition.text, /没有值得展开的新变化/);
 });
 
-test('invalid selection stops before drafting or sending', async () => {
+test('unknown selection IDs never enter extraction or drafting', async () => {
   let calls = 0;
-  await assert.rejects(curateDigest(raw, { now, extract, complete: async () => {
+  const edition = await curateDigest(raw, { now, extract: async () => assert.fail('unknown ID fetched'), complete: async () => {
     calls++; return { groups: [{ ids: ['unknown'], reason: 'Invalid' }] };
-  } }), /selection ID/);
+  } });
   assert.equal(calls, 1);
+  assert.equal(edition.stories.length, 0);
+  assert.equal(edition.selectionOmissions, 1);
+  assert.match(edition.text, /可核实的信息有限/);
+});
+
+test('known selection IDs survive unknown and repeated IDs without duplicate fetches', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  let reads = 0;
+  const edition = await curateDigest(raw, { now,
+    extract: async () => { reads++; return extract(); },
+    complete: async (_prompt, stage) => stage === 'select' ? { groups: [{ ids: [id, 'unknown', id], reason: 'test' }] } : draft(id),
+  });
+  assert.equal(reads, 1);
+  assert.equal(edition.selectionOmissions, 2);
+  assert.equal(edition.stories.length, 1);
 });
 
 test('selection source budget is capped even when six events have multiple sources', async () => {
@@ -141,6 +156,21 @@ test('the final gate retains one supported story per event even if review duplic
   assert.equal(edition.omissions[0].reason, 'Repeated event');
 });
 
+test('final length budget removes whole lower-priority stories without cutting sentences', async () => {
+  const data = { aiBlogs: Array.from({ length: 4 }, (_, index) => ({ title: `AI ${index}`, link: `https://example.com/${index}`, summary: text })) };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const stories = ids.map((id, index) => draft(id, { slot: ['lead', 'brief', 'brief', 'discovery'][index],
+    facts: Array.from({ length: 3 }, () => ({ text: '完整事实句'.repeat(30) + '。', sourceId: id, quote: 'Local export is now available to all users.' })),
+  }).stories[0]);
+  const edition = await curateDigest(data, { now, extract,
+    complete: async (_prompt, stage) => stage === 'select' ? { groups: ids.map(id => ({ ids: [id], reason: 'Separate events' })) } : { stories },
+  });
+  assert.ok(edition.stories.length > 0 && edition.stories.length < 4);
+  assert.ok((edition.text.match(/\p{Script=Han}/gu) || []).length <= 900);
+  assert.ok(edition.omissions.some(item => item.reason === 'length_budget'));
+  assert.ok(edition.stories.every(item => item.facts.length === 3 && item.facts.every(fact => fact.endsWith('。'))));
+});
+
 test('unchanged full text is skipped even when the model proposes it again', async () => {
   const id = prepareCandidates(raw)[0].id;
   const history = [{ id: 'event-old', title: '旧事件', facts: ['已开放'], urls: ['https://example.com/video'],
@@ -185,7 +215,7 @@ test('same-day event grouping produces only one final story', async () => {
   assert.equal(edition.stories.length, 0);
 });
 
-test('oversized or URL-injected prose is repaired instead of truncated or delivered', async () => {
+test('unused draft prose cannot inject URLs or oversized text into the final message', async () => {
   const id = prepareCandidates(raw)[0].id;
   for (const bad of [draft(id, { body: '长'.repeat(701) }), draft(id, { body: '点这里 https://evil.example.com' })]) {
     const replies = [{ groups: [{ ids: [id], reason: 'test' }] }, bad, draft(id)];
