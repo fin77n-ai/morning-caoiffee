@@ -1,16 +1,4 @@
 {
-  "2026-08-31": [
-    "anthropic com news claude opus 5",
-    "reddit com r artificial comments 1w2edm0 sony and warner accuse anthropic of training",
-    "youtube com watch v hpj6r6cjjf8",
-    "news ycombinator com item id 49463888",
-    "simonwillison net 2026 aug 30 understanding chatgpt work",
-    "reddit com r artificial comments 1w1ynrf google paper cuts agent token usage by 94 in long",
-    "github com tashfeenahmed freellmapi",
-    "github com abhigyanpatwari gitnexus",
-    "news ycombinator com item id 49419381",
-    "reddit com r artificial comments 1w2snwd amazon is killing mechanical turk by the end a"
-  ],
   "2026-09-01": [
     "webiterate dev google removed extensions ublock origin 108",
     "jasontucker blog how i turned my security cameras into an automatic bird identification system with birdnet go",
@@ -80,5 +68,17 @@
     "github com anthropics skills",
     "news ycombinator com item id 49580325",
     "reddit com r machinelearning comments 1w30ti8 d monthly whos hiring and who wants to be hired"
+  ],
+  "2026-09-07": [
+    "openai com index research acceleration view inside openai",
+    "anthropic com news claude opus 5",
+    "huggingface co papers 2609 04148",
+    "openai com index an alien mind",
+    "huggingface co papers 2609 04199",
+    "github com blader humanizer",
+    "github com coreyhaines31 marketingskills",
+    "github com aipoch open science",
+    "reddit com r machinelearning comments 1w92eis reproducibility seems to be headed towards",
+    "news ycombinator com item id 49591036"
   ]
 }
