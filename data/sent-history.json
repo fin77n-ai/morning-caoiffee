@@ -1,15 +1,4 @@
 {
-  "2026-09-01": [
-    "webiterate dev google removed extensions ublock origin 108",
-    "jasontucker blog how i turned my security cameras into an automatic bird identification system with birdnet go",
-    "openai com index expanding access to ai with chatgpt ads",
-    "simonwillison net 2026 aug 31 introducing wrapture",
-    "openai com index polimill",
-    "github com thu maic openmaic",
-    "github com osmantic ods",
-    "news ycombinator com item id 49512975",
-    "news ycombinator com item id 49511534"
-  ],
   "2026-09-02": [
     "github com ankidroid anki android issues 21656",
     "worldlabs ai blog atlas",
@@ -80,5 +69,16 @@
     "github com aipoch open science",
     "reddit com r machinelearning comments 1w92eis reproducibility seems to be headed towards",
     "news ycombinator com item id 49591036"
+  ],
+  "2026-09-08": [
+    "youtube com watch v 6ifvtcm28ka",
+    "d2lang com blog tala is open source",
+    "openai com index supporting independent journalism in ukraine",
+    "simonwillison net 2026 sep 7 creepy crawlies",
+    "huggingface co papers 2609 04304",
+    "github com jo inc camofox browser",
+    "github com mksglu context mode",
+    "reddit com r artificial comments 1wa8rjv can current llm architecture actually get us to",
+    "reddit com r machinelearning comments 1wa8rub generating bad apple autonomously from a single"
   ]
 }
