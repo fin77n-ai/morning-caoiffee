@@ -1,15 +1,4 @@
 {
-  "2026-09-04": [
-    "simonwillison net 2026 sep 3 gpt6 astra",
-    "news ycombinator com item id 49548452",
-    "news ycombinator com item id 49554520",
-    "ifm ai blog k2",
-    "zed dev blog agentic xanadu",
-    "github com magnitudedev magnitude",
-    "github com dietrichgebert ponytail",
-    "news ycombinator com item id 49551096",
-    "news ycombinator com item id 49555691"
-  ],
   "2026-09-05": [
     "anthropic com news model hardware standard research preview",
     "deepmind google blog introducing weathernext 3 our most advanced and accurate global weather ai model",
@@ -77,5 +66,16 @@
     "github com pascalorg editor",
     "news ycombinator com item id 49624856",
     "news ycombinator com item id 49636345"
+  ],
+  "2026-09-11": [
+    "mathstodon xyz andreasthom 117240535270608201",
+    "cognition com blog swe 2",
+    "johndcook com blog 2026 09 09 formal method revolution",
+    "anthropic com news improving alignment security efforts",
+    "simonwillison net 2026 sep 10 trynix",
+    "github com diegosouzapw omniroute",
+    "github com bilawalsidhu gods eye view",
+    "news ycombinator com item id 49649213",
+    "news ycombinator com item id 49645443"
   ]
 }
