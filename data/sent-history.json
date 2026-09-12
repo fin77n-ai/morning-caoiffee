@@ -1,15 +1,4 @@
 {
-  "2026-09-05": [
-    "anthropic com news model hardware standard research preview",
-    "deepmind google blog introducing weathernext 3 our most advanced and accurate global weather ai model",
-    "collusion wiki",
-    "simonwillison net 2026 sep 4 astra pelicans",
-    "openai com index playco game prototyping with astra",
-    "github com anomalyco opencode",
-    "github com mattpocock skills",
-    "news ycombinator com item id 49567053",
-    "news ycombinator com item id 49567310"
-  ],
   "2026-09-06": [
     "reddit com r machinelearning comments 1w89m36 gpt6 reportedly jailbroken within 24 hours using",
     "simonwillison net 2026 sep 5 introducing gpt 6 astra for developers",
@@ -77,5 +66,16 @@
     "github com bilawalsidhu gods eye view",
     "news ycombinator com item id 49649213",
     "news ycombinator com item id 49645443"
+  ],
+  "2026-09-12": [
+    "bbc com news articles c8r6y4me2g6o",
+    "rubyhack ai",
+    "dayzlegame com blog google ads bot farm",
+    "openai com index perplexity improving accuracy with astra",
+    "dwarkesh com p john beren charlie",
+    "github com github spec kit",
+    "github com melgarafael deskcommcrm",
+    "reddit com r machinelearning comments 1wdfmvq training a 210m texttoimage dit from scratch on",
+    "reddit com r machinelearning comments 1wbf3ox teach ml community service project from stanford n"
   ]
 }
