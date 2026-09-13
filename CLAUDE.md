@@ -68,3 +68,9 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 - [x] GitHub Actions for daily 7am automation
 - [x] More news sources (Anthropic News, Qwen, HF Daily Papers — 2026-07-13)
 - [ ] Eventually merge into Claudio (the AI radio station project)
+
+### Telegram presentation
+- Keep the existing Telegram selection, prose, model, columns and splitting behavior. `scripts/send-telegram-digest.js` adds native `expandable_blockquote` entities only after each text chunk is split.
+- Fold contiguous recognized explanation lines (为什么重要、继续观察、看点等); keep titles, section names, questions and source links visible. Unrecognized lines or lines containing a URL remain plain text.
+- Entity offsets and lengths use UTF-16. The original message text and sent-history input stay unchanged. Telegram controls the visible opening lines; short details may show in full.
+- Importing the sender has no send side effects. `test/telegramPresentation.test.js` verifies exact text preservation, ranges with emoji, multiple chunks and the mocked API payload.

@@ -1,6 +1,5 @@
 require('dotenv').config();
 const axios = require('axios');
-const { generateTelegramDigest } = require('./telegram-digest');
 const { recordSentDigest } = require('../src/sentHistory');
 
 // Telegram 单条消息上限 4096 字符；留余量。
@@ -57,10 +56,38 @@ function splitByLines(text, limit = 3500) {
   return chunks;
 }
 
+// Only fold explanation lines from the existing prompt; unfamiliar output stays visible.
+// Run after splitting so offsets are relative to the exact message being sent.
+function detailEntities(text) {
+  const entities = [];
+  const detail = /^\s*(?:为什么重要|继续观察|看点|能做什么|这帖在聊什么|为什么值得围观|一句话解释|今天为什么出现|我该怎么记|为什么值得想)[：:]/;
+  let offset = 0;
+  let start = null;
+  let end = 0;
+  const flush = () => {
+    if (start !== null) entities.push({ type: 'expandable_blockquote', offset: start, length: end - start });
+    start = null;
+  };
+  for (const line of text.split('\n')) {
+    // URLs always remain visible, even if the model puts one on a detail line.
+    if (detail.test(line) && !/https?:\/\//i.test(line)) {
+      if (start === null) start = offset;
+      end = offset + line.length;
+    } else {
+      flush();
+    }
+    // JavaScript lengths use UTF-16 code units, as required by Telegram.
+    offset += line.length + 1;
+  }
+  flush();
+  return entities;
+}
+
 async function sendMessage(token, chatId, text) {
   await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
     chat_id: chatId,
     text,
+    entities: detailEntities(text),
     link_preview_options: { is_disabled: true },
   }, { timeout: 30000 });
 }
@@ -73,6 +100,7 @@ async function main() {
   }
 
   console.log('Morning cAoIffee Telegram digest is brewing...');
+  const { generateTelegramDigest } = require('./telegram-digest');
   const digest = await generateTelegramDigest();
   const chunks = splitDigest(digest.trim());
   for (const [index, chunk] of chunks.entries()) {
@@ -90,7 +118,9 @@ async function main() {
   }
 }
 
-main().catch(async (err) => {
+module.exports = { splitDigest, detailEntities, sendMessage };
+
+if (require.main === module) main().catch(async (err) => {
   console.error(err.response ? JSON.stringify(err.response.data) : err);
   // 旅行周读者收到沉默是最差体验：尽力发一条罢工通知（只带错误首行，不带响应体）
   try {
