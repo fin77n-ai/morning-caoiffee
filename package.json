@@ -23,7 +23,7 @@
     "dotenv": "^17.4.2",
     "ipaddr.js": "^2.5.0",
     "jsdom": "^29.1.1",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^10.0.9",
     "openai": "^4.0.0"
   }
 }
