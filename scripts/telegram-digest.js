@@ -50,12 +50,13 @@ async function generateTelegramDigest(options) {
 
 function savePreview(edition, directory) {
   fs.mkdirSync(directory, { recursive: true });
-  // Public preview contains only the final digest and its short evidence snippets.
+  // Public preview includes bounded validation samples, never full article bodies.
   fs.writeFileSync(path.join(directory, 'digest.txt'), edition.text + '\n');
   fs.writeFileSync(path.join(directory, 'edition.json'), JSON.stringify({
     version: edition.version, generatedAt: edition.generatedAt, stories: edition.stories,
     previewMode: edition.previewMode || 'normal',
     omissions: edition.omissions || [],
+    validationFailures: edition.validationFailures || [], repairs: edition.repairs || [],
     selectionOmissions: edition.selectionOmissions || 0,
     usage: edition.usage, sourceHealth: edition.sourceHealth,
     articleReadings: edition.articles.map(item => ({ id: item.id, url: item.url,

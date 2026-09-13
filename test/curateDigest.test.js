@@ -129,6 +129,82 @@ test('a citation still invalid after review drops the story and its history fact
   assert.deepEqual(edition.stories, []);
   assert.match(edition.omissions[0].reason, /Invalid evidence quote/);
   assert.match(edition.text, /可核实的信息有限/);
+  assert.deepEqual(edition.validationFailures.map(item => item.stage), ['write', 'review']);
+  assert.match(edition.validationFailures[1].detail, /exact contiguous substring/);
+  assert.equal(edition.validationFailures[1].sample.facts[0].quote, 'This quote does not exist.');
+});
+
+test('an oversized reviewed headline can move intact below a short reviewed fact without another model call', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  for (const length of [73, 120]) {
+    const facts = [
+      { text: '长'.repeat(length), sourceId: id, quote: text },
+      { text: '下载模型仍需要联网', sourceId: id, quote: 'An internet connection is still needed to download models.' },
+    ];
+    let calls = 0;
+    const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => {
+      calls++;
+      return stage === 'select' ? { groups: [{ ids: [id] }] } : draft(id, { facts });
+    } });
+    assert.equal(calls, 3);
+    assert.equal(edition.stories.length, 1);
+    assert.deepEqual(edition.stories[0].evidence, [facts[1], facts[0]]);
+    assert.equal(edition.stories[0].headline, facts[1].text);
+    assert.equal(edition.stories[0].body, facts[0].text);
+    assert.deepEqual(edition.omissions, []);
+    assert.equal(edition.repairs[0].type, 'promote_reviewed_fact');
+    assert.equal(edition.repairs[0].headlineFactIndex, 1);
+    assert.equal(facts[0].text.length, length, 'model response must not be mutated');
+  }
+});
+
+test('headline repair never rescues invalid quotes, oversized body facts or unsafe prose', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  for (const extra of [
+    { text: '长'.repeat(121), sourceId: id, quote: text },
+    { text: '长'.repeat(90), sourceId: id, quote: 'This quote does not exist.' },
+    { text: '长'.repeat(80) + ' https://evil.example.com', sourceId: id, quote: text },
+  ]) {
+    const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+      ? { groups: [{ ids: [id] }] }
+      : draft(id, { facts: [extra, draft(id).stories[0].facts[0]] }),
+    });
+    assert.equal(edition.stories.length, 0);
+    assert.deepEqual(edition.repairs, []);
+    assert.equal(edition.omissions.length, 1);
+  }
+});
+
+test('headline repair skips obvious references to earlier sentences', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  const facts = [
+    { text: '长'.repeat(90), sourceId: id, quote: text },
+    { text: '它下载模型仍需要联网', sourceId: id, quote: text },
+  ];
+  const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+    ? { groups: [{ ids: [id] }] } : draft(id, { facts }),
+  });
+  assert.equal(edition.stories.length, 0);
+  assert.deepEqual(edition.repairs, []);
+});
+
+test('failure samples are bounded, retain original lengths, and survive preview serialization', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'digest-failures-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const id = prepareCandidates(raw)[0].id;
+  const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+    ? { groups: [{ ids: [id] }] }
+    : draft(id, { facts: [{ text: '长'.repeat(1000), sourceId: id, quote: 'x'.repeat(10000) }] }),
+  });
+  savePreview(edition, directory);
+  const saved = JSON.parse(fs.readFileSync(path.join(directory, 'edition.json'), 'utf8'));
+  const sample = saved.validationFailures.find(item => item.stage === 'review').sample.facts[0];
+  assert.equal(sample.text.length, 240);
+  assert.equal(sample.textLength, 1000);
+  assert.equal(sample.quote.length, 500);
+  assert.equal(sample.quoteLength, 10000);
+  assert.deepEqual(saved.repairs, []);
+  assert.equal(saved.articles, undefined, 'public diagnostics must not include full article text');
 });
 
 test('an invalid lead quote does not discard a supported brief', async () => {

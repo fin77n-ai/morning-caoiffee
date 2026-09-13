@@ -16,6 +16,16 @@ node scripts/telegram-digest.js --fresh-reader --input test/fixtures/editor-evid
 - 首事实是短标题，最多 72 字符；后续每个事实最多 120 字符。不能靠截句通过限制。
 - 字符串引文匹配与同模型复核仍不能证明语义准确；测试中的模拟模型也不能取代这一步。
 
+## 成稿校验诊断
+
+`edition.json` 的 `validationFailures` 区分 `write`（初稿）和 `review`（终审后仍不合格），包含具体错误及对应事实、引文样本。最多记录 24 项；每项最多 3 个事实，正文样本最多 240 字符、引文最多 500 字符，同时保留原始长度。样本可能截短，仅用于诊断，不能当作完整证据或已通过审稿的内容。
+
+`repairs` 记录 `promote_reviewed_fact`：终审标题为 73-120 字符时，程序可把同一故事里不超过 72 字符的完整事实提为标题，原标题完整移入正文，再跑证据、历史、重复事件及长度校验。`headlineFactIndex` 是该事实在终审稿中的原始位置（从 0 开始），`sample` 保存调整前的有限样本。超过 120 字符、没有可用短事实或引文不合格，仍然省略；不额外调用模型、不截句。调整成功的故事仍可能被最终整版长度预算移除，以 `stories` 为实际保留结果。
+
+以“它／其／该／这／上述”等明显回指开头的短句不会提为标题；这只是保守筛选，不能保证所有短句独立可读，人工验收仍需检查调整后的语序。
+
+先看 `omissions` 了解省略原因，再按候选 ID 对照样本与 `articleReadings` 的来源。完整文章只在本地忽略的 `work/digest-snapshots/` 留存；公开预览不新增完整文章。对比多次预览时，初稿失败数不能直接当作最终丢稿数。
+
 ## 发送后故障
 
 Actions 的 `telegram-delivery-recovery` artifact 包含 `delivery.json`：待发正文、事件事实及哈希、尝试时间、送达时间、Telegram 的 `message_id`/`date`。不包含 bot token、chat id 或完整 Telegram 响应。预览 artifact 独立保存，两者保留 14 天。

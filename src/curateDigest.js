@@ -132,6 +132,39 @@ function prose(value, field, max) {
   return plain(value);
 }
 
+function validationSample(story) {
+  // Upload only bounded diagnostic fields, never arbitrary model keys or article bodies.
+  const snippet = (value, max) => typeof value === 'string' ? value.slice(0, max) : null;
+  return {
+    event: snippet(story?.event, 300),
+    candidateIds: Array.isArray(story?.candidateIds) ? story.candidateIds.slice(0, 3).map(id => snippet(id, 80)) : [],
+    facts: Array.isArray(story?.facts) ? story.facts.slice(0, 3).map(fact => ({
+      text: snippet(fact?.text, 240), textLength: typeof fact?.text === 'string' ? fact.text.length : null,
+      sourceId: snippet(fact?.sourceId, 80),
+      quote: snippet(fact?.quote, 500), quoteLength: typeof fact?.quote === 'string' ? fact.quote.length : null,
+    })) : [],
+  };
+}
+
+function promoteReviewedFact(story) {
+  const facts = story?.facts;
+  const headline = facts?.[0]?.text;
+  if (!Array.isArray(facts) || facts.length > 3 || typeof headline !== 'string' ||
+      headline.length <= 72 || headline.length > 120) return { story };
+  const index = facts.findIndex((fact, index) => {
+    if (index === 0) return false;
+    // A heading beginning with "it/this/the above" would lose its subject after promotion.
+    if (/^(?:它|其|该|这|上述|[Ii]t\b|[Tt]his\b|[Tt]hey\b|[Tt]hese\b)/.test(plain(fact?.text))) return false;
+    try { prose(fact?.text, 'headline fact', 72); return true; } catch { return false; }
+  });
+  if (index < 0) return { story };
+  // Preserve every reviewed sentence and its quote verbatim; only change their order.
+  return {
+    story: { ...story, facts: [facts[index], ...facts.filter((_, i) => i !== index)] },
+    repair: { type: 'promote_reviewed_fact', headlineFactIndex: index, sample: validationSample(story) },
+  };
+}
+
 function validateDraft(result, items, groups, history) {
   if (!Array.isArray(result?.stories) || result.stories.length > 4) throw new Error('Invalid story count');
   const byId = new Map(items.map(item => [item.id, item]));
@@ -209,7 +242,13 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
   // During migration the legacy ledger has URLs but no facts to verify a delta against.
   // Keep those suppressed until its seven-day window expires; tracked events remain eligible for updates.
   const candidates = prepareCandidates(data, recentKeys, migrationExclusions(history, recentKeys));
-  const base = { version: 2, generatedAt: now.toISOString(), candidates, sourceHealth: data.sourceHealth || [] };
+  const base = { version: 2, generatedAt: now.toISOString(), candidates, sourceHealth: data.sourceHealth || [],
+    validationFailures: [], repairs: [] };
+  const recordFailure = (stage, story, error) => {
+    if (base.validationFailures.length < 24) base.validationFailures.push({
+      stage, detail: String(error.message).slice(0, 500), sample: validationSample(story),
+    });
+  };
   const empty = extra => ({ ...base, ...extra, stories: [], text: renderDigest([], now, data.sourceHealth,
     base.selectionOmissions > 0 || extra.articles.some(item => item.article.status === 'unavailable')) });
   if (!candidates.length) return empty({ selection: [], articles: [] });
@@ -237,7 +276,7 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
       for (const story of draft.stories) {
         try {
           validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, activeGroups, history);
-        } catch (error) { problems.push(error.message); }
+        } catch (error) { problems.push(error.message); recordFailure('write', story, error); }
       }
     }
     try {
@@ -268,7 +307,9 @@ DRAFT ${JSON.stringify(draft || null)}`, 'review');
   const usedEvents = new Set();
   const counts = { lead: 0, brief: 0, discovery: 0 };
   const limits = { lead: 1, brief: 2, discovery: 1 };
-  const supported = result.stories.filter(story => {
+  const supported = [];
+  for (const original of result.stories) {
+    const { story, repair } = promoteReviewedFact(original);
     try {
       if (!story || !Object.hasOwn(counts, story.slot)) throw new Error('Invalid story slot');
       const [validated] = validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, [{ ids: story.candidateIds }], history);
@@ -280,12 +321,13 @@ DRAFT ${JSON.stringify(draft || null)}`, 'review');
       usedEvents.add(eventKey);
       story.candidateIds.forEach(id => usedSources.add(id));
       counts[story.slot]++;
-      return true;
+      supported.push(story);
+      if (repair) base.repairs.push(repair);
     } catch (error) {
       omissions.push({ candidateIds: story?.candidateIds || [], reason: error.message.split(':')[0] });
-      return false;
+      recordFailure('review', original, error);
     }
-  });
+  }
   // A rejected lead must not discard otherwise valid briefs, or their sources.
   if (supported.length && !supported.some(story => story.slot === 'lead')) {
     supported[0] = { ...supported[0], slot: 'lead' };
