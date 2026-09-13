@@ -327,3 +327,21 @@ test('tracked same-URL updates remain eligible through the full migration filter
   assert.equal(edition.stories[0].id, 'event-old');
   assert.match(edition.text, /新进展/);
 });
+
+test('final editor receives all per-story mechanical errors in the one repair pass', async () => {
+  const data = { ...raw, hackerNews: [{ title: 'Second release', url: 'https://example.com/second', summary: text }] };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const edition = await curateDigest(data, { now, extract, complete: async (prompt, stage) => {
+    if (stage === 'select') return { groups: ids.map(id => ({ ids: [id] })) };
+    if (stage === 'write') return { stories: ids.map((id, index) => draft(id, {
+      slot: index === 0 ? 'lead' : 'brief',
+      facts: [{ text: '超长标题'.repeat(25), sourceId: id, quote: text }],
+    }).stories[0]) };
+    const problems = prompt.slice(prompt.indexOf('Mechanical problem to fix:'), prompt.indexOf('\nDRAFT '));
+    assert.match(problems, new RegExp(`headline fact for ${ids[0]}`));
+    assert.match(problems, new RegExp(`headline fact for ${ids[1]}`));
+    return { stories: [draft(ids[0]).stories[0], draft(ids[1], { slot: 'brief' }).stories[0]] };
+  } });
+  assert.equal(edition.stories.length, 2);
+  assert.deepEqual(edition.omissions, []);
+});

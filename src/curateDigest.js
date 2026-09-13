@@ -231,7 +231,19 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
   let problem = '';
   try {
     draft = await complete(prompt, 'write');
-    renderDigest(validateDraft(draft, available, activeGroups, history), now, data.sourceHealth);
+    const problems = [];
+    // Give the one review call every broken story, not just the first thrown error.
+    if (Array.isArray(draft?.stories)) {
+      for (const story of draft.stories) {
+        try {
+          validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, activeGroups, history);
+        } catch (error) { problems.push(error.message); }
+      }
+    }
+    try {
+      renderDigest(validateDraft(draft, available, activeGroups, history), now, data.sourceHealth);
+    } catch (error) { problems.push(error.message); }
+    problem = [...new Set(problems)].join('\n');
   } catch (error) {
     problem = error.message;
   }
