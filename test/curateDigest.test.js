@@ -220,7 +220,7 @@ test('headline repair never rescues invalid quotes, oversized body facts or unsa
 
 test('headline repair skips references and unnamed model subjects hidden by collapsed details', async () => {
   const id = prepareCandidates(raw)[0].id;
-  for (const heading of ['它下载模型仍需要联网', '模型采用双许可，使用者可任选其一']) {
+  for (const heading of ['它下载模型仍需要联网', '模型采用双许可，使用者可任选其一', '在榜单上，它是高表现模型']) {
     const facts = [
       { text: '长'.repeat(90), sourceId: id, quote: text },
       { text: heading, sourceId: id, quote: text },
@@ -487,4 +487,17 @@ test('Telegram folds only story bodies with UTF-16 offsets, leaving headlines an
   }
   assert.ok(entities[1].offset > entities[0].offset + entities[0].length);
   assert.deepEqual(renderTelegramDigest([], now).entities, []);
+});
+
+
+test('collapsed headlines cannot rely on a subject revealed only in the body', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  for (const heading of ['该方案保存客户数据', '在榜单上，它表现很好']) {
+    const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+      ? { groups: [{ ids: [id] }] }
+      : draft(id, { facts: [{ text: heading, sourceId: id, quote: text }] }),
+    });
+    assert.equal(edition.stories.length, 0);
+    assert.equal(edition.omissions[0].reason, 'Headline needs an explicit subject');
+  }
 });

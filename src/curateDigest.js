@@ -157,6 +157,10 @@ function validationSample(story) {
   };
 }
 
+function dependentHeadline(text) {
+  return /^(?:它|其|该|这|上述|模型|项目|系统|平台|[Ii]t\b|[Tt]his\b|[Tt]hey\b|[Tt]hese\b)|[，,]\s*(?:它|其|该)/.test(plain(text));
+}
+
 function promoteReviewedFact(story) {
   const facts = story?.facts;
   const headline = facts?.[0]?.text;
@@ -165,7 +169,7 @@ function promoteReviewedFact(story) {
   const index = facts.findIndex((fact, index) => {
     if (index === 0) return false;
     // A heading beginning with "it/this/the above" would lose its subject after promotion.
-    if (/^(?:它|其|该|这|上述|模型|项目|系统|平台|[Ii]t\b|[Tt]his\b|[Tt]hey\b|[Tt]hese\b)/.test(plain(fact?.text))) return false;
+    if (dependentHeadline(fact?.text)) return false;
     try { prose(fact?.text, 'headline fact', 72); return true; } catch { return false; }
   });
   if (index < 0) return { story };
@@ -202,6 +206,7 @@ function validateDraft(result, items, groups, history, { requireLead = true } = 
       if (!source) throw new Error('Invalid evidence quote: sourceId must belong to this story');
       if (quote.length < 12 || quote.length > 500) throw new Error(`Invalid evidence quote for ${source.id}: use 12-500 characters`);
       if (!evidence.includes(quote)) throw new Error(`Invalid evidence quote for ${source.id}: copy an exact contiguous substring; unmatched quote starts ${JSON.stringify(quote.slice(0, 120))}`);
+      if (index === 0 && dependentHeadline(fact.text)) throw new Error('Headline needs an explicit subject');
       return prose(fact.text, `${index === 0 ? 'headline fact' : 'fact'} for ${source.id}`, index === 0 ? 72 : 120);
     });
     const previous = story.historyId == null ? null : history.find(item => item.id === story.historyId);
