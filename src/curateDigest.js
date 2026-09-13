@@ -97,6 +97,8 @@ Write for a curious general reader, not a benchmark researcher. Keep headlines s
 The lead should use 4-6 separately evidenced facts including its headline, at most one numerical comparison, and avoid repeating its headline.
 Briefs and discovery should use 2-3 separately evidenced facts when available. Explain technical terms in ordinary Chinese instead of listing acronyms.
 The first fact is the headline: aim for 36 Chinese characters, hard maximum 72 characters including English.
+The headline must name its subject so it makes sense when all detail paragraphs are collapsed. Never lead with only "模型", "项目", "它" or "该系统".
+For long model names, use the evidenced short product name and move parameter counts, licenses and technical identifiers to later facts.
 If the first fact is too long, write a narrower short claim and move details to separately quoted facts; never repeat the oversized sentence unchanged.
 Other facts have a hard maximum of 120 characters each. Do not cram tool lists or research acronyms into a fact.
 Mention at most two example tool names, then say 等工具; omit the rest of a compatibility list.
@@ -163,7 +165,7 @@ function promoteReviewedFact(story) {
   const index = facts.findIndex((fact, index) => {
     if (index === 0) return false;
     // A heading beginning with "it/this/the above" would lose its subject after promotion.
-    if (/^(?:它|其|该|这|上述|[Ii]t\b|[Tt]his\b|[Tt]hey\b|[Tt]hese\b)/.test(plain(fact?.text))) return false;
+    if (/^(?:它|其|该|这|上述|模型|项目|系统|平台|[Ii]t\b|[Tt]his\b|[Tt]hey\b|[Tt]hese\b)/.test(plain(fact?.text))) return false;
     try { prose(fact?.text, 'headline fact', 72); return true; } catch { return false; }
   });
   if (index < 0) return { story };

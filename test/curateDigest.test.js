@@ -218,17 +218,19 @@ test('headline repair never rescues invalid quotes, oversized body facts or unsa
   }
 });
 
-test('headline repair skips obvious references to earlier sentences', async () => {
+test('headline repair skips references and unnamed model subjects hidden by collapsed details', async () => {
   const id = prepareCandidates(raw)[0].id;
-  const facts = [
-    { text: '长'.repeat(90), sourceId: id, quote: text },
-    { text: '它下载模型仍需要联网', sourceId: id, quote: text },
-  ];
-  const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
-    ? { groups: [{ ids: [id] }] } : draft(id, { facts }),
-  });
-  assert.equal(edition.stories.length, 0);
-  assert.deepEqual(edition.repairs, []);
+  for (const heading of ['它下载模型仍需要联网', '模型采用双许可，使用者可任选其一']) {
+    const facts = [
+      { text: '长'.repeat(90), sourceId: id, quote: text },
+      { text: heading, sourceId: id, quote: text },
+    ];
+    const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+      ? { groups: [{ ids: [id] }] } : draft(id, { facts }),
+    });
+    assert.equal(edition.stories.length, 0);
+    assert.deepEqual(edition.repairs, []);
+  }
 });
 
 test('failure samples are bounded, retain original lengths, and survive preview serialization', async t => {
