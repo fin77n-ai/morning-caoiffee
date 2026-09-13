@@ -12,7 +12,7 @@ const { extractArticle } = require('../src/extractArticle');
 function buildCompletionOptions(prompt) {
   return {
     model: process.env.DEEPSEEK_MODEL || 'deepseek-flash',
-    thinking: { type: 'disabled' }, max_tokens: 2200,
+    thinking: { type: 'disabled' }, max_tokens: 6000,
     messages: [{ role: 'user', content: prompt }],
   };
 }
@@ -54,6 +54,7 @@ function savePreview(edition, directory) {
   fs.writeFileSync(path.join(directory, 'digest.txt'), edition.text + '\n');
   fs.writeFileSync(path.join(directory, 'edition.json'), JSON.stringify({
     version: edition.version, generatedAt: edition.generatedAt, stories: edition.stories,
+    text: edition.text, entities: edition.entities || [],
     previewMode: edition.previewMode || 'normal',
     omissions: edition.omissions || [],
     validationFailures: edition.validationFailures || [], repairs: edition.repairs || [],
@@ -61,7 +62,7 @@ function savePreview(edition, directory) {
     usage: edition.usage, sourceHealth: edition.sourceHealth,
     articleReadings: edition.articles.map(item => ({ id: item.id, url: item.url,
       status: item.article.status, source: item.article.source, truncated: item.article.truncated,
-      excerptLength: item.article.text.length })),
+      excerptLength: item.article.text.length, readFailures: item.article.readFailures || [] })),
   }, null, 2) + '\n');
   const input = { sourceHealth: edition.sourceHealth };
   for (const item of edition.candidates) {

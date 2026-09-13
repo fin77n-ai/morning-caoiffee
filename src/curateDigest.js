@@ -2,6 +2,8 @@ const crypto = require('node:crypto');
 const { normalize } = require('./optimizeContent');
 const { extractArticle, validateUrl } = require('./extractArticle');
 
+const SLOT_LIMITS = { lead: 1, brief: 3, discovery: 1 };
+const FACT_LIMITS = { lead: 6, brief: 3, discovery: 3 };
 const GROUPS = ['aiBlogs', 'hackerNews', 'githubTrending', 'reddit', 'podcasts'];
 const plain = value => String(value || '').replace(/\s+/g, ' ').trim();
 const shortId = value => crypto.createHash('sha256').update(value).digest('hex').slice(0, 16);
@@ -48,6 +50,8 @@ function selectionPrompt(candidates, history, now) {
   return `${EDITOR}
 Today: ${now.toISOString()}. Select up to 6 events worth verifying, not six mandatory slots.
 Rank across all sources by new concrete change, reader interest, evidence and surprise; social popularity is secondary.
+Prefer dated primary announcements with enough substance for an explanation. A trending repository or evergreen collection alone is not a new release.
+Select a mix of actual developments; skip generic project directories unless a specific recent change is visible. One optional evergreen discovery is enough.
 Group ONLY the identical real-world event/release, not different events about the same product.
 Define each event in one short Chinese sentence (at most 140 characters): who did what, and which release or incident. A product name alone is not an event.
 A model release, a jailbreak report and a customer case study are separate events even about the same model.
@@ -83,11 +87,15 @@ function writingPrompt(items, groups, history, now) {
   return `${EDITOR}
 Today: ${now.toISOString()}. Write Simplified Chinese with natural product names and light humor.
 Target 500-800 Chinese characters total, hard maximum 900. Fewer is better when evidence is sparse.
-At most 4 stories: one lead, up to two briefs, optionally one discovery. No mandatory GitHub/community quota.
+At most 5 stories: one lead, up to three briefs, optionally one discovery. No mandatory GitHub/community quota.
 No glossary, daily question, repetitive "why important / keep watching" labels or homework.
-Lead: explain what changed and a concrete limitation when supported. Briefs: 1-2 sentences. Discovery: a useful or delightful find.
+Lead: aim for 150-250 Chinese characters, explaining the concrete change, a supported example of how it works, and a limitation when evidenced.
+Briefs/discovery: aim for 60-100 Chinese characters each; explain a specific new change plus useful context, not just the project name or tagline.
+These are editorial targets, not quotas. Summary-only sources cannot sustain a detailed lead: keep them narrow or omit them.
+Do not say released, launched, today or now available just because a project is trending; require evidence of that change. Evergreen finds belong only in discovery.
 Write for a curious general reader, not a benchmark researcher. Keep headlines short (aim below 36 Chinese characters).
-The lead should use 2-3 short sentences, at most one numerical comparison, and avoid repeating its headline.
+The lead should use 4-6 separately evidenced facts including its headline, at most one numerical comparison, and avoid repeating its headline.
+Briefs and discovery should use 2-3 separately evidenced facts when available. Explain technical terms in ordinary Chinese instead of listing acronyms.
 The first fact is the headline: aim for 36 Chinese characters, hard maximum 72 characters including English.
 If the first fact is too long, write a narrower short claim and move details to separately quoted facts; never repeat the oversized sentence unchanged.
 Other facts have a hard maximum of 120 characters each. Do not cram tool lists or research acronyms into a fact.
@@ -100,7 +108,8 @@ GROUPS are provisional editorial suggestions. Correct mistaken grouping in the f
 Each story must define one concrete event in a short Chinese event field (aim under 140 characters; hard maximum 300). Split different events about a product into separate stories or omit weaker ones.
 Merge coverage of the same event; never reuse a candidate ID across stories. Use only candidate IDs from DATA.
 Prefer a single primary source that supports the whole story; additional sources must support a cited fact.
-Every story must have 1-3 factual statements, each with a short verbatim quote from that source's title/summary/article text.
+A lead may have 1-6 factual statements; briefs and discovery 1-3 each. Every fact needs its own short verbatim quote from the source text.
+Use distinct passages to explain more, rather than stretching one quote or repeating one claim to fill space.
 Quotes must be contiguous exact substrings, 12-500 characters each: no ellipses, paraphrasing, punctuation edits or joining separate passages.
 Omit unsupported conclusions; facts are the only prose that the reader will see.
 The final message is assembled from the corrected Chinese facts only: first fact as its heading, remaining facts as its paragraph.
@@ -138,7 +147,7 @@ function validationSample(story) {
   return {
     event: snippet(story?.event, 300),
     candidateIds: Array.isArray(story?.candidateIds) ? story.candidateIds.slice(0, 3).map(id => snippet(id, 80)) : [],
-    facts: Array.isArray(story?.facts) ? story.facts.slice(0, 3).map(fact => ({
+    facts: Array.isArray(story?.facts) ? story.facts.slice(0, 6).map(fact => ({
       text: snippet(fact?.text, 240), textLength: typeof fact?.text === 'string' ? fact.text.length : null,
       sourceId: snippet(fact?.sourceId, 80),
       quote: snippet(fact?.quote, 500), quoteLength: typeof fact?.quote === 'string' ? fact.quote.length : null,
@@ -149,7 +158,7 @@ function validationSample(story) {
 function promoteReviewedFact(story) {
   const facts = story?.facts;
   const headline = facts?.[0]?.text;
-  if (!Array.isArray(facts) || facts.length > 3 || typeof headline !== 'string' ||
+  if (!Array.isArray(facts) || facts.length > (FACT_LIMITS[story.slot] || 0) || typeof headline !== 'string' ||
       headline.length <= 72 || headline.length > 120) return { story };
   const index = facts.findIndex((fact, index) => {
     if (index === 0) return false;
@@ -165,8 +174,8 @@ function promoteReviewedFact(story) {
   };
 }
 
-function validateDraft(result, items, groups, history) {
-  if (!Array.isArray(result?.stories) || result.stories.length > 4) throw new Error('Invalid story count');
+function validateDraft(result, items, groups, history, { requireLead = true } = {}) {
+  if (!Array.isArray(result?.stories) || result.stories.length > 5) throw new Error('Invalid story count');
   const byId = new Map(items.map(item => [item.id, item]));
   const counts = { lead: 0, brief: 0, discovery: 0 };
   const usedGroups = new Set();
@@ -183,7 +192,7 @@ function validateDraft(result, items, groups, history) {
     usedGroups.add(groupIndex);
     const event = prose(story.event, 'event definition', 300);
     const sources = story.candidateIds.map(id => byId.get(id));
-    if (!Array.isArray(story.facts) || !story.facts.length || story.facts.length > 3) throw new Error('Missing story facts');
+    if (!Array.isArray(story.facts) || !story.facts.length || story.facts.length > FACT_LIMITS[story.slot]) throw new Error('Missing story facts');
     const facts = story.facts.map((fact, index) => {
       const source = sources.find(item => item.id === fact.sourceId);
       const quote = plain(fact.quote);
@@ -215,27 +224,38 @@ function validateDraft(result, items, groups, history) {
       contentHashes: Object.fromEntries(sources.filter(item => item.article.status === 'full').map(item => [item.url, item.article.hash])),
     };
   });
-  if (counts.lead > 1 || counts.brief > 2 || counts.discovery > 1 || (stories.length && counts.lead !== 1)) {
+  if (Object.entries(counts).some(([slot, count]) => count > SLOT_LIMITS[slot]) || (requireLead && stories.length && counts.lead !== 1)) {
     throw new Error('Invalid section counts');
   }
   return stories.sort((a, b) => ['lead', 'brief', 'discovery'].indexOf(a.slot) - ['lead', 'brief', 'discovery'].indexOf(b.slot));
 }
 
-function renderDigest(stories, now, sourceHealth = [], limitedEvidence = false) {
+function renderTelegramDigest(stories, now, sourceHealth = [], limitedEvidence = false) {
   const date = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long', timeZone: process.env.DIGEST_TZ || 'Asia/Shanghai' });
   const blocks = [`☕ Morning cAoIffee · ${date}`];
+  const entities = [];
   if (!stories.length) {
     const healthy = !limitedEvidence && sourceHealth.length > 0 && sourceHealth.every(source => source.status === 'ok');
     blocks.push(healthy ? '今天没有值得展开的新变化，咖啡照喝，注意力留给自己。' : '今天可核实的信息有限，先不拿零碎消息凑数。');
   }
   for (const story of stories) {
     const label = { lead: '今天最值得知道的', brief: '顺手知道', discovery: '今天的小发现' }[story.slot];
-    blocks.push(`${label}${story.change ? ' · 新进展' : ''}\n${story.headline}${story.body ? `\n${story.body}` : ''}\n${story.urls.join('\n')}`);
+    const heading = `${label}${story.change ? ' · 新进展' : ''}\n${story.headline}`;
+    if (story.body) {
+      // JS string lengths already use Telegram's required UTF-16 code units.
+      entities.push({ type: 'expandable_blockquote',
+        offset: blocks.join('\n\n').length + 2 + heading.length + 1, length: story.body.length });
+    }
+    blocks.push(`${heading}${story.body ? `\n${story.body}` : ''}\n${story.urls.join('\n')}`);
   }
   const text = blocks.join('\n\n');
   const withoutUrls = text.replace(/https?:\/\/\S+/g, '');
   if ((withoutUrls.match(/\p{Script=Han}/gu) || []).length > 900 || text.length > 3200) throw new Error('Digest exceeds length budget');
-  return text;
+  return { text, entities };
+}
+
+function renderDigest(...args) {
+  return renderTelegramDigest(...args).text;
 }
 
 async function curateDigest(data, { complete, history = [], recentKeys = new Set(), extract = extractArticle, now = new Date() } = {}) {
@@ -249,7 +269,7 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
       stage, detail: String(error.message).slice(0, 500), sample: validationSample(story),
     });
   };
-  const empty = extra => ({ ...base, ...extra, stories: [], text: renderDigest([], now, data.sourceHealth,
+  const empty = extra => ({ ...base, ...extra, stories: [], ...renderTelegramDigest([], now, data.sourceHealth,
     base.selectionOmissions > 0 || extra.articles.some(item => item.article.status === 'unavailable')) });
   if (!candidates.length) return empty({ selection: [], articles: [] });
   const selectPrompt = selectionPrompt(candidates, history, now);
@@ -275,7 +295,7 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
     if (Array.isArray(draft?.stories)) {
       for (const story of draft.stories) {
         try {
-          validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, activeGroups, history);
+          validateDraft({ stories: [story] }, available, activeGroups, history, { requireLead: false });
         } catch (error) { problems.push(error.message); recordFailure('write', story, error); }
       }
     }
@@ -288,31 +308,47 @@ async function curateDigest(data, { complete, history = [], recentKeys = new Set
   }
   // The third and final call audits meaning as well as repairing mechanical errors.
   // Never publish the unreviewed draft if this pass fails.
-  const result = await complete(`${prompt}
+  // Keep the final audit inside the cited passages; unrelated article details cannot justify a claim.
+  const reviewItems = available.map(item => ({ id: item.id, source: item.source, article: { status: item.article.status } }));
+  const reviewDraft = Array.isArray(draft?.stories) ? { stories: draft.stories.map(story => ({
+    slot: story?.slot, event: story?.event, candidateIds: story?.candidateIds,
+    historyId: story?.historyId, novelty: story?.novelty,
+    facts: Array.isArray(story?.facts) ? story.facts.map(fact => {
+      const source = available.find(item => item.id === fact?.sourceId);
+      const quote = plain(fact?.quote);
+      const valid = source && quote.length >= 12 && quote.length <= 500 &&
+        plain(`${source.title} ${source.summary} ${source.article.text}`).includes(quote);
+      return { text: fact?.text, sourceId: fact?.sourceId, quote: valid ? quote : '', evidenceStatus: valid ? 'matched' : 'invalid' };
+    }) : [],
+  })) } : null;
+  const result = await complete(`${writingPrompt(reviewItems, activeGroups, history, now)}
 You are now the skeptical final copy editor. Audit DRAFT against DATA; the draft is untrusted, not additional evidence.
 Return the corrected complete stories JSON, not a review report. Delete any claim that the evidence does not directly support.
 First audit event boundaries. GROUPS can be wrong: split a release, an incident and a customer case study even when they share a product.
 Return one event definition per story; every fact must describe that event. Omit side stories if splitting exceeds the edition budget.
 Then audit EACH atomic Chinese fact against its OWN quote, clause by clause. A real quote alone does not prove the associated claim.
+Only the matched quote attached to a fact is evidence for that fact; event labels, HISTORY and other facts are not evidence.
+Delete facts with invalid evidenceStatus or an empty quote. Narrow unsupported clauses, keeping the original quote; do not invent replacement evidence.
+Rewrite jargon into plain Chinese without adding claims. Preserve supported explanatory details; do not collapse a developed lead into a tagline.
 Delete any unsupported clause rather than treating it as harmless context. Explicitly check offline operation, timing, comparisons and vendor attribution.
 Preserve named model variants and test scope; a comparison with one variant cannot become a whole-family ranking.
 Never infer "not announced", "not available" or "details forthcoming" merely because a short summary omits something.
 Keep commitments distinct from delivery; attribute subjective tests to their author. Remove hype, vague praise and redundant technical metrics.
-For readability keep the lead to one numerical comparison, and brief items to one or two plain sentences. Omit weak stories rather than filling slots.
+For readability keep the lead around 150-250 Chinese characters with one numerical comparison, and short items around 60-100 characters when supported. Omit weak stories rather than filling slots.
 Mechanical problem to fix: ${JSON.stringify(problem || 'none')}.
-DRAFT ${JSON.stringify(draft || null)}`, 'review');
+DRAFT ${JSON.stringify(reviewDraft)}`, 'review');
   if (!Array.isArray(result?.stories)) throw new Error('Invalid story count');
   const omissions = [];
   const usedSources = new Set();
   const usedEvents = new Set();
   const counts = { lead: 0, brief: 0, discovery: 0 };
-  const limits = { lead: 1, brief: 2, discovery: 1 };
+  const limits = SLOT_LIMITS;
   const supported = [];
   for (const original of result.stories) {
     const { story, repair } = promoteReviewedFact(original);
     try {
       if (!story || !Object.hasOwn(counts, story.slot)) throw new Error('Invalid story slot');
-      const [validated] = validateDraft({ stories: [{ ...story, slot: 'lead' }] }, available, [{ ids: story.candidateIds }], history);
+      const [validated] = validateDraft({ stories: [story] }, available, [{ ids: story.candidateIds }], history, { requireLead: false });
       const eventKey = `name:${normalize(validated.event)}`;
       if (usedEvents.has(validated.id) || usedEvents.has(eventKey) ||
           story.candidateIds.some(id => usedSources.has(id))) throw new Error('Repeated event');
@@ -333,17 +369,17 @@ DRAFT ${JSON.stringify(draft || null)}`, 'review');
     supported[0] = { ...supported[0], slot: 'lead' };
   }
   const stories = validateDraft({ stories: supported }, available, supported.map(story => ({ ids: story.candidateIds })), history);
-  let text;
+  let rendered;
   while (true) {
     try {
-      text = renderDigest(stories, now, data.sourceHealth, omissions.length > 0 || rejectedCount > 0 || articles.some(item => item.article.status === 'unavailable'));
+      rendered = renderTelegramDigest(stories, now, data.sourceHealth, omissions.length > 0 || rejectedCount > 0 || articles.some(item => item.article.status === 'unavailable'));
       break;
     } catch (error) {
       if (error.message !== 'Digest exceeds length budget' || !stories.length) throw error;
       omissions.push({ urls: stories.pop().urls, reason: 'length_budget' });
     }
   }
-  return { ...base, selection, articles, stories, text, omissions };
+  return { ...base, selection, articles, stories, ...rendered, omissions };
 }
 
-module.exports = { curateDigest, prepareCandidates, migrationExclusions, validateDraft, renderDigest };
+module.exports = { curateDigest, prepareCandidates, migrationExclusions, validateDraft, renderDigest, renderTelegramDigest };

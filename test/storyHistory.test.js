@@ -153,3 +153,24 @@ test('an intermediary HTTP error without Telegram acknowledgement remains unknow
   }), error => error.deliveryUnknown === true);
   assert.equal(JSON.parse(fs.readFileSync(recoveryPath)).status, 'delivery_unknown');
 });
+
+
+test('delivery passes expandable entities to Telegram and preserves them in recovery', async t => {
+  const axios = require('axios');
+  const { sendMessage } = require('../scripts/send-telegram-digest');
+  const recoveryPath = temp(t);
+  const edition = { text: '☕ 早报\n展开后的细节', stories: [story],
+    entities: [{ type: 'expandable_blockquote', offset: 5, length: 6 }] };
+  t.mock.method(axios, 'post', async (_url, payload) => {
+    assert.equal(payload.text, edition.text);
+    assert.deepEqual(payload.entities, edition.entities);
+    assert.equal(payload.parse_mode, undefined);
+    assert.deepEqual(payload.link_preview_options, { is_disabled: true });
+    return { data: { ok: true, result: { message_id: 42 } } };
+  });
+  await deliverEdition(edition, { recoveryPath,
+    send: (text, entities) => sendMessage('test-token', 'test-chat', text, entities),
+    recordStories: () => {}, recordUrls: text => assert.equal(text, edition.text),
+  });
+  assert.deepEqual(JSON.parse(fs.readFileSync(recoveryPath)).entities, edition.entities);
+});

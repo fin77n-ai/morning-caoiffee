@@ -14,7 +14,7 @@ test('uses DeepSeek V4.1 Flash without thinking for the daily digest', () => {
 
     assert.equal(options.model, 'deepseek-flash');
     assert.deepEqual(options.thinking, { type: 'disabled' });
-    assert.equal(options.max_tokens, 2200);
+    assert.equal(options.max_tokens, 6000);
     assert.deepEqual(options.messages, [
       { role: 'user', content: 'same morning prompt' },
     ]);

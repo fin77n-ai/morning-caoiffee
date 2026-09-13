@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { curateDigest, prepareCandidates } = require('../src/curateDigest');
+const { curateDigest, prepareCandidates, renderTelegramDigest } = require('../src/curateDigest');
 const { generateTelegramEdition, savePreview } = require('../scripts/telegram-digest');
 const { extractArticle } = require('../src/extractArticle');
 const { normalize } = require('../src/optimizeContent');
@@ -115,6 +115,49 @@ test('one strong item stays one item, with source links and no forced homework',
   assert.match(edition.text, /https:\/\/example.com\/video/);
   assert.doesNotMatch(edition.text, /概念卡片|思考题|为什么重要|继续观察/);
   assert.equal(edition.stories[0].facts[0], '本地导出向所有用户开放');
+});
+
+test('a developed lead and four short items retain their separately evidenced facts', async () => {
+  const data = { aiBlogs: Array.from({ length: 5 }, (_, i) => ({ title: `Release ${i}`, url: `https://example.com/${i}`, summary: text })) };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const stories = ids.map((id, i) => draft(id, {
+    slot: ['lead', 'brief', 'brief', 'brief', 'discovery'][i],
+    facts: Array.from({ length: i === 0 ? 6 : 3 }, (_, n) => ({ text: `独立事实${i}-${n}`, sourceId: id, quote: text })),
+  }).stories[0]);
+  const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+    ? { groups: ids.map(id => ({ ids: [id] })) } : { stories },
+  });
+  assert.equal(edition.stories.length, 5);
+  assert.deepEqual(edition.stories.map(story => story.facts.length), [6, 3, 3, 3, 3]);
+  assert.match(edition.text, /独立事实0-5/);
+});
+
+test('short items cannot borrow the expanded lead fact limit', async () => {
+  const data = { aiBlogs: [0, 1].map(i => ({ title: `Release ${i}`, url: `https://example.com/${i}`, summary: text })) };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+    ? { groups: ids.map(id => ({ ids: [id] })) }
+    : { stories: [draft(ids[0]).stories[0], draft(ids[1], { slot: 'brief', facts: Array.from({ length: 4 }, () => ({ text: '独立事实', sourceId: ids[1], quote: text })) }).stories[0]] },
+  });
+  assert.equal(edition.stories.length, 1);
+  assert.match(edition.omissions[0].reason, /Missing story facts/);
+});
+
+test('final review sees cited evidence only, not unrelated details from the full article', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  const edition = await curateDigest(raw, { now,
+    extract: async () => ({ text: text + ' UNQUOTED_DETAIL_5KM', status: 'full', hash: 'hash' }),
+    complete: async (prompt, stage) => {
+      if (stage === 'select') return { groups: [{ ids: [id] }] };
+      if (stage === 'write') assert.match(prompt, /UNQUOTED_DETAIL_5KM/);
+      if (stage === 'review') {
+        assert.doesNotMatch(prompt, /UNQUOTED_DETAIL_5KM/);
+        assert.match(prompt, /Local export is now available/);
+      }
+      return draft(id);
+    },
+  });
+  assert.equal(edition.stories.length, 1);
 });
 
 test('a citation still invalid after review drops the story and its history facts', async () => {
@@ -329,6 +372,9 @@ test('whole preview chain uses optimizer, Readability, evidence checks, renderin
   savePreview(edition, directory);
   assert.match(fs.readFileSync(path.join(directory, 'digest.txt'), 'utf8'), /本地导出向所有用户开放/);
   assert.equal(JSON.parse(fs.readFileSync(path.join(directory, 'edition.json'), 'utf8')).stories.length, 1);
+  const saved = JSON.parse(fs.readFileSync(path.join(directory, 'edition.json'), 'utf8'));
+  assert.equal(saved.text, edition.text);
+  assert.deepEqual(saved.entities, edition.entities);
   assert.equal(JSON.parse(fs.readFileSync(path.join(directory, 'candidates.json'), 'utf8')).aiBlogs.length, 1);
   assert.equal(edition.articles[0].article.status, 'full');
   assert.deepEqual(fs.readdirSync(directory).sort(), ['candidates.json', 'digest.txt', 'edition.json']);
@@ -420,4 +466,23 @@ test('final editor receives all per-story mechanical errors in the one repair pa
   } });
   assert.equal(edition.stories.length, 2);
   assert.deepEqual(edition.omissions, []);
+});
+
+
+test('Telegram folds only story bodies with UTF-16 offsets, leaving headlines and sources visible', () => {
+  const stories = [
+    { slot: 'lead', headline: '☕ 模型更新', body: '细节包含 🧪 测试。第二项变化。', urls: ['https://example.com/a'] },
+    { slot: 'brief', headline: '只有一句话', body: '', urls: ['https://example.com/b'] },
+    { slot: 'brief', headline: '另一条消息', body: '细节包含 🧪 测试。第二项变化。', urls: ['https://example.com/c'] },
+  ];
+  const { text, entities } = renderTelegramDigest(stories, now);
+  assert.equal(entities.length, 2);
+  for (const entity of entities) {
+    assert.equal(entity.type, 'expandable_blockquote');
+    assert.equal(text.slice(entity.offset, entity.offset + entity.length), stories[0].body);
+    assert.equal(text[entity.offset - 1], '\n');
+    assert.equal(text[entity.offset + entity.length], '\n');
+  }
+  assert.ok(entities[1].offset > entities[0].offset + entities[0].length);
+  assert.deepEqual(renderTelegramDigest([], now).entities, []);
 });

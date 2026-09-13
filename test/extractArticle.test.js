@@ -16,6 +16,44 @@ test('failed extraction keeps only supplied summary and marks evidence as incomp
   const result = await extractArticle({ url: 'https://example.com/a', summary: 'Only this fact is known.' }, { fetch: async () => { throw new Error('timeout'); } });
   assert.equal(result.status, 'summary');
   assert.equal(result.text, 'Only this fact is known.');
+  assert.equal(result.readFailures[0].reason, 'timeout');
+});
+
+test('GitHub root repositories use the rendered README before the navigation-heavy page', async () => {
+  const calls = [];
+  const result = await extractArticle({ url: 'https://github.com/example/music', summary: 'Short description.' }, {
+    fetch: async (url, options) => {
+      calls.push(url);
+      assert.equal(options.accept, 'application/vnd.github.html+json');
+      return { html: '<article><h1>Music</h1><p>' + 'The new release supports editable song plans and local generation with non-commercial weights. '.repeat(4) + '</p></article>' };
+    },
+  });
+  assert.deepEqual(calls, ['https://api.github.com/repos/example/music/readme']);
+  assert.equal(result.status, 'full');
+  assert.equal(result.source, 'github-readme');
+  assert.match(result.text, /non-commercial weights/);
+});
+
+test('a failed README read falls back to the page and preserves the failure reason', async () => {
+  const calls = [];
+  const result = await extractArticle({ url: 'https://github.com/example/music' }, {
+    fetch: async url => {
+      calls.push(url);
+      if (url.includes('api.github.com')) throw Object.assign(new Error('rate limited'), { response: { status: 403 } });
+      return { html: '<article><p>' + 'The new release supports editable song plans and non-commercial local weights. '.repeat(4) + '</p></article>' };
+    },
+  });
+  assert.equal(calls.length, 2);
+  assert.equal(result.source, 'page');
+  assert.equal(result.readFailures[0].reason, 'http_403');
+});
+
+test('unsafe input URLs cannot reach the README or page reader', async () => {
+  const result = await extractArticle({ url: 'http://127.0.0.1/private', summary: 'Only supplied evidence.' }, {
+    fetch: async () => assert.fail('unsafe URL was fetched'),
+  });
+  assert.equal(result.status, 'summary');
+  assert.equal(result.readFailures[0].reason, 'non_public_address');
 });
 
 test('updates beyond the model excerpt still change the full-text hash', async () => {

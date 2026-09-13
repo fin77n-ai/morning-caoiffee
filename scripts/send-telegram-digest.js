@@ -6,10 +6,11 @@ const { generateTelegramEdition, savePreview } = require('./telegram-digest');
 const { recordSentDigest } = require('../src/sentHistory');
 const { recordSentStories } = require('../src/storyHistory');
 
-async function sendMessage(token, chatId, text) {
+async function sendMessage(token, chatId, text, entities = []) {
   const { data } = await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
     chat_id: chatId,
     text,
+    entities,
     link_preview_options: { is_disabled: true },
   }, { timeout: 30000 });
   if (!data.ok || !Number.isInteger(data.result?.message_id)) throw new Error('Invalid Telegram delivery response');
@@ -33,12 +34,12 @@ async function deliverEdition(edition, {
   if (preview) return;
   if (!edition.text || edition.text.length > 3200) throw new Error('Invalid V2 message length');
   const recovery = { version: 1, status: 'delivery_unknown', attemptedAt: new Date().toISOString(),
-    text: edition.text, stories: edition.stories };
+    text: edition.text, entities: edition.entities || [], stories: edition.stories };
   // Persist before the external side effect. A lost response is not proof of non-delivery.
   saveDelivery(recoveryPath, recovery);
   let receipt;
   try {
-    receipt = await send(edition.text);
+    receipt = await send(edition.text, recovery.entities);
   } catch (error) {
     const rejected = error.response?.status >= 400 && error.response?.status < 500 &&
       error.response?.data?.ok === false;
@@ -73,7 +74,7 @@ async function main() {
   console.log('Morning cAoIffee Telegram digest is brewing...');
   const edition = await generateTelegramEdition();
   savePreview(edition, 'work/telegram-preview');
-  await deliverEdition(edition, { send: text => sendMessage(token, chatId, text),
+  await deliverEdition(edition, { send: (text, entities) => sendMessage(token, chatId, text, entities),
     recoveryPath: 'work/telegram-recovery/delivery.json' });
   console.log('Digest delivered.');
 }
