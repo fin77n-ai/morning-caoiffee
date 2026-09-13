@@ -16,7 +16,7 @@ const raw = {
 const text = 'Local export is now available to all users. An internet connection is still needed to download models.';
 const extract = async () => ({ text, status: 'full', hash: 'new-hash' });
 function draft(id, extra = {}) {
-  return { stories: [{ slot: 'lead', candidateIds: [id], historyId: null, novelty: 'new', change: '',
+  return { stories: [{ slot: 'lead', event: `Release ${id}`, candidateIds: [id], historyId: null, novelty: 'new', change: '',
     headline: '视频可以在本地导出了', body: '这次开放的是本地导出；下载模型仍需要联网。',
     facts: [{ text: '本地导出向所有用户开放', sourceId: id, quote: 'Local export is now available to all users.' }], ...extra }] };
 }
@@ -150,7 +150,7 @@ test('the final gate retains one supported story per event even if review duplic
   const ids = prepareCandidates(data).map(item => item.id);
   const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => {
     if (stage === 'select') return { groups: [{ ids, reason: 'Same event' }] };
-    return { stories: [draft(ids[0]).stories[0], draft(ids[1], { slot: 'brief' }).stories[0]] };
+    return { stories: [draft(ids[0], { event: 'Same release' }).stories[0], draft(ids[1], { slot: 'brief', event: 'Same release' }).stories[0]] };
   } });
   assert.equal(edition.stories.length, 1);
   assert.equal(edition.omissions[0].reason, 'Repeated event');
@@ -160,7 +160,7 @@ test('final length budget removes whole lower-priority stories without cutting s
   const data = { aiBlogs: Array.from({ length: 4 }, (_, index) => ({ title: `AI ${index}`, link: `https://example.com/${index}`, summary: text })) };
   const ids = prepareCandidates(data).map(item => item.id);
   const stories = ids.map((id, index) => draft(id, { slot: ['lead', 'brief', 'brief', 'discovery'][index],
-    facts: Array.from({ length: 3 }, () => ({ text: '完整事实句'.repeat(30) + '。', sourceId: id, quote: 'Local export is now available to all users.' })),
+    facts: Array.from({ length: 3 }, (_, factIndex) => ({ text: '完整事实句'.repeat(factIndex === 0 ? 12 : 23) + '。', sourceId: id, quote: 'Local export is now available to all users.' })),
   }).stories[0]);
   const edition = await curateDigest(data, { now, extract,
     complete: async (_prompt, stage) => stage === 'select' ? { groups: ids.map(id => ({ ids: [id], reason: 'Separate events' })) } : { stories },
@@ -256,4 +256,74 @@ test('whole preview chain uses optimizer, Readability, evidence checks, renderin
   assert.equal(JSON.parse(fs.readFileSync(path.join(directory, 'candidates.json'), 'utf8')).aiBlogs.length, 1);
   assert.equal(edition.articles[0].article.status, 'full');
   assert.deepEqual(fs.readdirSync(directory).sort(), ['candidates.json', 'digest.txt', 'edition.json']);
+});
+
+test('migration suppression happens before source quotas and preserves unsent candidates', async () => {
+  const old = Array.from({ length: 8 }, (_, i) => ({ title: `AI model agent coding launch ${i}`,
+    link: `https://example.com/old-${i}`, summary: text, pubDate: new Date().toISOString() }));
+  const fresh = { title: 'AI model release', link: 'https://example.com/fresh', summary: text, pubDate: new Date().toISOString() };
+  const id = prepareCandidates({ aiBlogs: [fresh] })[0].id;
+  const edition = await generateTelegramEdition({ rawData: { aiBlogs: [...old, fresh], sourceHealth: raw.sourceHealth },
+    history: [], recentKeys: new Set(old.map(item => normalize(item.link))), extract,
+    complete: async (_prompt, stage) => stage === 'select' ? { groups: [{ ids: [id], reason: 'new release' }] } : draft(id),
+  });
+  assert.deepEqual(edition.candidates.map(item => item.url), [fresh.link]);
+  assert.equal(edition.stories.length, 1);
+});
+
+test('final editor can split a mistaken product group into distinct events', async () => {
+  const data = { ...raw, hackerNews: [{ title: 'Example AI incident', url: 'https://example.com/incident', summary: text }] };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => {
+    if (stage === 'select') return { groups: [{ ids, event: 'Example AI news', reason: 'Incorrect product grouping' }] };
+    return { stories: [draft(ids[0], { event: 'Local export release' }).stories[0],
+      draft(ids[1], { event: 'Export service incident', slot: 'brief' }).stories[0]] };
+  } });
+  assert.equal(edition.stories.length, 2);
+  assert.deepEqual(edition.stories.map(story => story.event), ['Local export release', 'Export service incident']);
+});
+
+test('final editor cannot reuse one source across regrouped stories', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+    ? { groups: [{ ids: [id] }] }
+    : { stories: [draft(id, { event: 'Release' }).stories[0], draft(id, { event: 'Another event', slot: 'brief' }).stories[0]] },
+  });
+  assert.equal(edition.stories.length, 1);
+  assert.equal(edition.omissions[0].reason, 'Repeated event');
+});
+
+test('oversized first facts cannot become paragraph-length headlines', async () => {
+  const id = prepareCandidates(raw)[0].id;
+  const edition = await curateDigest(raw, { now, extract, complete: async (_prompt, stage) => stage === 'select'
+    ? { groups: [{ ids: [id] }] }
+    : draft(id, { facts: [{ text: '很长的标题'.repeat(20), sourceId: id, quote: text }] }),
+  });
+  assert.equal(edition.stories.length, 0);
+  assert.match(edition.omissions[0].reason, /Invalid headline fact/);
+});
+
+test('an invalid broad story cannot collapse two valid regrouped stories', async () => {
+  const data = { ...raw, hackerNews: [{ title: 'Example AI incident', url: 'https://example.com/incident', summary: text }] };
+  const ids = prepareCandidates(data).map(item => item.id);
+  const edition = await curateDigest(data, { now, extract, complete: async (_prompt, stage) => {
+    if (stage === 'select') return { groups: [{ ids }] };
+    return { stories: [draft(ids[0], { candidateIds: ids, facts: [] }).stories[0],
+      draft(ids[0], { event: 'Release' }).stories[0], draft(ids[1], { event: 'Incident', slot: 'brief' }).stories[0]] };
+  } });
+  assert.equal(edition.stories.length, 2);
+});
+
+test('tracked same-URL updates remain eligible through the full migration filter', async () => {
+  const url = raw.aiBlogs[0].link;
+  const id = prepareCandidates(raw)[0].id;
+  const history = [{ id: 'event-old', title: '旧事件', facts: ['只对候补用户开放'], urls: [url],
+    contentHashes: { [url]: 'old-hash' }, firstSentAt: now.toISOString(), lastSentAt: now.toISOString() }];
+  const edition = await generateTelegramEdition({ rawData: { ...raw, aiBlogs: [{ ...raw.aiBlogs[0], pubDate: new Date().toISOString() }] },
+    history, recentKeys: new Set([normalize(url)]), extract,
+    complete: async (_prompt, stage) => stage === 'select' ? { groups: [{ ids: [id] }] }
+      : draft(id, { historyId: 'event-old', novelty: 'update' }),
+  });
+  assert.equal(edition.stories[0].id, 'event-old');
+  assert.match(edition.text, /新进展/);
 });

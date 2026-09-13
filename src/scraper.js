@@ -408,11 +408,12 @@ async function scrapeAIBlogs() {
         const link = item.find('link').attr('href') || item.find('link').first().text().trim();
         const summary = cleanText(item.find('summary, description, content').first().text() || '').slice(0, 300);
         const content = (item.find('content\\:encoded').first().text() || item.find('content').first().text() ||
-          item.find('summary, description').first().text() || '').slice(0, 30000);
+          item.find('summary, description').first().text() || '');
         // RSS 里现成的发布时间，以前白白扔掉，现在供新鲜度衰减用
         const pubDate = item.find('pubDate, published, updated').first().text().trim();
         if (title) {
-          items.push({ author: feed.name, title, link, summary, content, pubDate });
+          items.push({ author: feed.name, title, link, summary, content: content.slice(0, 30000),
+            contentTruncated: content.length > 30000, pubDate });
         }
       });
       if (!items.length) throw new Error(`${feed.name} feed returned no parsable entries`);

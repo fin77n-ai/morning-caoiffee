@@ -6,7 +6,7 @@ const { scrapeAll } = require('../src/scraper');
 const { optimizeContent } = require('../src/optimizeContent');
 const { loadRecentKeys } = require('../src/sentHistory');
 const { loadStoryHistory } = require('../src/storyHistory');
-const { curateDigest } = require('../src/curateDigest');
+const { curateDigest, migrationExclusions } = require('../src/curateDigest');
 const { extractArticle } = require('../src/extractArticle');
 
 function buildCompletionOptions(prompt) {
@@ -20,7 +20,10 @@ function buildCompletionOptions(prompt) {
 async function generateTelegramEdition(options = {}) {
   const now = options.now || new Date();
   const rawData = options.rawData || await scrapeAll();
-  const data = optimizeContent(rawData); // Seen URLs remain eligible for real updates.
+  const history = options.history || loadStoryHistory(undefined, now);
+  const recentKeys = options.recentKeys || loadRecentKeys();
+  // Suppress legacy-only URLs before source quotas; tracked events can still update.
+  const data = optimizeContent(rawData, undefined, { excludeKeys: migrationExclusions(history, recentKeys) });
   const usage = [];
   let client;
   const complete = options.complete || (async (prompt, stage) => {
@@ -33,8 +36,7 @@ async function generateTelegramEdition(options = {}) {
   });
   const edition = await curateDigest(data, {
     complete, now, extract: options.extract,
-    history: options.history || loadStoryHistory(undefined, now),
-    recentKeys: options.recentKeys || loadRecentKeys(),
+    history, recentKeys,
   });
   console.log(`Source health: ${data.sourceHealth.filter(source => source.status === 'ok').length}/${data.sourceHealth.length} ok`);
   console.log(`V2: ${edition.candidates.length} candidates -> ${edition.selection.length} events -> ${edition.stories.length} stories (${edition.text.length} chars)`);
@@ -57,7 +59,8 @@ function savePreview(edition, directory) {
     selectionOmissions: edition.selectionOmissions || 0,
     usage: edition.usage, sourceHealth: edition.sourceHealth,
     articleReadings: edition.articles.map(item => ({ id: item.id, url: item.url,
-      status: item.article.status, excerptLength: item.article.text.length })),
+      status: item.article.status, source: item.article.source, truncated: item.article.truncated,
+      excerptLength: item.article.text.length })),
   }, null, 2) + '\n');
   const input = { sourceHealth: edition.sourceHealth };
   for (const item of edition.candidates) {

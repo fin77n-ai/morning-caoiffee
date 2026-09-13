@@ -1,27 +1,61 @@
 require('dotenv').config({ quiet: true });
 const axios = require('axios');
+const fs = require('node:fs');
+const path = require('node:path');
 const { generateTelegramEdition, savePreview } = require('./telegram-digest');
 const { recordSentDigest } = require('../src/sentHistory');
 const { recordSentStories } = require('../src/storyHistory');
 
 async function sendMessage(token, chatId, text) {
-  await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const { data } = await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
     chat_id: chatId,
     text,
     link_preview_options: { is_disabled: true },
   }, { timeout: 30000 });
+  if (!data.ok || !Number.isInteger(data.result?.message_id)) throw new Error('Invalid Telegram delivery response');
+  return { message_id: data.result.message_id, date: data.result.date };
+}
+
+function saveDelivery(file, record) {
+  if (!file) return;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const temporary = `${file}.${process.pid}.tmp`;
+  try {
+    fs.writeFileSync(temporary, JSON.stringify(record, null, 2) + '\n', { mode: 0o600 });
+    fs.renameSync(temporary, file);
+  } finally { fs.rmSync(temporary, { force: true }); }
 }
 
 async function deliverEdition(edition, {
-  preview = false, send,
+  preview = false, send, recoveryPath,
   recordStories = recordSentStories, recordUrls = recordSentDigest,
 } = {}) {
   if (preview) return;
   if (!edition.text || edition.text.length > 3200) throw new Error('Invalid V2 message length');
-  await send(edition.text);
+  const recovery = { version: 1, status: 'delivery_unknown', attemptedAt: new Date().toISOString(),
+    text: edition.text, stories: edition.stories };
+  // Persist before the external side effect. A lost response is not proof of non-delivery.
+  saveDelivery(recoveryPath, recovery);
+  let receipt;
   try {
+    receipt = await send(edition.text);
+  } catch (error) {
+    const rejected = error.response?.status >= 400 && error.response?.status < 500 &&
+      error.response?.data?.ok === false;
+    recovery.status = rejected ? 'send_failed' : 'delivery_unknown';
+    error.deliveryUnknown = !rejected;
+    try { saveDelivery(recoveryPath, recovery); } catch { console.error('Could not update delivery recovery record.'); }
+    throw error;
+  }
+  try {
+    recovery.status = 'delivered';
+    recovery.deliveredAt = new Date().toISOString();
+    recovery.receipt = receipt && { message_id: receipt.message_id, date: receipt.date };
+    saveDelivery(recoveryPath, recovery);
     recordStories(edition.stories);
     recordUrls(edition.text);
+    recovery.status = 'history_saved_locally';
+    saveDelivery(recoveryPath, recovery);
   } catch (error) {
     const failure = new Error(`Digest delivered, but history could not be saved: ${error.message}`);
     failure.delivered = true;
@@ -39,11 +73,12 @@ async function main() {
   console.log('Morning cAoIffee Telegram digest is brewing...');
   const edition = await generateTelegramEdition();
   savePreview(edition, 'work/telegram-preview');
-  await deliverEdition(edition, { send: text => sendMessage(token, chatId, text) });
+  await deliverEdition(edition, { send: text => sendMessage(token, chatId, text),
+    recoveryPath: 'work/telegram-recovery/delivery.json' });
   console.log('Digest delivered.');
 }
 
-module.exports = { deliverEdition };
+module.exports = { deliverEdition, sendMessage };
 
 if (require.main === module) main().catch(async (err) => {
   console.error(err.message);
@@ -51,7 +86,7 @@ if (require.main === module) main().catch(async (err) => {
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_DEFAULT_CHAT_ID;
-    if (token && chatId && !err.delivered) {
+    if (token && chatId && !err.delivered && !err.deliveryUnknown) {
       const reason = String(err.message || err).split('\n')[0].slice(0, 200);
       await sendMessage(token, chatId, `⚠️ 今天早报罢工了：${reason}\n详情在 GitHub Actions 日志里，明天见。`);
     }

@@ -73,9 +73,17 @@ jobs:
           fi
 
       - name: Save readable preview
-        if: success()
+        if: always() && hashFiles('work/telegram-preview/digest.txt') != ''
         uses: actions/upload-artifact@v4
         with:
           name: telegram-preview
           path: work/telegram-preview/
+          retention-days: 14
+
+      - name: Save delivery recovery record
+        if: always() && hashFiles('work/telegram-recovery/delivery.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: telegram-delivery-recovery
+          path: work/telegram-recovery/
           retention-days: 14

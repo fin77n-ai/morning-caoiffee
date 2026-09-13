@@ -75,22 +75,29 @@ function articleText(html, url) {
 }
 
 async function extractArticle(item, { fetch = fetchHtml } = {}) {
-  const fallback = clean(item.summary || item.description).slice(0, MAX_TEXT);
+  let fallback = clean(item.summary || item.description).slice(0, MAX_TEXT);
+  let source = 'summary';
+  let truncated = Boolean(item.contentTruncated || String(item.content || '').length > 30000);
   const extracted = text => ({ text: text.length <= MAX_TEXT ? text : `${text.slice(0, 9000)} … ${text.slice(-2990)}`,
-    status: 'full', hash: fingerprint(`${item.title || ''}\n${text}`) });
+    status: 'full', source: 'page', truncated: text.length > MAX_TEXT, hash: fingerprint(`${item.title || ''}\n${text}`) });
   try {
     validateUrl(item.url);
     if (item.content) {
       const text = articleText(`<article>${item.content.slice(0, 30000)}</article>`, item.url);
-      if (text.length >= 600) return extracted(text);
+      if (text.length > fallback.length) {
+        fallback = text.slice(0, MAX_TEXT);
+        source = 'feed';
+        truncated ||= text.length > MAX_TEXT;
+      }
     }
+    // Feeds may be excerpts even when long. Only a page read establishes a full-text hash.
     const page = await fetch(item.url);
     const text = articleText(page.html, page.url || item.url);
     if (text.length >= 120) return extracted(text);
   } catch {
     // A blocked or unavailable page is weaker evidence, not a reason to invent it.
   }
-  return { text: fallback, status: fallback ? 'summary' : 'unavailable', hash: fingerprint(fallback) };
+  return { text: fallback, status: fallback ? 'summary' : 'unavailable', source, truncated, hash: fingerprint(fallback) };
 }
 
 module.exports = { extractArticle, articleText, fingerprint, validateUrl, isPublicAddress, fetchHtml };

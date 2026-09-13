@@ -1,0 +1,111 @@
+{
+  "description": "Bounded evidence snippets from the 2026-09-06 preview. No full articles; for manual live preview acceptance, never a factual news source.",
+  "rawData": {
+    "sourceHealth": [
+      {
+        "source": "Historical evidence fixture",
+        "status": "ok"
+      }
+    ],
+    "aiBlogs": [
+      {
+        "title": "Developer observations of GPT-6 Astra",
+        "url": "https://simonwillison.net/2026/Sep/5/introducing-gpt-6-astra-for-developers/",
+        "summary": "Across the board, Astra has more attention to detail, better understanding of the user's prompt, and can build more sophisticated outputs. In particular, it excels at building 3D models.",
+        "content": "Across the board, Astra has more attention to detail, better understanding of the user's prompt, and can build more sophisticated outputs. In particular, it excels at building 3D models."
+      },
+      {
+        "title": "Reported GPT-6 Astra jailbreak",
+        "url": "https://www.reddit.com/r/MachineLearning/comments/1w89m36/gpt6_reportedly_jailbroken_within_24_hours_using/",
+        "summary": "A researcher has reported a jailbreak of GPT-6 Astra within a day after release. The attack is described as combination of TIP (Task-in-Prompt) attack from ACL 2025 paper with four other unnamed techniques.",
+        "content": "A researcher has reported a jailbreak of GPT-6 Astra within a day after release. The attack is described as combination of TIP (Task-in-Prompt) attack from ACL 2025 paper with four other unnamed techniques."
+      },
+      {
+        "title": "Playco game prototype case study",
+        "url": "https://openai.com/index/playco-game-prototyping-with-astra",
+        "summary": "Using GPT-6 Astra, Playco built three themed game prototypes from one grey box foundation and reported 50% fewer manual fixes than with the previous model.",
+        "content": "Using GPT-6 Astra, Playco built three themed game prototypes from one grey box foundation and reported 50% fewer manual fixes than with the previous model."
+      },
+      {
+        "title": "WeatherNext 3 announcement",
+        "url": "https://deepmind.google/blog/introducing-weathernext-3-our-most-advanced-and-accurate-global-weather-ai-model/",
+        "summary": "Today, Google DeepMind and Google Research are introducing WeatherNext 3, the most advanced and accurate global weather model to date, according to independent live evaluations by Brightband. Our model learns directly from real-time observations, enabling it to provide timely and more localized predictions for the weather events that impact people the most. WeatherNext 3 will begin powering weather experiences within Google Search, Gemini app, Google Maps, Google Maps Platform Weather API, and Google Earth Engine starting today.",
+        "content": "Today, Google DeepMind and Google Research are introducing WeatherNext 3, the most advanced and accurate global weather model to date, according to independent live evaluations by Brightband. Our model learns directly from real-time observations, enabling it to provide timely and more localized predictions for the weather events that impact people the most. WeatherNext 3 will begin powering weather experiences within Google Search, Gemini app, Google Maps, Google Maps Platform Weather API, and Google Earth Engine starting today."
+      },
+      {
+        "title": "Daybreak for Frontline Defenders",
+        "url": "https://openai.com/index/daybreak-for-frontline-defenders",
+        "summary": "OpenAI introduces Daybreak for Frontline Defenders. A $1 billion commitment expands access to frontier cyber AI, training, and support for essential services.",
+        "content": "OpenAI introduces Daybreak for Frontline Defenders. A $1 billion commitment expands access to frontier cyber AI, training, and support for essential services."
+      },
+      {
+        "title": "Magnitude inference server",
+        "url": "https://github.com/magnitudedev/magnitude",
+        "summary": "Magnitude is an open source inference server that runs the best local models for your hardware, plugged into the agent you already use. It profiles your machine, recommends the models that fit, then downloads, tunes, and runs them. Works with Pi, OpenCode, Hermes, OpenClaw, Codex, Claude Code, Oh My Pi, and Cline, or use the built-in harness.",
+        "content": "Magnitude is an open source inference server that runs the best local models for your hardware, plugged into the agent you already use. It profiles your machine, recommends the models that fit, then downloads, tunes, and runs them. Works with Pi, OpenCode, Hermes, OpenClaw, Codex, Claude Code, Oh My Pi, and Cline, or use the built-in harness."
+      }
+    ]
+  },
+  "articles": [
+    {
+      "url": "https://simonwillison.net/2026/Sep/5/introducing-gpt-6-astra-for-developers/",
+      "article": {
+        "text": "Across the board, Astra has more attention to detail, better understanding of the user's prompt, and can build more sophisticated outputs. In particular, it excels at building 3D models.",
+        "status": "summary",
+        "source": "fixture",
+        "truncated": false,
+        "hash": "fixture"
+      }
+    },
+    {
+      "url": "https://www.reddit.com/r/MachineLearning/comments/1w89m36/gpt6_reportedly_jailbroken_within_24_hours_using/",
+      "article": {
+        "text": "A researcher has reported a jailbreak of GPT-6 Astra within a day after release. The attack is described as combination of TIP (Task-in-Prompt) attack from ACL 2025 paper with four other unnamed techniques.",
+        "status": "summary",
+        "source": "fixture",
+        "truncated": false,
+        "hash": "fixture"
+      }
+    },
+    {
+      "url": "https://openai.com/index/playco-game-prototyping-with-astra",
+      "article": {
+        "text": "Using GPT-6 Astra, Playco built three themed game prototypes from one grey box foundation and reported 50% fewer manual fixes than with the previous model.",
+        "status": "summary",
+        "source": "fixture",
+        "truncated": false,
+        "hash": "fixture"
+      }
+    },
+    {
+      "url": "https://deepmind.google/blog/introducing-weathernext-3-our-most-advanced-and-accurate-global-weather-ai-model/",
+      "article": {
+        "text": "Today, Google DeepMind and Google Research are introducing WeatherNext 3, the most advanced and accurate global weather model to date, according to independent live evaluations by Brightband. Our model learns directly from real-time observations, enabling it to provide timely and more localized predictions for the weather events that impact people the most. WeatherNext 3 will begin powering weather experiences within Google Search, Gemini app, Google Maps, Google Maps Platform Weather API, and Google Earth Engine starting today.",
+        "status": "summary",
+        "source": "fixture",
+        "truncated": false,
+        "hash": "fixture"
+      }
+    },
+    {
+      "url": "https://openai.com/index/daybreak-for-frontline-defenders",
+      "article": {
+        "text": "OpenAI introduces Daybreak for Frontline Defenders. A $1 billion commitment expands access to frontier cyber AI, training, and support for essential services.",
+        "status": "summary",
+        "source": "fixture",
+        "truncated": false,
+        "hash": "fixture"
+      }
+    },
+    {
+      "url": "https://github.com/magnitudedev/magnitude",
+      "article": {
+        "text": "Magnitude is an open source inference server that runs the best local models for your hardware, plugged into the agent you already use. It profiles your machine, recommends the models that fit, then downloads, tunes, and runs them. Works with Pi, OpenCode, Hermes, OpenClaw, Codex, Claude Code, Oh My Pi, and Cline, or use the built-in harness.",
+        "status": "summary",
+        "source": "fixture",
+        "truncated": false,
+        "hash": "fixture"
+      }
+    }
+  ]
+}

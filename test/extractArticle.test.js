@@ -38,3 +38,25 @@ test('article requests reject local, metadata, mapped IPv6 and non-web URLs', ()
   for (const address of ['10.0.0.1', '192.168.1.1', '::1', '::ffff:127.0.0.1', '169.254.169.254']) assert.equal(isPublicAddress(address), false);
   assert.equal(isPublicAddress('1.1.1.1'), true);
 });
+
+test('long RSS cannot hide an update beyond its retained prefix', async () => {
+  const prefix = 'An account of the model release and its limitations. '.repeat(650);
+  let reads = 0;
+  const extract = update => extractArticle({ title: 'Release', url: 'https://example.com/rss', content: `<p>${prefix}${update}</p>` }, {
+    fetch: async () => { reads++; return { html: `<article><p>${prefix}${update}</p></article>` }; },
+  });
+  const before = await extract('Daily limit is 100 requests.');
+  const after = await extract('Daily limit is 200 requests.');
+  assert.equal(reads, 2);
+  assert.equal(before.status, 'full');
+  assert.notEqual(before.hash, after.hash);
+});
+
+test('a truncated feed remains incomplete evidence when the page is unavailable', async () => {
+  const result = await extractArticle({ url: 'https://example.com/rss', content: '<p>' + 'Known release fact. '.repeat(100) + '</p>', contentTruncated: true },
+    { fetch: async () => { throw new Error('blocked'); } });
+  assert.equal(result.status, 'summary');
+  assert.equal(result.source, 'feed');
+  assert.equal(result.truncated, true);
+  assert.match(result.text, /Known release fact/);
+});

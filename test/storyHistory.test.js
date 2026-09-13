@@ -70,3 +70,86 @@ test('history failure after delivery is reported as already delivered', async ()
   }), error => error.delivered === true && /disk full/.test(error.message));
   assert.equal(sends, 1);
 });
+
+test('delivery receipt survives local history failure and contains only recovery data', async t => {
+  const recoveryPath = temp(t);
+  await assert.rejects(deliverEdition({ text: '早报 https://example.com/a', stories: [story] }, {
+    recoveryPath, send: async () => ({ message_id: 123, date: 1788652800, chat: { id: 'private' } }),
+    recordStories: () => { throw new Error('disk full'); }, recordUrls: () => assert.fail('URL ledger updated'),
+  }), error => error.delivered === true);
+  const saved = JSON.parse(fs.readFileSync(recoveryPath, 'utf8'));
+  assert.equal(saved.status, 'delivered');
+  assert.deepEqual(saved.receipt, { message_id: 123, date: 1788652800 });
+  assert.deepEqual(saved.stories, [story]);
+  assert.equal(saved.text, '早报 https://example.com/a');
+  assert.equal(saved.receipt.chat, undefined);
+});
+
+test('a send timeout leaves an unknown outcome without updating history', async t => {
+  const recoveryPath = temp(t);
+  await assert.rejects(deliverEdition({ text: '早报', stories: [story] }, {
+    recoveryPath, send: async () => { throw new Error('timeout'); },
+    recordStories: () => assert.fail('history updated'), recordUrls: () => assert.fail('URL ledger updated'),
+  }), error => error.deliveryUnknown === true);
+  assert.equal(JSON.parse(fs.readFileSync(recoveryPath, 'utf8')).status, 'delivery_unknown');
+});
+
+test('rejected send is distinguished from an unknown outcome', async t => {
+  const recoveryPath = temp(t);
+  await assert.rejects(deliverEdition({ text: '早报', stories: [story] }, {
+    recoveryPath, send: async () => { throw Object.assign(new Error('rejected'), { response: { status: 400, data: { ok: false } } }); },
+  }), error => !error.deliveryUnknown);
+  assert.equal(JSON.parse(fs.readFileSync(recoveryPath, 'utf8')).status, 'send_failed');
+});
+
+test('recovery write failure aborts before sending', async t => {
+  const file = temp(t);
+  fs.writeFileSync(file, 'not a directory');
+  let sends = 0;
+  await assert.rejects(deliverEdition({ text: '早报', stories: [story] }, {
+    recoveryPath: path.join(file, 'delivery.json'), send: async () => { sends++; },
+  }));
+  assert.equal(sends, 0);
+});
+
+test('successful delivery records local history status and keeps preview side-effect free', async t => {
+  const recoveryPath = temp(t);
+  const file = path.join(path.dirname(recoveryPath), 'stories.json');
+  const edition = { text: '早报', stories: [story] };
+  await deliverEdition(edition, { preview: true, recoveryPath, send: async () => assert.fail('preview sent') });
+  assert.equal(fs.existsSync(recoveryPath), false);
+  await deliverEdition(edition, { recoveryPath, send: async () => ({ message_id: 42, date: 1788652800 }),
+    recordStories: stories => recordSentStories(stories, file, now), recordUrls: () => {},
+  });
+  assert.equal(JSON.parse(fs.readFileSync(recoveryPath)).status, 'history_saved_locally');
+  assert.equal(loadStoryHistory(file, now)[0].id, story.id);
+});
+
+test('Telegram response is reduced to a receipt without recipient details', async t => {
+  const axios = require('axios');
+  const { sendMessage } = require('../scripts/send-telegram-digest');
+  t.mock.method(axios, 'post', async () => ({ data: { ok: true,
+    result: { message_id: 123, date: 1788652800, chat: { id: 'private' }, text: '早报' } } }));
+  assert.deepEqual(await sendMessage('test-token', 'test-chat', '早报'), { message_id: 123, date: 1788652800 });
+});
+
+test('an invalid Telegram success response is never treated as delivered', async t => {
+  const axios = require('axios');
+  const { sendMessage } = require('../scripts/send-telegram-digest');
+  t.mock.method(axios, 'post', async () => ({ data: { ok: true, result: {} } }));
+  const recoveryPath = temp(t);
+  await assert.rejects(deliverEdition({ text: '早报', stories: [story] }, {
+    recoveryPath, send: text => sendMessage('test-token', 'test-chat', text),
+    recordStories: () => assert.fail('history updated'), recordUrls: () => assert.fail('history updated'),
+  }), error => error.deliveryUnknown === true);
+  assert.equal(JSON.parse(fs.readFileSync(recoveryPath)).status, 'delivery_unknown');
+});
+
+test('an intermediary HTTP error without Telegram acknowledgement remains unknown', async t => {
+  const recoveryPath = temp(t);
+  await assert.rejects(deliverEdition({ text: '早报', stories: [story] }, {
+    recoveryPath, send: async () => { throw Object.assign(new Error('gateway timeout'), { response: { status: 408, data: '<html>Timeout</html>' } }); },
+    recordStories: () => assert.fail('history updated'), recordUrls: () => assert.fail('history updated'),
+  }), error => error.deliveryUnknown === true);
+  assert.equal(JSON.parse(fs.readFileSync(recoveryPath)).status, 'delivery_unknown');
+});
