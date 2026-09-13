@@ -11,7 +11,7 @@ const { extractArticle } = require('../src/extractArticle');
 
 function buildCompletionOptions(prompt) {
   return {
-    model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-pro',
+    model: process.env.DEEPSEEK_MODEL || 'deepseek-flash',
     thinking: { type: 'disabled' }, max_tokens: 2200,
     messages: [{ role: 'user', content: prompt }],
   };

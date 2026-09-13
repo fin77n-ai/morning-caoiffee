@@ -22,6 +22,7 @@ A personal AI-powered morning digest that scrapes AI news and sends a beautifull
 ### Telegram V2 (2026-09-05)
 
 - Daily automation uses `scripts/send-telegram-digest.js`; the email flow remains manual.
+- Telegram defaults to DeepSeek V4.1 Flash via the official `deepseek-flash` alias, with thinking disabled; `DEEPSEEK_MODEL` can override the model. The alias follows the provider's current Flash version rather than pinning a dated release.
 - `src/curateDigest.js`: select at most six candidate articles across sources, merge same-day events, enrich them, then write a structured short digest. Maximum one lead, two briefs and one optional discovery; no fixed glossary or question.
 - `src/extractArticle.js`: use Mozilla Readability + jsdom for bounded public-page extraction. Feeds are treated as potentially incomplete, including long RSS content. If the page cannot be read, use the retained feed text or summary as incomplete evidence; only a page read receives a full-text hash. Source and truncation metadata remain visible in the preview.
 - `src/storyHistory.js`: retain 30 days of sent event facts and full-text hashes. Unchanged full text is filtered deterministically; different-URL/paraphrased repeats and genuine updates are compared by the model against history. Semantic deduplication is not infallible.

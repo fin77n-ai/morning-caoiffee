@@ -5,14 +5,14 @@ process.env.DEEPSEEK_API_KEY ||= 'test-key';
 
 const { buildCompletionOptions } = require('../scripts/telegram-digest');
 
-test('uses DeepSeek V4 Pro without thinking for the daily digest', () => {
+test('uses DeepSeek V4.1 Flash without thinking for the daily digest', () => {
   const previousModel = process.env.DEEPSEEK_MODEL;
   delete process.env.DEEPSEEK_MODEL;
 
   try {
     const options = buildCompletionOptions('same morning prompt');
 
-    assert.equal(options.model, 'deepseek-v4-pro');
+    assert.equal(options.model, 'deepseek-flash');
     assert.deepEqual(options.thinking, { type: 'disabled' });
     assert.equal(options.max_tokens, 2200);
     assert.deepEqual(options.messages, [
@@ -29,12 +29,12 @@ test('uses DeepSeek V4 Pro without thinking for the daily digest', () => {
 
 test('allows an explicit model override', () => {
   const previousModel = process.env.DEEPSEEK_MODEL;
-  process.env.DEEPSEEK_MODEL = 'deepseek-v4-flash';
+  process.env.DEEPSEEK_MODEL = 'custom-model';
 
   try {
     assert.equal(
       buildCompletionOptions('prompt').model,
-      'deepseek-v4-flash'
+      'custom-model'
     );
   } finally {
     if (previousModel === undefined) {
