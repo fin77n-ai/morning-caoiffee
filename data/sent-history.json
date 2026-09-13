@@ -1,16 +1,4 @@
 {
-  "2026-09-06": [
-    "reddit com r machinelearning comments 1w89m36 gpt6 reportedly jailbroken within 24 hours using",
-    "simonwillison net 2026 sep 5 introducing gpt 6 astra for developers",
-    "anthropic com news claude text watermark",
-    "openai com index daybreak for frontline defenders",
-    "huggingface co papers 2609 03796",
-    "github com affaan m ecc",
-    "github com nousresearch hermes agent",
-    "github com anthropics skills",
-    "news ycombinator com item id 49580325",
-    "reddit com r machinelearning comments 1w30ti8 d monthly whos hiring and who wants to be hired"
-  ],
   "2026-09-07": [
     "openai com index research acceleration view inside openai",
     "anthropic com news claude opus 5",
@@ -77,5 +65,16 @@
     "github com melgarafael deskcommcrm",
     "reddit com r machinelearning comments 1wdfmvq training a 210m texttoimage dit from scratch on",
     "reddit com r machinelearning comments 1wbf3ox teach ml community service project from stanford n"
+  ],
+  "2026-09-13": [
+    "anthropic com news model hardware standard research preview",
+    "openai com index scaling storage one billion users part one",
+    "withspecific com benchmarks real swe",
+    "simonwillison net 2026 sep 12 astra running routes",
+    "huggingface co papers 2609 11929",
+    "github com asgeirtj system prompts leaks",
+    "github com jihe520 mathmodelagent",
+    "reddit com r machinelearning comments 1wea1t7 a severe misalignment of ai in mathematics",
+    "news ycombinator com item id 49671159"
   ]
 }
