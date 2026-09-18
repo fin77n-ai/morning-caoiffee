@@ -1,15 +1,4 @@
 {
-  "2026-09-11": [
-    "mathstodon xyz andreasthom 117240535270608201",
-    "cognition com blog swe 2",
-    "johndcook com blog 2026 09 09 formal method revolution",
-    "anthropic com news improving alignment security efforts",
-    "simonwillison net 2026 sep 10 trynix",
-    "github com diegosouzapw omniroute",
-    "github com bilawalsidhu gods eye view",
-    "news ycombinator com item id 49649213",
-    "news ycombinator com item id 49645443"
-  ],
   "2026-09-12": [
     "bbc com news articles c8r6y4me2g6o",
     "rubyhack ai",
@@ -83,5 +72,16 @@
     "github com cline cline",
     "github com cloudflare security audit skill",
     "reddit com r machinelearning comments 1wid67h tmlr reached out to the authors of 10 papers"
+  ],
+  "2026-09-18": [
+    "z ai blog glm built its inference infrastructure",
+    "anthropic com news improving alignment security efforts",
+    "simonwillison net 2026 sep 17 targeted attacks on rustaceans",
+    "github com tencent browserskill",
+    "dwarkesh com p noam brown",
+    "github com alphaxiv openresearch",
+    "github com tencent weknora",
+    "news ycombinator com item id 49737787",
+    "news ycombinator com item id 49743049"
   ]
 }
