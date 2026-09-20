@@ -1,24 +1,4 @@
 {
-  "2026-09-13": [
-    "anthropic com news model hardware standard research preview",
-    "openai com index scaling storage one billion users part one",
-    "withspecific com benchmarks real swe",
-    "simonwillison net 2026 sep 12 astra running routes",
-    "huggingface co papers 2609 11929",
-    "github com asgeirtj system prompts leaks",
-    "github com jihe520 mathmodelagent",
-    "reddit com r machinelearning comments 1wea1t7 a severe misalignment of ai in mathematics",
-    "news ycombinator com item id 49671159",
-    "deepmind google blog introducing weathernext 3 our most advanced and accurate global weather ai model",
-    "huggingface co blog ibm research ibm releases sota granite time series",
-    "huggingface co papers 2609 10715",
-    "huggingface co blog gradio workflow 1111",
-    "transformer circuits pub 2021 framework index html",
-    "github com shubhamsaboo awesome llm apps",
-    "github com vxcontrol pentagi",
-    "news ycombinator com item id 49676324",
-    "reddit com r machinelearning comments 1w4xaes d selfpromotion thread"
-  ],
   "2026-09-14": [
     "twitter com davidsacks status 2098973625252708460",
     "lesswrong com posts munjkf7iwmswjlah2 astra and fable still hack on simple variants of alignment",
@@ -83,5 +63,17 @@
     "github com tencentcloud octop",
     "reddit com r machinelearning comments 1wjuki0 im a principal applied scientist at aws who",
     "reddit com r machinelearning comments 1wjzgng iclr submission 47647 how that possible d"
+  ],
+  "2026-09-20": [
+    "laya convaiinnovations com",
+    "github com trycua cua",
+    "planetscale com blog introducing tin",
+    "anthropic com news accenture embedded evaluation",
+    "huggingface co papers 2609 18323",
+    "github com higgsfield ai higgsfield",
+    "github com anthropics claude code",
+    "github com yynxxxxx codex x",
+    "news ycombinator com item id 49765348",
+    "reddit com r machinelearning comments 1wks0dv iclr 2027 submission 50kd"
   ]
 }
