@@ -1,14 +1,4 @@
 {
-  "2026-09-17": [
-    "rohanbansal com qorl",
-    "deepmind google blog introducing gemini 3 8 live and 3 8 live extended thinking",
-    "mimo xiaomi com rl",
-    "openai com index reimagining advertising with ai",
-    "github com vinnylarouge jevlike",
-    "github com cline cline",
-    "github com cloudflare security audit skill",
-    "reddit com r machinelearning comments 1wid67h tmlr reached out to the authors of 10 papers"
-  ],
   "2026-09-18": [
     "z ai blog glm built its inference infrastructure",
     "anthropic com news improving alignment security efforts",
@@ -76,5 +66,16 @@
     "github com google ax",
     "news ycombinator com item id 49801324",
     "news ycombinator com item id 49802161"
+  ],
+  "2026-09-24": [
+    "blog szypowi cz p claude code reads agents md only when telemetry is on",
+    "artificialanalysis ai models mercury 2 5",
+    "simonwillison net 2026 sep 23 gemini tts playground",
+    "deepmind google blog advancing private ai compute with secure server side memory",
+    "anthropic com news claude discovers novel enzyme system",
+    "github com strands agents harness sdk",
+    "github com dream num univer",
+    "news ycombinator com item id 49814947",
+    "news ycombinator com item id 49824268"
   ]
 }
