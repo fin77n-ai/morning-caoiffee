@@ -1,15 +1,4 @@
 {
-  "2026-09-18": [
-    "z ai blog glm built its inference infrastructure",
-    "anthropic com news improving alignment security efforts",
-    "simonwillison net 2026 sep 17 targeted attacks on rustaceans",
-    "github com tencent browserskill",
-    "dwarkesh com p noam brown",
-    "github com alphaxiv openresearch",
-    "github com tencent weknora",
-    "news ycombinator com item id 49737787",
-    "news ycombinator com item id 49743049"
-  ],
   "2026-09-19": [
     "simonwillison net 2026 sep 18 gemini hacked three companies",
     "code claude com docs en changelog",
@@ -77,5 +66,16 @@
     "github com dream num univer",
     "news ycombinator com item id 49814947",
     "news ycombinator com item id 49824268"
+  ],
+  "2026-09-25": [
+    "transluce org agent activity",
+    "youtube com watch v vdjw drykxy",
+    "blog google innovation and ai models and research google research google project suncatcher facts",
+    "deepmind google blog introducing gemini 38 live with live avatar",
+    "blog trailofbits com 2026 09 18 auditing in the age of good enough ai",
+    "github com nvidia model optimizer",
+    "github com leejet stable diffusion cpp",
+    "news ycombinator com item id 49826565",
+    "reddit com r machinelearning comments 1wp6oi3 neurips accepted papers are now visible r"
   ]
 }
