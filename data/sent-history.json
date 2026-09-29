@@ -1,16 +1,4 @@
 {
-  "2026-09-22": [
-    "simonwillison net 2026 sep 21 jev",
-    "linear app now ci bottleneck reworked",
-    "github com jaredpalmer kev tree main",
-    "openai com index higgsfield from prompt to production with astra",
-    "huggingface co papers 2609 22068",
-    "github com akitaonrails ai memory",
-    "github com crosstalk solutions project nomad",
-    "github com zhouxiaoka autoclip",
-    "reddit com r machinelearning comments 1wm9hgn these were not rogue ai escapes just sloppy",
-    "news ycombinator com item id 49791125"
-  ],
   "2026-09-23": [
     "cryptocellar org bgac the mvueh break html",
     "openai com index introducing gpt 6 sol and luna",
@@ -76,5 +64,15 @@
     "github com mvschwarz openrig",
     "news ycombinator com item id 49870367",
     "news ycombinator com item id 49867775"
+  ],
+  "2026-09-29": [
+    "simonwillison net 2026 sep 28 claude sonnet 5 5",
+    "news ycombinator com item id 49877988",
+    "cnbc com 2026 09 28 nvidia releases html",
+    "blog cloudflare com cloudflare cf cli launch",
+    "stateofutopia com experiments microllmlab",
+    "github com firelex jeff",
+    "github com low zi hong esp32s3 llm cluster",
+    "blog alexewerlof com p coding is not solved"
   ]
 }
