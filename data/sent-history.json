@@ -1,15 +1,4 @@
 {
-  "2026-09-24": [
-    "blog szypowi cz p claude code reads agents md only when telemetry is on",
-    "artificialanalysis ai models mercury 2 5",
-    "simonwillison net 2026 sep 23 gemini tts playground",
-    "deepmind google blog advancing private ai compute with secure server side memory",
-    "anthropic com news claude discovers novel enzyme system",
-    "github com strands agents harness sdk",
-    "github com dream num univer",
-    "news ycombinator com item id 49814947",
-    "news ycombinator com item id 49824268"
-  ],
   "2026-09-25": [
     "transluce org agent activity",
     "youtube com watch v vdjw drykxy",
@@ -74,5 +63,16 @@
     "github com t8y2 dbx",
     "news ycombinator com item id 49891290",
     "news ycombinator com item id 49880411"
+  ],
+  "2026-10-01": [
+    "openai com index disrupting a coordinated model distillation campaign",
+    "deepmind google blog gemini 4 argon our next era of frontier intelligence",
+    "anthropic com news claude discovers novel enzyme system",
+    "deepmind google blog introducing synthid bio",
+    "huggingface co papers 2609 35427",
+    "github com mattpocock skills",
+    "github com dietrichgebert ponytail",
+    "news ycombinator com item id 49911995",
+    "news ycombinator com item id 49912048"
   ]
 }
