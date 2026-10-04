@@ -1,15 +1,4 @@
 {
-  "2026-09-27": [
-    "alignment openai com misalignment reports an agent used dns to reach an external chatbot",
-    "blog priyan in 2026 09 analyzing frontier model progress with html",
-    "anthropic com news accenture embedded evaluation",
-    "tangled org yanndegat tngl sh drawgent",
-    "huggingface co papers 2609 29845",
-    "github com vectorize io hindsight",
-    "github com mobile next mobile mcp",
-    "news ycombinator com item id 49855315",
-    "news ycombinator com item id 49832768"
-  ],
   "2026-09-28": [
     "anthropic com news life sciences verification program",
     "simonwillison net 2026 sep 27 2026 in llms so far",
@@ -74,5 +63,16 @@
     "github com juliusbrussee caveman",
     "blog sshh io p the harness is the company",
     "github com anteloc ldraw nova"
+  ],
+  "2026-10-04": [
+    "aleph alpha com en blog kolibri has landed a sovereign open weight model",
+    "theguardian com technology 2026 oct 03 openai safety leader quits warning ai companys culture is broken",
+    "pipod dev",
+    "liao gg blog agents dont need memory",
+    "huggingface co blog microsoft thinkingbox",
+    "github com addyosmani agent skills",
+    "github com thedotmack claude mem",
+    "reddit com r artificial comments 1wwccsz pewdiepie unveils uncensored ajax ai model built",
+    "reddit com r artificial comments 1wwzkiw i asked claude opus 55 to make a mario 64 style"
   ]
 }
