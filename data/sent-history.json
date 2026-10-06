@@ -1,14 +1,4 @@
 {
-  "2026-09-29": [
-    "simonwillison net 2026 sep 28 claude sonnet 5 5",
-    "news ycombinator com item id 49877988",
-    "cnbc com 2026 09 28 nvidia releases html",
-    "blog cloudflare com cloudflare cf cli launch",
-    "stateofutopia com experiments microllmlab",
-    "github com firelex jeff",
-    "github com low zi hong esp32s3 llm cluster",
-    "blog alexewerlof com p coding is not solved"
-  ],
   "2026-09-30": [
     "openai com index introducing dots",
     "jorgegarciaherrero com wp content interactivos 20260916 prompt like a butterfly sting like a tracker clean",
@@ -74,5 +64,16 @@
     "github com michael denyer pstack claude",
     "news ycombinator com item id 49952111",
     "news ycombinator com item id 49956681"
+  ],
+  "2026-10-06": [
+    "techspot com news 114091 florida woman used claude diary anthropic reported shoot html",
+    "vals ai blogs room temperature magnetic semiconductors",
+    "reflection ai blog introducing beam",
+    "openai com index eu text provenance",
+    "openai com index new chatgpt ads format and measurement",
+    "github com cloudflare cloudflare os",
+    "github com msitarzewski agency agents",
+    "news ycombinator com item id 49961057",
+    "news ycombinator com item id 49970667"
   ]
 }
