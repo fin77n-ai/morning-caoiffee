@@ -1,15 +1,4 @@
 {
-  "2026-09-30": [
-    "openai com index introducing dots",
-    "jorgegarciaherrero com wp content interactivos 20260916 prompt like a butterfly sting like a tracker clean",
-    "openai com index introducing gpt 6 1 sol",
-    "simonwillison net 2026 sep 29 anthropic frontier red team",
-    "openai com index devday 2026 recap",
-    "github com nvidia openshell",
-    "github com t8y2 dbx",
-    "news ycombinator com item id 49891290",
-    "news ycombinator com item id 49880411"
-  ],
   "2026-10-01": [
     "openai com index disrupting a coordinated model distillation campaign",
     "deepmind google blog gemini 4 argon our next era of frontier intelligence",
@@ -75,5 +64,16 @@
     "github com msitarzewski agency agents",
     "news ycombinator com item id 49961057",
     "news ycombinator com item id 49970667"
+  ],
+  "2026-10-07": [
+    "blog google innovation and ai technology developers tools embeddinggemma 2",
+    "reuters com world south koreas lee says ai appears have been used bank hacks 2026 10 06",
+    "openai com index sharing ai progress in mathematics",
+    "zohaib cc blog smartest claude code feature",
+    "simonwillison net 2026 oct 7 openai rogue agents wikimedia",
+    "github com fesens opentpu",
+    "github com ayghri i have adhd",
+    "reddit com r machinelearning comments 1wz71g3 transformers vs rnns vs ssms where does memory",
+    "news ycombinator com item id 49967427"
   ]
 }
