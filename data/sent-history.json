@@ -1,15 +1,4 @@
 {
-  "2026-10-01": [
-    "openai com index disrupting a coordinated model distillation campaign",
-    "deepmind google blog gemini 4 argon our next era of frontier intelligence",
-    "anthropic com news claude discovers novel enzyme system",
-    "deepmind google blog introducing synthid bio",
-    "huggingface co papers 2609 35427",
-    "github com mattpocock skills",
-    "github com dietrichgebert ponytail",
-    "news ycombinator com item id 49911995",
-    "news ycombinator com item id 49912048"
-  ],
   "2026-10-02": [
     "blog cloudflare com clef decision models",
     "turbopuffer com blog rip vector database",
@@ -75,5 +64,16 @@
     "github com ayghri i have adhd",
     "reddit com r machinelearning comments 1wz71g3 transformers vs rnns vs ssms where does memory",
     "news ycombinator com item id 49967427"
+  ],
+  "2026-10-08": [
+    "rswebsols com news meta and microsoft take steps to reduce employee usage of claude ai",
+    "agent reviews",
+    "github com docker docker agent",
+    "deepmind google blog embeddinggemma 2 an open lightweight multimodal embedding model",
+    "huggingface co blog liquidai open d1",
+    "github com cloudflare security audit skill",
+    "github com manaflow ai cmux",
+    "reddit com r machinelearning comments 1x04235 uploaded 56 billion tiktok videos metadata on",
+    "reddit com r machinelearning comments 1wunvg4 d monthly whos hiring and who wants to be hired"
   ]
 }
