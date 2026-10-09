@@ -1,15 +1,4 @@
 {
-  "2026-10-02": [
-    "blog cloudflare com clef decision models",
-    "turbopuffer com blog rip vector database",
-    "blog arxiv org 2026 10 01 updated rate limit policy",
-    "simonwillison net 2026 oct 1 matthew green",
-    "anthropic com news barclays scales claude",
-    "github com mksglu context mode",
-    "github com heygen com hyperframes",
-    "reddit com r machinelearning comments 1wvg7yc arxiv now limits submitters to up to two",
-    "news ycombinator com item id 49922437"
-  ],
   "2026-10-03": [
     "anthropic com news claude frontier academy",
     "dwarfstar sh",
@@ -75,5 +64,16 @@
     "github com manaflow ai cmux",
     "reddit com r machinelearning comments 1x04235 uploaded 56 billion tiktok videos metadata on",
     "reddit com r machinelearning comments 1wunvg4 d monthly whos hiring and who wants to be hired"
+  ],
+  "2026-10-09": [
+    "github com duckdb ducklake",
+    "anthropic com news cyber verification program",
+    "openai com index pollo ai",
+    "simonwillison net 2026 oct 8 ttok",
+    "huggingface co papers 2610 06100",
+    "github com cathrynlavery diagram design",
+    "github com anthropics knowledge work plugins",
+    "reddit com r machinelearning comments 1x0i6b5 nvidias erroneous paper accepted as icmls",
+    "news ycombinator com item id 49986882"
   ]
 }
