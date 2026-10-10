@@ -1,15 +1,4 @@
 {
-  "2026-10-03": [
-    "anthropic com news claude frontier academy",
-    "dwarfstar sh",
-    "wagtail org blog one month on glm 53 flash",
-    "openai com index practical guide building gpt 6",
-    "youtube com watch v nnv cweoo5q",
-    "github com panniantong agent reach",
-    "github com juliusbrussee caveman",
-    "blog sshh io p the harness is the company",
-    "github com anteloc ldraw nova"
-  ],
   "2026-10-04": [
     "aleph alpha com en blog kolibri has landed a sovereign open weight model",
     "theguardian com technology 2026 oct 03 openai safety leader quits warning ai companys culture is broken",
@@ -75,5 +64,16 @@
     "github com anthropics knowledge work plugins",
     "reddit com r machinelearning comments 1x0i6b5 nvidias erroneous paper accepted as icmls",
     "news ycombinator com item id 49986882"
+  ],
+  "2026-10-10": [
+    "nbcphiladelphia com news local anthropic ai model submits false tip on unsolved philly murder police say 4477051",
+    "simonwillison net 2026 oct 9 deno is joining cloudflare",
+    "openai com index asana browser agent",
+    "commandline microsoft com microsoft decision 1 model foundry",
+    "huggingface co papers 2610 11794",
+    "github com alibaba open code review",
+    "github com morluto rea",
+    "news ycombinator com item id 50018817",
+    "news ycombinator com item id 50028059"
   ]
 }
