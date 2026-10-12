@@ -15,3 +15,11 @@
 - Prefer adding reliable RSS sources over scraping brittle web pages.
 - Keep the digest broad-AI first: models, agents, multimodal AI, coding tools, evals/safety, product launches, research, open-source, and community debates.
 - RAG/data tooling can appear when it is genuinely relevant, but should not dominate by default.
+
+## Monthly Topics
+
+- The reader chose monthly topics over a daily reading habit. Automatic Telegram delivery now uses `monthly-topic.yml`; the daily digest remains available manually.
+- `config/monthly-topics.json` defines four editorial chapters per topic. Full articles and navigation live in `docs/topics/`; `src/monthlyTopic.js` selects the next unsent chapter and tracks local calendar weeks in Asia/Shanghai.
+- Do not infer reading progress from delivery history. Keep missed-week catch-up to one chapter per week, finish older topics across month boundaries, and stay quiet when no chapter is due.
+- New monthly topics require reviewed content and explicit configuration. Do not invent a new topic or generate filler when the queue is complete.
+- Operational details, including send/persist recovery, are in `docs/projects/monthly-topic/README.md`.

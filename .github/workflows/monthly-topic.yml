@@ -1,0 +1,50 @@
+name: Monthly cAoIffee Topic ☕
+
+on:
+  schedule:
+    - cron: '0 23 * * 0' # Monday 07:00 Asia/Shanghai
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-topic-delivery
+  cancel-in-progress: false
+
+jobs:
+  send-topic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - name: Send the next topic chapter
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: npm run topic:send
+      - name: Persist topic delivery history
+        run: |
+          git config user.name "morning-caoiffee-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/topic-deliveries.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: record topic delivery"
+            git pull --rebase origin main
+            git push origin main
+          fi
+      - name: Keep recovery history if delivery or persistence fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: topic-delivery-history-${{ github.run_id }}
+          path: data/topic-deliveries.json

@@ -9,7 +9,9 @@
     "preview:optimized": "node scripts/preview-optimized-content.js",
     "telegram-digest": "node scripts/telegram-digest.js",
     "video-candidates": "node scripts/video-candidates.js",
-    "test": "node --test"
+    "test": "node --test",
+    "topic:preview": "node scripts/monthly-topic.js",
+    "topic:send": "node scripts/monthly-topic.js --send"
   },
   "keywords": [],
   "author": "",

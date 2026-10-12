@@ -1,9 +1,7 @@
 name: Telegram Morning Digest ☕
 
 on:
-  schedule:
-    - cron: '0 23 * * *'   # 23:00 UTC = 07:00 北京 / 08:00 东京
-  workflow_dispatch:        # 手动触发（测试用）
+  workflow_dispatch:        # 日报保留手动触发；自动推送改用 monthly-topic.yml
 
 permissions:
   contents: write   # 发送后把 data/sent-history.json 提交回仓库（跨天反重复账本）
